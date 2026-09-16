@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <title>Manajemen Kampus - SIMARSIP Admin</title>
+    <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            background: #f4f7fb;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .app-header {
+            background: linear-gradient(180deg, #2f8bff, #1e73ff);
+            color: #fff;
+            padding: 16px 16px 36px 16px;
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-title {
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .user-chip {
+            background: rgba(255,255,255,0.18);
+            padding: 8px 12px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .page-content { 
+            padding: 16px; 
+            padding-bottom: 100px;
+        }
+
+        .section { margin-bottom: 20px; }
+        .section-title { color: #1e73ff; font-weight: 700; margin-bottom: 12px; font-size: 14px; }
+
+        /* Data Items */
+        .data-item {
+            background: white;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .data-info {
+            flex: 1;
+        }
+
+        .data-name {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .data-desc {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .data-desc-secondary {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 6px;
+        }
+
+        /* Search Box */
+        .search-box {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-box input {
+            width: 100%;
+            border: none;
+            padding: 10px;
+            font-size: 14px;
+            outline: none;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .filter-btn {
+            padding: 8px 14px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .filter-btn.active {
+            background: #1e73ff;
+            color: white;
+            border-color: #1e73ff;
+        }
+
+        .role-organisasi { background: #e3f2fd; color: #1976d2; }
+        .role-baa { background: #f3e5f5; color: #7b1fa2; }
+        .role-admin { background: #ffe0b2; color: #e65100; }
+
+        .data-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 11px;
+            transition: 0.2s;
+        }
+
+        .btn-edit {
+            background: #1e73ff;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #ff4b5c;
+            color: white;
+        }
+
+        /* Toolbar */
+        .toolbar-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            z-index: 99;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .toolbar-inner {
+            display: flex;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .toolbar-link {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 6px;
+            text-decoration: none;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: 0.2s;
+            font-size: 12px;
+        }
+
+        .toolbar-link.active {
+            color: #1e73ff;
+            border-bottom-color: #1e73ff;
+        }
+
+        .toolbar-link i {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .toolbar-label {
+            font-size: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .add-btn {
+            position: fixed;
+            bottom: 80px;
+            right: 16px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #007aff, #0056d2);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            padding: 10px;
+            background: #007aff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 10px;
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="app-header-inner">
+                <div class="app-title">Manajemen Kampus</div>
+                <div class="user-chip">
+                    <span class="user-name" style="font-size: 13px;">Admin</span>
+                    <i class="material-icons">admin_panel_settings</i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="page-content">
+            <div class="section">
+                <div class="section-title">🏢 Daftar Kampus</div>
+                
+                <div class="search-box">
+                    <input type="text" id="searchKampus" placeholder="Cari nama kampus..." onkeyup="filterKampus()">
+                </div>
+
+                <div class="filter-tabs">
+                    <button class="filter-btn active" onclick="filterByStatus('all', this)">Semua</button>
+                    <button class="filter-btn" onclick="filterByStatus('Aktif', this)">Aktif</button>
+                    <button class="filter-btn" onclick="filterByStatus('Non-Aktif', this)">Non-Aktif</button>
+                </div>
+
+                <div id="kampusList">
+                    <!-- Items will be rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Add Button -->
+        <button class="add-btn" title="Tambah Data" onclick="openAddModal()">+</button>
+
+        <!-- Modal Add/Edit -->
+        <div class="modal-overlay" id="dataModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span id="modalTitle">Tambah Data</span>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                
+                <form id="dataForm">
+                    <div class="form-group">
+                        <label class="form-label">🏢 Nama Kampus</label>
+                        <input type="text" id="formKampusName" class="form-input" placeholder="Contoh: Kampus Pusat" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">📍 Alamat/Kota</label>
+                        <input type="text" id="formKampusAlamat" class="form-input" placeholder="Contoh: Jl. Pendidikan No. 20, Bandung" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">📝 Deskripsi (Opsional)</label>
+                        <textarea id="formKampusDesc" class="form-input" placeholder="Deskripsi kampus" style="min-height: 70px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">📊 Status</label>
+                        <select id="formKampusStatus" class="form-input">
+                            <option value="Aktif">Aktif</option>
+                            <option value="Non-Aktif">Non-Aktif</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit">Simpan</button>
+                        <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bottom Toolbar -->
+        <div class="toolbar-bottom">
+            <div class="toolbar-inner">
+                <a href="index_admin.html" class="toolbar-link">
+                    <i class="material-icons">dashboard</i>
+                    <span class="toolbar-label">Dashboard</span>
+                </a>
+                <a href="manajemen_user.html" class="toolbar-link">
+                    <i class="material-icons">manage_accounts</i>
+                    <span class="toolbar-label">User</span>
+                </a>
+                <a href="verifikasi_baa.html" class="toolbar-link">
+                    <i class="material-icons">verified_user</i>
+                    <span class="toolbar-label">Verifikasi</span>
+                </a>
+                <a href="manajemen_kampus.html" class="toolbar-link active">
+                    <i class="material-icons">business</i>
+                    <span class="toolbar-label">Kampus</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Config
+        let db;
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+            authDomain: "simarsip-apk.firebaseapp.com",
+            databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "simarsip-apk",
+            storageBucket: "simarsip-apk.firebasestorage.app",
+            messagingSenderId: "707332524030",
+            appId: "1:707332524030:web:d91551b5f199df489622af"
+        };
+
+        try {
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+        } catch (err) {
+            console.error('Firebase init error:', err);
+        }
+
+        let editingId = null;
+        let allKampusData = [];
+        let currentStatusFilter = 'all';
+        let searchQuery = '';
+
+        const kampusData = [
+            { id: 1, nama: 'Kampus Pusat', alamat: 'Jl. Pendidikan No. 20, Bandung', kota: 'Bandung', deskripsi: 'Kampus utama dengan 5 gedung' },
+            { id: 2, nama: 'Kampus Cipacing', alamat: 'Jl. Cipacing No. 50, Bandung', kota: 'Bandung', deskripsi: 'Kampus satelit untuk program khusus' },
+            { id: 3, nama: 'Kampus Cirebon', alamat: 'Jl. Siliwangi No. 10, Cirebon', kota: 'Cirebon', deskripsi: 'Kampus regional di Cirebon' },
+        ];
+
+        function renderList(data, containerId) {
+            const container = document.getElementById(containerId);
+            let html = '';
+
+            if (!data || data.length === 0) {
+                container.innerHTML = `<div style="text-align: center; color: #999; padding: 20px;">Belum ada kampus. Klik + untuk menambah.</div>`;
+                return;
+            }
+
+            data.forEach(item => {
+                const status = item.status || 'Aktif';
+                const statusColor = status === 'Aktif' ? '#00c853' : '#ff9800';
+                let desc = `${item.alamat}`;
+
+                html += `
+                    <div class="data-item">
+                        <div class="data-info">
+                            <div class="data-name">${item.nama}</div>
+                            <div class="data-desc">${desc}</div>
+                            <div class="data-desc-secondary">
+                                Status: <span style="color: ${statusColor}; font-weight: 600;">${status}</span>
+                            </div>
+                        </div>
+                        <div class="data-actions">
+                            <button class="btn-small btn-edit" onclick="editItem('${item.id}', '${escapeQuotes(item.nama)}')">Edit</button>
+                            <button class="btn-small btn-delete" onclick="deleteItem('${item.id}', '${escapeQuotes(item.nama)}')">Hapus</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function escapeQuotes(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+        }
+
+        function filterKampus() {
+            searchQuery = document.getElementById('searchKampus').value.toLowerCase();
+            applyFilters();
+        }
+
+        function filterByStatus(status, element) {
+            currentStatusFilter = status;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const filtered = allKampusData.filter(item => {
+                const matchSearch = (item.nama || '').toLowerCase().includes(searchQuery);
+                const matchStatus = currentStatusFilter === 'all' || (item.status || 'Aktif') === currentStatusFilter;
+                return matchSearch && matchStatus;
+            });
+            renderList(filtered, 'kampusList');
+        }
+
+        function loadKampus() {
+            if (!db) {
+                allKampusData = kampusData;
+                applyFilters();
+                return;
+            }
+
+            db.ref('kampus/main').once('value', snapshot => {
+                const data = snapshot.val();
+                allKampusData = data ? Object.entries(data).map(([id, item]) => ({id, ...item})) : [];
+                applyFilters();
+            }).catch(() => {
+                allKampusData = [];
+                applyFilters();
+            });
+        }
+
+        function openAddModal() {
+            editingId = null;
+            document.getElementById('dataForm').reset();
+            document.getElementById('modalTitle').textContent = 'Tambah Kampus';
+            document.getElementById('dataModal').classList.add('active');
+        }
+
+        function editItem(id, name) {
+            editingId = id;
+            document.getElementById('dataForm').reset();
+            
+            const item = kampusData.find(k => k.id == id);
+            if (item) {
+                document.getElementById('formKampusName').value = item.nama;
+                document.getElementById('formKampusAlamat').value = item.alamat;
+                document.getElementById('formKampusDesc').value = item.deskripsi || '';
+            }
+            
+            document.getElementById('modalTitle').textContent = `Edit: ${name}`;
+            document.getElementById('dataModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('dataModal').classList.remove('active');
+            editingId = null;
+        }
+
+        function deleteItem(id, name) {
+            if (confirm(`Hapus ${name}?`)) {
+                if (db) {
+                    db.ref(`kampus/main/${id}`).remove()
+                        .then(() => {
+                            alert('Kampus berhasil dihapus');
+                            loadKampus();
+                        })
+                        .catch(err => alert('Error: ' + err.message));
+                } else {
+                    alert('Kampus berhasil dihapus');
+                }
+            }
+        }
+
+        document.getElementById('dataForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const dataToSave = {
+                nama: document.getElementById('formKampusName').value,
+                alamat: document.getElementById('formKampusAlamat').value,
+                deskripsi: document.getElementById('formKampusDesc').value
+            };
+
+            if (db) {
+                if (editingId) {
+                    // Update
+                    db.ref(`kampus/main/${editingId}`).update(dataToSave)
+                        .then(() => {
+                            alert('Kampus berhasil diperbarui');
+                            closeModal();
+                            loadKampus();
+                        })
+                        .catch(err => alert('Error: ' + err.message));
+                } else {
+                    // Add new
+                    const newRef = db.ref('kampus/main').push();
+                    newRef.set({...dataToSave, createdAt: new Date().toISOString()})
+                        .then(() => {
+                            alert('Kampus berhasil ditambahkan');
+                            closeModal();
+                            loadKampus();
+                        })
+                        .catch(err => alert('Error: ' + err.message));
+                }
+            } else {
+                alert(editingId ? 'Kampus berhasil diperbarui' : 'Kampus berhasil ditambahkan');
+                closeModal();
+            }
+        });
+
+        // Set active toolbar link based on current page
+        function setActiveToolbarLink() {
+            const currentPage = window.location.pathname.split('/').pop() || 'manajemen_kampus.html';
+            document.querySelectorAll('.toolbar-link').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === currentPage || (href === 'manajemen_kampus.html' && currentPage === '')) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Session protection - redirect if not accessed from splash
+            const fromSplashAdmin = sessionStorage.getItem("fromSplash");
+            if (!fromSplashAdmin) {
+                window.location.href = "splash.html";
+            }
+
+            const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+            if (!loggedUser || (loggedUser.role !== "Admin Simarsip" && loggedUser.role !== "super_admin")) {
+                window.location.href = 'login.html';
+            }
+            
+            setActiveToolbarLink();
+            loadKampus();
+        });
+    </script>
+</body>
+
+</html>

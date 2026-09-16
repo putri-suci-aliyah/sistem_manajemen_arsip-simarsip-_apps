@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>Dashboard Admin - SIMARSIP</title>
+    <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            background: #f4f7fb;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Top Header */
+        .app-header {
+            background: linear-gradient(180deg, #2f8bff, #1e73ff);
+            color: #fff;
+            padding: 16px 16px 36px 16px;
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-title {
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .user-chip {
+            background: rgba(255,255,255,0.18);
+            padding: 8px 12px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .user-chip .user-name { 
+            font-size: 13px; 
+            font-weight: 600;
+        }
+
+        .user-icon { 
+            font-size: 34px; 
+            color: #fff; 
+        }
+
+        .icon-btn {
+            background: rgba(255,255,255,0.18);
+            border: none;
+            border-radius: 12px;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .bell-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            background: #ff3b30;
+            color: white;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .bell-badge.hidden {
+            display: none;
+        }
+
+        .toast {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20,20,20,0.92);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 18px 35px rgba(0,0,0,0.18);
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            max-width: 92%;
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .welcome-card {
+            margin-top: 12px;
+        }
+
+        .welcome-title { 
+            font-size: 20px; 
+            font-weight: 700; 
+            color: #fff; 
+        }
+
+        .welcome-sub { 
+            color: rgba(255,255,255,0.95); 
+            margin-top: 6px; 
+            font-size: 13px;
+        }
+
+        /* Page Content */
+        .page-content { 
+            padding: 16px; 
+            padding-top: 8px;
+            padding-bottom: 100px;
+        }
+
+        /* Stats Section */
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            color: #1e73ff;
+            font-weight: 700;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 100px;
+            background: white;
+            border-radius: 14px;
+            padding: 16px 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            border-top: 4px solid #1e73ff;
+        }
+
+        .stat-card.users {
+            border-top-color: #007aff;
+        }
+
+        .stat-card.baa {
+            border-top-color: #00c082;
+        }
+
+        .stat-card.surat {
+            border-top-color: #ffc107;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e73ff;
+            margin: 8px 0;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* Chart Section */
+        .chart-container {
+            background: white;
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            margin-bottom: 16px;
+        }
+
+        .chart-title {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 150px;
+            margin-bottom: 12px;
+        }
+
+        .bar-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .bar {
+            width: 100%;
+            background: linear-gradient(180deg, #1e73ff, #0056d2);
+            border-radius: 4px;
+            position: relative;
+            min-height: 10px;
+        }
+
+        .bar-label {
+            font-size: 10px;
+            color: #888;
+            margin-top: 6px;
+            font-weight: 600;
+        }
+
+        .bar-value {
+            font-size: 11px;
+            font-weight: 800;
+            color: #333;
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        /* Status Section */
+        .status-breakdown {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .status-item {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #ffc107;
+            cursor: pointer;
+            transition: transform 0.16s ease, box-shadow 0.16s ease;
+        }
+        .status-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        }
+
+        .status-item.approved {
+            border-left-color: #00c082;
+        }
+
+        .status-item.rejected {
+            border-left-color: #ff4b5c;
+        }
+
+        .status-count {
+            font-size: 20px;
+            font-weight: 800;
+            margin: 6px 0;
+        }
+
+        .status-item.pending .status-count { color: #ff9800; }
+        .status-item.approved .status-count { color: #00c082; }
+        .status-item.rejected .status-count { color: #ff4b5c; }
+
+        .status-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        /* Bottom Toolbar */
+        .toolbar-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            z-index: 99;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .toolbar-inner {
+            display: flex;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .toolbar-link {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 6px;
+            text-decoration: none;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: 0.2s;
+            font-size: 12px;
+        }
+
+        .toolbar-link.active {
+            color: #1e73ff;
+            border-bottom-color: #1e73ff;
+        }
+
+        .toolbar-link i {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .toolbar-label {
+            font-size: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Hide toolbar if not admin */
+        .toolbar-hidden {
+            display: none;
+        }
+
+        /* View container */
+        .view-container {
+            padding-bottom: 80px;
+        }
+
+        /* Alert styles */
+        .alert-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+
+        .loading i {
+            font-size: 32px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Top Header -->
+        <header class="app-header">
+            <div class="app-header-inner" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <div class="app-title">SIMARSIP ADMIN</div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <button class="icon-btn" id="notifButton" onclick="gotoNotifications()" aria-label="Notifikasi">
+                        <i class="material-icons">notifications</i>
+                        <span id="notifBadge" class="bell-badge hidden">0</span>
+                    </button>
+                    <div class="user-chip" onclick="window.location.href='profile.html'">
+                        <span class="user-name" id="adminName">Halo, Admin!</span>
+                        <i class="material-icons user-icon">admin_panel_settings</i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="welcome-card">
+                <div class="welcome-title">Selamat Datang di Dashboard Admin</div>
+                <div class="welcome-sub">Kelola sistem SIMARSIP dengan mudah</div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="view view-container">
+            <div id="dashboardPage">
+                <div class="page-content">
+
+                    <!-- Alert for Access -->
+                    <div id="alertBox" class="alert-box" style="display: none;">
+                        ⚠️ Hanya admin yang dapat mengakses halaman ini. Jika Anda bukan admin, silakan login ulang.
+                    </div>
+
+                    <!-- Total Statistics Section -->
+                    <div class="section">
+                        <div class="section-title">Statistik Umum</div>
+                        <div class="stats-row">
+                            <div class="stat-card users">
+                                <i class="material-icons" style="font-size: 28px; color: #007aff;">people</i>
+                                <div class="stat-number" id="totalUsers">0</div>
+                                <div class="stat-label">Total Pengguna</div>
+                            </div>
+                            <div class="stat-card baa">
+                                <i class="material-icons" style="font-size: 28px; color: #00c082;">check_circle</i>
+                                <div class="stat-number" id="totalBaa">0</div>
+                                <div class="stat-label">Total BAA</div>
+                            </div>
+                            <div class="stat-card surat">
+                                <i class="material-icons" style="font-size: 28px; color: #ffc107;">description</i>
+                                <div class="stat-number" id="totalSurat">0</div>
+                                <div class="stat-label">Total Pengajuan</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Submissions Chart -->
+                    <div class="section">
+                        <div class="chart-container">
+                            <div class="chart-title">📊 Pengajuan Surat Bulanan</div>
+                            <div class="chart-bars" id="monthlyChart">
+                                <!-- Chart will be rendered here -->
+                            </div>
+                            <div style="text-align: center; font-size: 12px; color: #999;">
+                                Statistik pengajuan surat 12 bulan terakhir
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Breakdown Section -->
+                    <div class="section">
+                        <div class="section-title">Status Pengajuan Terkini</div>
+                        <div class="status-breakdown">
+                            <div class="status-item pending" onclick="window.location.href='status_admin_menunggu.html'">
+                                <i class="material-icons" style="font-size: 24px; color: #ff9800;">schedule</i>
+                                <div class="status-count" id="pendingCount">0</div>
+                                <div class="status-label">Menunggu</div>
+                            </div>
+                            <div class="status-item approved" onclick="window.location.href='status_admin_disetujui.html'">
+                                <i class="material-icons" style="font-size: 24px; color: #00c082;">check_circle</i>
+                                <div class="status-count" id="approvedCount">0</div>
+                                <div class="status-label">Disetujui</div>
+                            </div>
+                            <div class="status-item rejected" onclick="window.location.href='status_admin_ditolak.html'">
+                                <i class="material-icons" style="font-size: 24px; color: #ff4b5c;">cancel</i>
+                                <div class="status-count" id="rejectedCount">0</div>
+                                <div class="status-label">Ditolak</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Toolbar -->
+        <div class="toolbar-bottom" id="adminToolbar">
+            <div class="toolbar-inner">
+                <a href="index_admin.html" class="toolbar-link active">
+                    <i class="material-icons">dashboard</i>
+                    <span class="toolbar-label">Dashboard</span>
+                </a>
+                <a href="manajemen_user.html" class="toolbar-link">
+                    <i class="material-icons">manage_accounts</i>
+                    <span class="toolbar-label">User</span>
+                </a>
+                <a href="verifikasi_baa.html" class="toolbar-link">
+                    <i class="material-icons">verified_user</i>
+                    <span class="toolbar-label">Verifikasi</span>
+                </a>
+                <a href="manajemen_kampus.html" class="toolbar-link">
+                    <i class="material-icons">business</i>
+                    <span class="toolbar-label">Kampus</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <!-- Firebase Scripts -->
+    <script>
+        // Entry point protection - jika akses langsung, redirect ke splash
+        const fromSplashAdmin = sessionStorage.getItem("fromSplash");
+        if (!fromSplashAdmin) {
+            window.location.href = "splash.html";
+        }
+
+        // Auto-redirect check untuk login
+        const loggedUserAdmin = JSON.parse(localStorage.getItem("loggedUser"));
+        if (!loggedUserAdmin) {
+            window.location.href = "splash.html";
+        } else if (loggedUserAdmin.role !== "Admin Simarsip") {
+            // Jika role bukan Admin, redirect sesuai role
+            if (loggedUserAdmin.role === "HMIF") {
+                window.location.href = "index.html";
+            } else if (loggedUserAdmin.role === "BAA") {
+                window.location.href = "index_baa.html";
+            }
+        }
+
+        // ===== FIREBASE CONFIG =====
+        let db;
+        try {
+            const firebaseConfig = {
+                apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+                authDomain: "simarsip-apk.firebaseapp.com",
+                databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+                projectId: "simarsip-apk",
+                storageBucket: "simarsip-apk.firebasestorage.app",
+                messagingSenderId: "707332524030",
+                appId: "1:707332524030:web:d91551b5f199df489622af"
+            };
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+        } catch (err) {
+            console.error('Firebase init error:', err.message);
+        }
+
+        // ===== ROLE PROTECTION =====
+        function checkAdminAccess() {
+            const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+            
+            // Check if user is logged in
+            if (!loggedUser) {
+                window.location.href = 'login.html';
+                return false;
+            }
+
+            // Check if user is Admin or Super Admin
+            if (loggedUser.role !== "Admin Simarsip" && loggedUser.role !== "super_admin") {
+                document.getElementById('alertBox').style.display = 'block';
+                console.warn('Access Denied: User is not admin');
+                // Redirect after 3 seconds
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 3000);
+                return false;
+            }
+
+            // Display admin name with role indicator
+            let adminNameText = `Halo, ${loggedUser.name}!`;
+            if (loggedUser.role === "super_admin") {
+                adminNameText += " 👑";
+            }
+            document.getElementById('adminName').textContent = adminNameText;
+            return true;
+        }
+
+        // ===== LOAD STATISTICS FROM FIREBASE =====
+        function loadStatistics() {
+            if (!db) {
+                console.error('Firebase tidak terkoneksi');
+                return;
+            }
+
+            // Load total users
+            db.ref('users').once('value', snapshot => {
+                const users = snapshot.val() || {};
+                document.getElementById('totalUsers').textContent = Object.keys(users).length;
+            });
+
+            // Load total BAA admins
+            db.ref('users').once('value', snapshot => {
+                const users = snapshot.val() || {};
+                const baaCount = Object.values(users).filter(u => u.role === 'BAA' || u.jabatan === 'Admin BAA').length;
+                document.getElementById('totalBaa').textContent = baaCount;
+            });
+
+            // Load submissions data from pengajuan (ruangan, dispensasi, peralatan) - REAL-TIME
+            db.ref('pengajuan').on('value', snapshot => {
+                const pengajuan = snapshot.val() || {};
+                let allSubmissions = [];
+
+                // Aggregate dari semua category
+                Object.keys(pengajuan).forEach(category => {
+                    const categoryData = pengajuan[category];
+                    if (categoryData) {
+                        Object.values(categoryData).forEach(item => {
+                            allSubmissions.push({
+                                ...item,
+                                type: category
+                            });
+                        });
+                    }
+                });
+
+                // Total submissions
+                document.getElementById('totalSurat').textContent = allSubmissions.length;
+
+                // Status breakdown
+                const statuses = {
+                    pending: allSubmissions.filter(s => s.status === 'pending').length,
+                    approved: allSubmissions.filter(s => s.status === 'approved').length,
+                    rejected: allSubmissions.filter(s => s.status === 'rejected').length
+                };
+                
+                document.getElementById('pendingCount').textContent = statuses.pending;
+                document.getElementById('approvedCount').textContent = statuses.approved;
+                document.getElementById('rejectedCount').textContent = statuses.rejected;
+
+                // Load monthly chart
+                loadMonthlyChart(allSubmissions);
+            }).catch(err => {
+                console.warn('Error loading submissions:', err);
+            });
+        }
+
+        // ===== LOAD MONTHLY CHART FROM FIREBASE =====
+        function loadMonthlyChart(submissionsArray) {
+            const currentYear = new Date().getFullYear();
+            const monthlyData = new Array(12).fill(0);
+
+            submissionsArray.forEach(submission => {
+                const submitDate = new Date(submission.createdAt || submission.date);
+                if (submitDate.getFullYear() === currentYear) {
+                    monthlyData[submitDate.getMonth()]++;
+                }
+            });
+
+            renderMonthlyChart(monthlyData);
+        }
+
+        // ===== RENDER MONTHLY CHART =====
+        function renderMonthlyChart(monthlyData) {
+            const chartContainer = document.getElementById('monthlyChart');
+            const maxValue = Math.max(...monthlyData);
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+            
+            let chartHTML = '';
+            monthlyData.forEach((value, index) => {
+                const height = (value / maxValue) * 100;
+                chartHTML += `
+                    <div class="bar-group">
+                        <div class="bar" style="height: ${height}%;">
+                            <span class="bar-value">${value}</span>
+                        </div>
+                        <div class="bar-label">${monthNames[index]}</div>
+                    </div>
+                `;
+            });
+
+            chartContainer.innerHTML = chartHTML;
+        }
+
+        // ===== SET ACTIVE TOOLBAR LINK =====
+        function setActiveToolbarLink() {
+            const currentPage = window.location.pathname.split('/').pop() || 'index_admin.html';
+            document.querySelectorAll('.toolbar-link').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === currentPage || (href === 'index_admin.html' && currentPage === '')) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
+        // ===== INIT ON PAGE LOAD =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set active toolbar link
+            setActiveToolbarLink();
+            
+            // Check admin access first
+            if (checkAdminAccess()) {
+                // Load statistics
+                loadStatistics();
+                listenAdminNotifications();
+            }
+        });
+
+        function gotoNotifications() {
+            window.location.href = 'HalamanNotifikasi.html';
+        }
+
+        function showToast(message, duration = 4000) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toast.hideTimeout);
+            toast.hideTimeout = setTimeout(() => toast.classList.remove('show'), duration);
+        }
+
+        function updateNotificationBadge(count) {
+            const badge = document.getElementById('notifBadge');
+            if (!badge) return;
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        let adminNotificationsInitialKeys = new Set();
+        function listenAdminNotifications() {
+            if (!db) return;
+            const notifRef = db.ref('notifications/admins');
+
+            notifRef.once('value', snapshot => {
+                snapshot.forEach(child => adminNotificationsInitialKeys.add(child.key));
+                updateAdminNotificationBadge(snapshot);
+            });
+
+            notifRef.on('child_added', snap => {
+                const id = snap.key;
+                const data = snap.val() || {};
+                const isUnread = data.read !== true && data.read !== 'true';
+
+                if (!adminNotificationsInitialKeys.has(id)) {
+                    adminNotificationsInitialKeys.add(id);
+                    if (isUnread) {
+                        showToast(data.title || 'Notifikasi baru masuk');
+                    }
+                }
+            });
+
+            notifRef.on('value', snapshot => updateAdminNotificationBadge(snapshot));
+        }
+
+        function updateAdminNotificationBadge(snapshot) {
+            const data = snapshot ? snapshot.val() : null;
+            let unreadCount = 0;
+            if (data) {
+                Object.values(data).forEach(item => {
+                    if (item && item.read !== true && item.read !== 'true') {
+                        unreadCount += 1;
+                    }
+                });
+            }
+            updateNotificationBadge(unreadCount);
+        }
+
+        // ===== LOGOUT FUNCTION =====
+        function logout() {
+            localStorage.removeItem('loggedUser');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+
+</html>

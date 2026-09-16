@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>Pusat Bantuan - SIMARSIP APP</title>
+    <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/help-center-style.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Top header with blue background -->
+        <header class="app-header">
+            <div class="app-header-inner">
+                <div class="app-title">SIMARSIP APP</div>
+                <div class="user-chip" onclick="window.location.href='profile.html'">
+                    <span class="user-name">Hi, Organisasi!</span>
+                    <i class="material-icons user-icon">account_circle</i>
+                </div>
+            </div>
+        </header>
+
+        <div class="view view-main">
+            <!-- HELP CENTER PAGE -->
+            <div class="page page-help-center" data-name="help-center">
+                <div class="page-content">
+                    <!-- Breadcrumb -->
+                    <div class="breadcrumb-nav">
+                        <a href="index.html" class="breadcrumb-link">
+                            <i class="material-icons">home</i>
+                            Beranda
+                        </a>
+                        <span class="breadcrumb-separator">/</span>
+                        <span class="breadcrumb-current">Pusat Bantuan</span>
+                    </div>
+
+                    <!-- Page Title -->
+                    <div class="page-title-section">
+                        <h1 class="page-title">Pusat Bantuan</h1>
+                        <p class="page-subtitle">Temukan jawaban atas pertanyaan Anda atau hubungi kami untuk bantuan lebih lanjut</p>
+                    </div>
+
+                    <!-- Search Box -->
+                    <div class="help-search-wrapper">
+                        <div class="help-search-box">
+                            <i class="material-icons">search</i>
+                            <input type="text" id="faqSearchInput" placeholder="Cari FAQ atau topik bantuan...">
+                            <span id="searchClear" class="search-clear-btn" style="display: none;">
+                                <i class="material-icons">close</i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Tabs Navigation -->
+                    <div class="help-tabs-container">
+                        <div class="help-tabs">
+                            <button class="help-tab-btn active" data-tab="faq">
+                                <i class="material-icons">help_outline</i>
+                                <span>FAQ</span>
+                            </button>
+                            <button class="help-tab-btn" data-tab="tickets">
+                                <i class="material-icons">support_agent</i>
+                                <span>Ticketing</span>
+                                <span id="ticketBadge" class="notification-badge" style="display: none;">0</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Tab -->
+                    <div class="help-tab-content active" data-tab="faq">
+                        <!-- FAQ Categories -->
+                        <div class="faq-categories">
+                            <button class="faq-category-btn active" data-category="semua">
+                                Semua
+                            </button>
+                            <button class="faq-category-btn" data-category="surat">
+                                Surat
+                            </button>
+                            <button class="faq-category-btn" data-category="peminjaman">
+                                Peminjaman
+                            </button>
+                            <button class="faq-category-btn" data-category="peralatan">
+                                Peralatan
+                            </button>
+                            <button class="faq-category-btn" data-category="akun">
+                                Akun
+                            </button>
+                        </div>
+
+                        <!-- FAQ Items -->
+                        <div id="faqContainer" class="faq-container">
+                            <!-- FAQ items will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Ticketing Tab -->
+                    <div class="help-tab-content" data-tab="tickets">
+                        <div class="ticketing-container">
+                            <!-- New Ticket Form -->
+                            <div class="new-ticket-section">
+                                <h3 class="section-heading">Buat Tiket Baru</h3>
+                                <form id="newTicketForm" class="ticket-form">
+                                    <div class="form-group">
+                                        <label for="ticketTitle">Judul Keluhan <span class="required">*</span></label>
+                                        <input type="text" id="ticketTitle" class="form-input" placeholder="Contoh: Surat tidak terverifikasi" required>
+                                        <small class="form-hint">Deskripsi singkat masalah Anda</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="ticketCategory">Kategori <span class="required">*</span></label>
+                                        <select id="ticketCategory" class="form-input" required>
+                                            <option value="">Pilih Kategori</option>
+                                            <option value="surat">Masalah Surat</option>
+                                            <option value="peminjaman">Masalah Peminjaman</option>
+                                            <option value="peralatan">Masalah Peralatan</option>
+                                            <option value="akun">Masalah Akun</option>
+                                            <option value="lainnya">Lainnya</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="ticketPriority">Prioritas <span class="required">*</span></label>
+                                        <div class="priority-buttons">
+                                            <input type="radio" id="priority-low" name="ticketPriority" value="rendah" checked>
+                                            <label for="priority-low" class="priority-label priority-low">Rendah</label>
+
+                                            <input type="radio" id="priority-medium" name="ticketPriority" value="sedang">
+                                            <label for="priority-medium" class="priority-label priority-medium">Sedang</label>
+
+                                            <input type="radio" id="priority-high" name="ticketPriority" value="tinggi">
+                                            <label for="priority-high" class="priority-label priority-high">Tinggi</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="ticketDescription">Deskripsi Lengkap <span class="required">*</span></label>
+                                        <textarea id="ticketDescription" class="form-input form-textarea" placeholder="Jelaskan masalah Anda secara detail..." rows="5" required></textarea>
+                                        <small class="form-hint">Semakin detail, semakin cepat kami bisa membantu</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="ticketAttachment">Lampiran (Opsional)</label>
+                                        <div class="file-input-wrapper">
+                                            <input type="file" id="ticketAttachment" class="form-input" accept="image/*,.pdf">
+                                            <label for="ticketAttachment" class="file-input-label">
+                                                <i class="material-icons">attach_file</i>
+                                                <span>Pilih File atau Drag & Drop</span>
+                                            </label>
+                                            <small id="fileName" class="form-hint"></small>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary btn-block">Buat Tiket</button>
+                                </form>
+                            </div>
+
+                            <!-- My Tickets List -->
+                            <div class="my-tickets-section">
+                                <h3 class="section-heading">Tiket Saya</h3>
+                                <div id="ticketsContainer" class="tickets-container">
+                                    <!-- Tickets will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back Button (Mobile) -->
+        <div class="mobile-back-button">
+            <a href="index.html" class="btn-back">
+                <i class="material-icons">arrow_back</i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Modal for FAQ Detail -->
+    <div id="faqModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="faqModalTitle"></h2>
+                <button class="modal-close-btn" onclick="closeFAQModal()">
+                    <i class="material-icons">close</i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="faqModalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Ticket Detail -->
+    <div id="ticketModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="ticketModalTitle"></h2>
+                <button class="modal-close-btn" onclick="closeTicketModal()">
+                    <i class="material-icons">close</i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="ticketModalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.framework7.io/framework7/5.7.10/js/framework7.min.js"></script>
+    <script src="js/help-center.js"></script>
+</body>
+
+</html>

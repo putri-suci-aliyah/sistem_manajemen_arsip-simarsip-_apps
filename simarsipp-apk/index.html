@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>SIMARSIPP APP</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Top header with blue background -->
+        <header class="app-header">
+            <div class="app-header-inner">
+                <div class="app-title">SIMARSIP APP</div>
+                <div class="user-chip" onclick="window.location.href='profile.html'">
+                    <span class="user-name">Hi, Organisasi!</span>
+                    <i class="material-icons user-icon">account_circle</i>
+                </div>
+            </div>
+
+            <div class="welcome-card">
+                <div class="welcome-title">Selamat Datang!</div>
+                <div class="welcome-sub">Kelola pengajuan surat dan peminjaman dengan mudah</div>
+            </div>
+        </header>
+
+        <div class="view view-main">
+            <!-- HOME PAGE -->
+            <div class="page page-home" data-name="home">
+                <div class="page-content">
+
+                    <!-- <div class="search-wrapper">
+                        <div class="searchbar custom-searchbar">
+                            <div class="searchbar-inner">
+                                <div class="searchbar-input-wrap">
+                                    <i class="material-icons searchbar-icon">search</i>
+                                    <input type="search" placeholder="Cari pengajuan...">
+                                    <span class="input-clear-button"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+
+                    <div class="section">
+                        <div class="section-title">Ajukan Surat Baru</div>
+                        <div class="row actions-row">
+                            <div class="col-33">
+                                <a href="peminjaman.html" style="text-decoration:none;color:inherit">
+                                    <div class="action-card">
+                                        <div class="action-icon"><i class="material-icons">format_list_bulleted</i>
+                                        </div>
+                                        <div class="action-label">Peminjaman Ruangan</div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-33">
+                                <a href="dispensasi.html" style="text-decoration:none;color:inherit">
+                                    <div class="action-card">
+                                        <div class="action-icon"><i class="material-icons">description</i></div>
+                                        <div class="action-label">Surat Dispen</div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-33">
+                                <a href="peralatan.html" style="text-decoration:none;color:inherit">
+                                    <div class="action-card">
+                                        <div class="action-icon"><i class="material-icons">important_devices</i></div>
+                                        <div class="action-label">Peminjaman Peralatan</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Bantuan & Dukungan</div>
+                        <div class="row actions-row">
+                            <div class="col-33" style="flex: 1;">
+                                <a href="help-center.html" style="text-decoration:none;color:inherit">
+                                    <div class="action-card">
+                                        <div class="action-icon"><i class="material-icons">help_center</i></div>
+                                        <div class="action-label">Pusat Bantuan</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Status Pengajuan Terakhir</div>
+                        <div id="latest-status-list">
+                            <!-- Status dinamis akan dirender di sini -->
+                        </div>
+                        <a href="riwayat.html" class="history-link"
+                            style="display: inline-flex; align-items: center; justify-content: flex-end; width: 100%; text-decoration: none; color: #1e88ff; font-weight: 500; font-size: 14px; margin-top: 12px; padding: 8px 0;">
+                            Lihat Riwayat Pengajuan
+                            <i class="material-icons" style="margin-left: 4px; font-size: 18px;">chevron_right</i>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- CALENDAR PAGE -->
+            <div class="page page-calendar" data-name="calendar" style="display:none">
+                <div class="page-content">
+                    <div class="calendar-header"
+                        style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                        <button class="calendar-prev"
+                            style="background:transparent;border:none;font-size:20px;padding:4px">&#x2039;</button>
+                        <div class="calendar-title" style="font-weight:700">November 2025</div>
+                        <button class="calendar-next"
+                            style="background:transparent;border:none;font-size:20px;padding:4px">&#x203A;</button>
+                    </div>
+                    <div class="calendar-grid"
+                        style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px"></div>
+                    <div class="calendar-legend"
+                        style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px;font-size:12px">
+                        <div><span
+                                style="display:inline-block;width:12px;height:12px;background:#4CAF50;border-radius:2px;margin-right:6px"></span>
+                            Tersedia</div>
+                        <div><span
+                                style="display:inline-block;width:12px;height:12px;background:#FFC107;border-radius:2px;margin-right:6px"></span>
+                            Pending</div>
+                        <div><span
+                                style="display:inline-block;width:12px;height:12px;background:#2196F3;border-radius:2px;margin-right:6px"></span>
+                            Sedang dipinjam</div>
+                        <div><span
+                                style="display:inline-block;width:12px;height:12px;background:#9E9E9E;border-radius:2px;margin-right:6px"></span>
+                            Sudah dikembalikan</div>
+                    </div>
+                    <button class="calendar-fab" title="Tambah"
+                        style="position:fixed;bottom:70px;right:16px;width:56px;height:56px;border-radius:50%;background:#2196F3;color:white;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 6px rgba(0,0,0,0.3)">+</button>
+                </div>
+            </div>
+
+            <!-- PEMINJAMAN PAGE -->
+            <div class="page page-peminjaman" data-name="peminjaman" style="display:none">
+                <div class="page-content">
+                    <h2>Tambah Peminjaman</h2>
+                    <form class="booking-form">
+                        <div style="margin-bottom:12px">
+                            <label style="display:block;margin-bottom:4px;font-weight:500">Nama Kegiatan <span
+                                    style="color:red">*</span></label>
+                            <input type="text" name="title" placeholder="Contoh: Rapat Koordinasi" required
+                                style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;box-sizing:border-box">
+                        </div>
+                        <div style="margin-bottom:12px">
+                            <label style="display:block;margin-bottom:4px;font-weight:500">Jenis Ruangan <span
+                                    style="color:red">*</span></label>
+                            <select name="room" required
+                                style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;box-sizing:border-box">
+                                <option value="">Pilih ruangan</option>
+                                <option value="ruang_a">Ruang 111</option>
+                                <option value="ruang_b">Ruang 112</option>
+                                <option value="ruang_c">Ruang 113</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom:12px">
+                            <label style="display:block;margin-bottom:4px;font-weight:500">Tanggal <span
+                                    style="color:red">*</span></label>
+                            <input type="date" name="date" required
+                                style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;box-sizing:border-box">
+                        </div>
+                        <div style="margin-bottom:12px">
+                            <label style="display:block;margin-bottom:4px;font-weight:500">Jam Mulai</label>
+                            <input type="time" name="start"
+                                style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;box-sizing:border-box">
+                        </div>
+                        <div style="margin-bottom:12px">
+                            <label style="display:block;margin-bottom:4px;font-weight:500">Jam Selesai</label>
+                            <input type="time" name="end"
+                                style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;box-sizing:border-box">
+                        </div>
+                        <div style="margin-bottom:12px">
+                            <label style="display:block;margin-bottom:4px;font-weight:500">Catatan (opsional)</label>
+                            <textarea name="note" rows="3" placeholder="Keterangan tambahan..."
+                                style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;box-sizing:border-box;font-family:inherit"></textarea>
+                        </div>
+                        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+                            <button type="button" class="booking-cancel"
+                                style="padding:8px 16px;background:#f0f0f0;border:1px solid #ddd;border-radius:4px;cursor:pointer">Batal</button>
+                            <button type="submit"
+                                style="padding:8px 16px;background:#2196F3;color:white;border:none;border-radius:4px;cursor:pointer;font-weight:500">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom toolbar -->
+        <div class="toolbar toolbar-bottom app-toolbar">
+            <div class="toolbar-inner">
+                <a href="#" class="link active">
+                    <i class="material-icons">home</i>
+                    <span class="tabbar-label">Beranda</span>
+                </a>
+                <a href="calendar.html" class="link link-calendar">
+                    <i class="material-icons">calendar_today</i>
+                    <span class="tabbar-label">Kalender</span>
+                </a>
+                <a href="notifikasi.html" class="link">
+                    <i class="material-icons">notifications</i>
+                    <span class="tabbar-label">Notifikasi</span>
+                </a>
+                <!-- <a href="#" class="link">
+                    <i class="material-icons">help_outline</i>
+                    <span class="tabbar-label">Bantuan</span>
+                </a> -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar moved to separate page: calendar.html -->
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <script src="js/campus-utils.js"></script>
+    <script>
+        // ========= ENTRY POINT REDIRECT TO SPLASH ==========
+        // index.html hanya serve sebagai protected dashboard
+        // Semua akses harus lewat splash.html terlebih dahulu
+        
+        // Jika akses langsung index.html, redirect ke splash
+        const fromSplash = sessionStorage.getItem("fromSplash");
+        if (!fromSplash) {
+            window.location.href = "splash.html";
+        }
+
+        // ========= LOGIN PROTECTION & ROUTING ==========
+        const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+        
+        // Jika belum login, redirect ke splash (entry point)
+        if (!loggedUser) {
+            window.location.href = "splash.html";
+        } else if (loggedUser.role && loggedUser.role !== "organisasi") {
+            // Jika sudah login tapi role bukan organisasi, redirect ke dashboard yang sesuai
+            if (loggedUser.role === "BAA") {
+                window.location.href = "index_baa.html";
+            } else if (loggedUser.role === "Admin Simarsip" || loggedUser.role === "super_admin") {
+                window.location.href = "index_admin.html";
+            }
+        }
+
+        // Update user greeting dengan nama organisasi dari localStorage
+        if (loggedUser) {
+            document.addEventListener('DOMContentLoaded', () => {
+                const userNameEl = document.querySelector('.user-name');
+                if (userNameEl && loggedUser.organisasi) {
+                    // Extract short name dari dalam parenthesis jika ada (contoh: "HMIF" atau "IDE LPKIA" dari "Institut Digital Ekonomi LPKIA (IDE LPKIA)")
+                    const match = loggedUser.organisasi.match(/\(([^)]+)\)/);
+                    const shortName = match ? match[1] : loggedUser.organisasi;
+                    userNameEl.textContent = `Hi, ${shortName}!`;
+                }
+            });
+        }
+
+        // ========= SHARED DUMMY DATA ==========
+        const sharedDummyData = [
+    { id: 'dummy-1', type: 'ruangan', title: 'Rapat BEM', room: 'Ruang 101', date: '2026-01-05', status: 'approved', createdAt: new Date('2026-01-10T10:00:00Z').toISOString(), note: 'Rapat persiapan acara tahunan.' },
+    { id: 'dummy-2', type: 'peralatan', title: 'Peminjaman Proyektor', equipmentName: 'Proyektor Epson', quantity: 1, date: '2026-01-20', status: 'pending', createdAt: new Date('2026-01-18T14:00:00Z').toISOString(), note: 'Untuk presentasi kelas.' },
+    { id: 'dummy-3', type: 'dispensasi', title: 'Dispensasi Lomba', purpose: 'Lomba Debat Nasional', date: '2026-01-22', status: 'rejected', createdAt: new Date('2026-01-19T11:00:00Z').toISOString(), reason: 'Surat keterangan dari panitia tidak lengkap.' },
+    { id: 'dummy-4', type: 'ruangan', title: 'Workshop Fotografi', room: 'Lab. Komputer', date: '2026-01-25', status: 'approved', createdAt: new Date('2026-01-20T09:00:00Z').toISOString(), note: 'Dibutuhkan akses ke 5 unit PC.' },
+    { id: 'dummy-5', type: 'peralatan', title: 'Peminjaman Kamera', equipmentName: 'Kamera DSLR Canon', quantity: 2, date: '2026-01-28', status: 'pending', createdAt: new Date('2026-01-27T16:00:00Z').toISOString(), note: 'Untuk dokumentasi acara.' },
+];
+    
+
+        // ========= FIREBASE INITIALIZATION ==========
+let db;
+try {
+    const firebaseConfig = {
+        apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+        authDomain: "simarsip-apk.firebaseapp.com",
+        databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "simarsip-apk",
+        storageBucket: "simarsip-apk.firebasestorage.app",
+        messagingSenderId: "707332524030",
+        appId: "1:707332524030:web:d91551b5f199df489622af"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+} catch (err) {
+    console.error('Firebase init error:', err.message);
+}
+
+// normalizeCampus and getUserCampus provided by js/campus-utils.js
+
+// FUNGSI RENDER
+function renderLatestStatus(items) {
+    const container = document.getElementById('latest-status-list');
+    if (!container) {
+        console.error('Container latest-status-list not found');
+        return;
+    }
+    if (!items || items.length === 0) {
+        container.innerHTML = '<div class="status-card"><div class="status-row">Tidak ada pengajuan terbaru.</div></div>';
+        return;
+    }
+
+    let html = '';
+    items.forEach(item => {
+        let statusClass = '', statusText = '';
+        
+        // Penyesuaian Status & Warna (Sinkron dengan BAA & Kalender)
+        switch (item.status) {
+            case 'approved': 
+                statusClass = 'color-green'; 
+                statusText = 'Disetujui'; 
+                break;
+            case 'pending': 
+                statusClass = 'color-orange'; 
+                statusText = 'Menunggu'; 
+                break;
+            case 'rejected': 
+                statusClass = 'color-red'; 
+                statusText = 'Ditolak'; 
+                break;
+            case 'Sudah dikembalikan': 
+                statusClass = 'color-gray'; // Anda bisa ganti hex warna ungu jika ada di CSS
+                statusText = 'Selesai'; 
+                break;
+            default: 
+                statusClass = 'color-gray'; 
+                statusText = item.status || 'Proses';
+        }
+
+        const dateVal = item.date || item.borrowDate || new Date().toISOString();
+        const formattedDate = new Date(dateVal).toLocaleDateString('id-ID', { 
+            day: '2-digit', 
+            month: 'short', 
+            year: 'numeric' 
+        });
+
+        html += `
+            <a href="detail-riwayat.html?type=${item.category}&id=${item.id}" style="text-decoration: none; color: inherit;">
+                <div class="status-card">
+                    <div class="status-row">
+                        <div class="status-left">
+                            <div class="status-title">${item.title || 'Tanpa Judul'}</div>
+                            <div class="status-date">${formattedDate}</div>
+                        </div>
+                        <div class="status-right">
+                            <span class="badge ${statusClass}">${statusText.toUpperCase()}</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+// FUNGSI FETCH REALTIME
+function fetchLatestStatus() {
+    // Get current logged user
+    const loggedUser = JSON.parse(localStorage.getItem('loggedUser')) || {};
+    const currentUserKampus = normalizeCampus(loggedUser.kampus);
+
+    console.log('=== FETCH LATEST STATUS ===');
+    console.log('Current user kampus:', currentUserKampus);
+
+    if (!currentUserKampus) {
+        console.warn('Logged user has no kampus set, campus-based filtering will be skipped or fallback to dummy data.');
+    }
+
+    if (!db) {
+        console.warn("Firebase not available. Using dummy data.");
+        let fallbackItems = [...sharedDummyData];
+        const sorted = fallbackItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        renderLatestStatus(sorted.slice(0, 5));
+        return;
+    }
+
+    // Menggunakan .on('value') agar setiap kali BAA update status, tampilan user berubah otomatis
+    db.ref('pengajuan').on('value', (snapshot) => {
+        let allItems = []; // Mulai dengan array kosong - PRIORITAS REAL DATA
+        
+        const data = snapshot.val();
+        if (data) {
+            console.log('Firebase data keys:', Object.keys(data));
+            
+            // Mengambil dari semua kategori: ruangan, dispensasi, peralatan
+            Object.keys(data).forEach(categoryKey => {
+                const categoryData = data[categoryKey];
+                for (const key in categoryData) {
+                    const item = categoryData[key];
+                    
+                    // PENTING: Filter hanya data dari kampus yang sama
+                    const itemKampus = normalizeCampus(item.kampus);
+                    if (itemKampus && currentUserKampus && itemKampus === currentUserKampus) {
+                        console.log(`✓ Found matching item in ${categoryKey}:`, key, item.kampus);
+                        allItems.push({
+                            id: key,
+                            category: categoryKey,
+                            ...item,
+                            status: item.status || 'pending',
+                            // Pastikan ada createdAt untuk sorting, jika tidak ada pakai date
+                            sortDate: item.createdAt || item.date || item.borrowDate
+                        });
+                    }
+                }
+            });
+        }
+        
+        console.log(`Found ${allItems.length} real data items`);
+        
+        // Selalu tambahkan dummy data untuk demo agar terlihat banyak
+        // Only append dummy data if there are no real items AND the logged user has no campus set
+        if (allItems.length === 0 && (!loggedUser || !loggedUser.kampus)) {
+            console.log('No real items found and user has no campus -> adding dummy data as fallback...');
+            allItems = [...allItems, ...sharedDummyData];
+        } else {
+            console.log('Real data present or user has campus -> do not append dummy data.');
+        }
+
+        // Urutkan berdasarkan yang terbaru (Terakhir diinput/dibuat)
+        const sorted = allItems.sort((a, b) => {
+            return new Date(b.sortDate || 0) - new Date(a.sortDate || 0);
+        });
+
+        // Tampilkan 5 data terakhir saja di Beranda
+        console.log(`Rendering ${Math.min(5, sorted.length)} items`);
+        renderLatestStatus(sorted.slice(0, 5));
+    }, (error) => {
+        console.error("Firebase Realtime Error:", error);
+        // Fallback ke dummy data saja
+        let fallbackItems = [...sharedDummyData];
+        const sorted = fallbackItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        renderLatestStatus(sorted.slice(0, 5));
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Delay sedikit untuk memastikan DOM fully loaded
+    setTimeout(fetchLatestStatus, 100);
+});
+
+// Handle form submission
+document.querySelector('.booking-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+    
+    const data = {
+        title: formData.get('title'),
+        room: formData.get('room'),
+        date: formData.get('date'),
+        start: formData.get('start'),
+        end: formData.get('end'),
+        note: formData.get('note'),
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        name: loggedUser ? loggedUser.name : 'User',
+        organisasi: loggedUser ? loggedUser.organisasi : 'Organisasi',
+        kampus: loggedUser ? loggedUser.kampus : 'Kampus'
+    };
+    
+    if (!db) {
+        alert('Firebase tidak tersedia. Data disimpan lokal saja.');
+        return;
+    }
+    
+    // Push to Firebase
+    const ref = db.ref('pengajuan/ruangan').push();
+    ref.set(data).then((result) => {
+        // Create admin notification automatically
+        createPengajuanNotification('ruangan', ref.key, data);
+        alert('Pengajuan berhasil dikirim!');
+        this.reset();
+        // Refresh status
+        fetchLatestStatus();
+    }).catch(err => {
+        alert('Gagal mengirim: ' + err.message);
+    });
+});
+
+    // Helper function: Create automatic admin notification for new submissions
+    function createPengajuanNotification(type, pengajuanId, pengajuanData) {
+        if (!db) return;
+        
+        try {
+            const typeLabel = {
+                'ruangan': 'Peminjaman Ruangan',
+                'peralatan': 'Peminjaman Peralatan', 
+                'dispensasi': 'Surat Dispensasi',
+                'surat': 'Surat Baru'
+            }[type] || 'Pengajuan Baru';
+            
+            const notifId = `notif_${type}_${pengajuanId.substring(0, 10)}_${Date.now()}`;
+            
+            db.ref(`notifications/admins/${notifId}`).set({
+                id: notifId,
+                title: `${typeLabel} Baru`,
+                message: `Pengajuan ${typeLabel} dari ${pengajuanData.organisasi || 'User'}: ${pengajuanData.title || pengajuanData.room || 'Permintaan Baru'}`,
+                relatedId: pengajuanId,
+                type: `submission_${type}`,
+                createdAt: new Date().toISOString(),
+                read: false,
+                submissionType: type,
+                from: pengajuanData.organisasi || pengajuanData.name || 'Unknown',
+                kampus: pengajuanData.kampus || 'Unknown'
+            }).catch(err => {
+                console.warn('Failed to create notification:', err.message);
+            });
+        } catch (err) {
+            console.warn('Error in createPengajuanNotification:', err.message);
+        }
+    }
+    </script>
+</body>
+
+</html>

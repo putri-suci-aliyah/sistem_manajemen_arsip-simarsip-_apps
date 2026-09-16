@@ -1,0 +1,305 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard Persetujuan - BAA</title>
+  <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { 
+      background: #fafafa; 
+      max-width: 480px; 
+      margin: 0 auto; 
+      font-family: -apple-system, sans-serif;
+    }
+    
+    .app-header {
+      background: linear-gradient(135deg, #007aff 0%, #005bb5 100%);
+      padding: 16px; color: white; position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .back-btn { color: white; cursor: pointer; display: flex; align-items: center; }
+    .header-title { font-weight: 700; font-size: 18px; flex: 1; }
+
+    .search-wrapper {
+      padding: 12px 16px; background: white; border-bottom: 1px solid #eee;
+      position: sticky; top: 56px; z-index: 99;
+    }
+    .search-input-group {
+      background: #f1f3f4; border-radius: 10px; padding: 8px 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .search-input-group i { color: #5f6368; font-size: 20px; }
+    .search-input-group input {
+      border: none; background: transparent; width: 100%; outline: none;
+      font-size: 14px; color: #333;
+    }
+
+    .filter-container .filter-chip {
+      padding: 8px 16px;
+      background: #f0f0f0;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #666;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: 0.2s;
+    }
+    .filter-container .filter-chip.active {
+      background: #007aff;
+      color: white;
+    }
+
+    .page-content { padding: 16px; padding-bottom: 40px; }
+
+    .approval-item {
+      background: white; border-radius: 12px; padding: 15px;
+      margin-bottom: 15px; border-left: 5px solid #ffc107;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: transform 0.2s;
+    }
+    .approval-item:active { transform: scale(0.98); }
+    .approval-item.approved { border-left-color: #00eb9f; }
+    .approval-item.rejected { border-left-color: #ff4b5c; }
+
+    .item-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .item-type { 
+        font-size: 10px; font-weight: 800; color: #007aff; 
+        background: #eef6ff; padding: 2px 8px; border-radius: 20px;
+    }
+    .item-date { font-size: 11px; color: #999; }
+    .item-title { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 4px; }
+    .item-user { font-size: 13px; color: #666; display: flex; align-items: center; gap: 4px; }
+    
+    .status-badge {
+        font-size: 10px; font-weight: 700; text-transform: uppercase;
+        margin-top: 10px; display: inline-block;
+    }
+    .status-pending { color: #ff9800; }
+    .status-approved { color: #00c082; }
+    .status-rejected { color: #ff4b5c; }
+
+    .action-btns { display: flex; gap: 8px; margin-top: 15px; }
+    .btn-action {
+        flex: 1; padding: 10px; border-radius: 8px; border: none;
+        font-weight: 700; font-size: 12px; cursor: pointer;
+    }
+    .btn-approve { background: #00eb9f; color: white; }
+    .btn-reject { background: #ff4b5c; color: white; }
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="back-btn" onclick="window.location.href='index_baa.html'">
+      <i class="material-icons">arrow_back</i>
+    </div>
+    <div class="header-title">Daftar Persetujuan</div>
+  </header>
+
+  <div class="search-wrapper">
+    <div class="search-input-group">
+      <i class="material-icons">search</i>
+      <input type="text" id="searchInput" placeholder="Cari judul pengajuan..." onkeyup="filterData()">
+    </div>
+  </div>
+
+  <div id="dashboard-list"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+  <script src="js/campus-utils.js"></script>
+
+  <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+        authDomain: "simarsip-apk.firebaseapp.com",
+        databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "simarsip-apk"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function normalizeStatus(value) {
+      const status = String(value || '').trim().toLowerCase();
+      if (status === 'revisi' || status === 'revision') return 'pending';
+      if (['pending', 'approved', 'rejected'].includes(status)) return status;
+      return 'pending';
+    }
+
+    function getStatusLabel(status) {
+      return status === 'approved' ? 'DISETUJUI' : status === 'rejected' ? 'DITOLAK' : 'MENUNGGU';
+    }
+
+    function belongsToBaa(item, baaKampus, baaOrg) {
+        // Prefer centralized helper when available. It enforces campus-first matching.
+        if (typeof belongsToUserCampusOrOrg === 'function') return belongsToUserCampusOrOrg(item, baaKampus, baaOrg);
+        // Fallback to previous local logic (keeps behavior if helper missing)
+        const itemKampus = item.kampus ? String(item.kampus).trim().toLowerCase() : null;
+        const itemOrg = item.organisasi ? String(item.organisasi).trim().toLowerCase() : null;
+        if (itemKampus && baaKampus && itemKampus === baaKampus) return true;
+        if (itemOrg && baaOrg && itemOrg === baaOrg) return true;
+        if (itemKampus && baaKampus && itemKampus.includes(baaKampus)) return true;
+        if (itemOrg && baaOrg && itemOrg.includes(baaOrg)) return true;
+        return false;
+      }
+
+  let allItems = [];
+    let currentSearchText = '';
+
+    const sharedDummyData = [
+    { 
+        id: 'dummy-1', 
+        type: 'ruangan', 
+        title: 'Rapat BEM', 
+        room: 'Ruang 101',      
+        name: 'Zaki (Ketua)', 
+        date: '2026-01-05', 
+        status: 'pending',
+        note: 'Rapat internal koordinasi proker.' 
+    },
+    { 
+        id: 'dummy-2', 
+        type: 'peralatan', 
+        title: 'Peminjaman Proyektor', 
+        equipmentName: 'Proyektor Epson', 
+        name: 'Admin HMIF', 
+        date: '2026-01-27', 
+        status: 'pending',
+        note: 'Untuk acara workshop.'
+    },
+    { 
+        id: 'dummy-5', 
+        type: 'peralatan', 
+        title: 'Peminjaman Kamera', 
+        equipmentName: 'Kamera DSLR Canon', 
+        name: 'Dika (Staff)', 
+        date: '2026-01-28', 
+        status: 'pending',
+        note: 'Dokumentasi kegiatan luar ruangan.'
+    }
+];
+
+    // --- FUNGSI NAVIGASI (PENTING) ---
+    window.goToDetail = function(type, id) {
+        window.location.href = `detail_data.html?type=${type}&id=${id}`;
+    };
+
+  function fetchData() {
+  // Ensure we have a loggedUser and campus scoping for BAA accounts (use centralized helpers)
+  const loggedUser = getLoggedUser();
+  const baaKampus = getUserCampus(loggedUser) || null;
+  const baaOrg = getUserOrg(loggedUser) || null;
+    if(!baaKampus && !baaOrg) {
+      alert('Silakan lengkapi informasi Kampus atau Organisasi pada profil Anda agar dapat melihat pengajuan.');
+      window.location.href = 'profile.html';
+      return;
+    }
+
+    db.ref('pengajuan').on('value', snap => {
+      const fbData = snap.val() || {};
+      allItems = [];
+
+      // Only include shared dummy data when there are no real submissions for this campus or organisasi
+      let hasRealForCampus = false;
+      Object.keys(fbData).forEach(cat => {
+        Object.keys(fbData[cat] || {}).forEach(key => {
+          const item = fbData[cat][key];
+          if (belongsToBaa(item, baaKampus, baaOrg)) hasRealForCampus = true;
+        });
+      });
+      if (!hasRealForCampus) {
+        sharedDummyData.forEach(d => allItems.push({...d, isDummy: true}));
+      }
+
+      Object.keys(fbData).forEach(cat => {
+        Object.keys(fbData[cat] || {}).forEach(key => {
+          const item = fbData[cat][key];
+          if (belongsToBaa(item, baaKampus, baaOrg)) {
+            const status = normalizeStatus(item.status);
+            allItems.push({
+              id: key,
+              type: cat,
+              title: item.title || item.namaKegiatan || 'Tanpa Judul',
+              name: item.pengaju || item.user || 'HMIF User',
+              date: item.date || item.createdAt || '-',
+              status,
+              isDummy: false
+            });
+          }
+        });
+      });
+      renderData(allItems); // Render awal tanpa filter
+    });
+  }
+
+  function filterData() {
+    currentSearchText = document.getElementById('searchInput').value.toLowerCase();
+
+    const filtered = allItems.filter(item => {
+      const matchSearch = item.title.toLowerCase().includes(currentSearchText);
+      return matchSearch;
+    });
+
+    renderData(filtered);
+  }
+
+    function renderData(data) {
+        const container = document.getElementById('dashboard-list');
+        container.innerHTML = '';
+
+        if (data.length === 0) {
+            container.innerHTML = '<div style="text-align:center;color:#999;padding:40px;">Data tidak ditemukan</div>';
+            return;
+        }
+
+    data.forEach(item => {
+            const normalizedStatus = normalizeStatus(item.status);
+            const card = document.createElement('div');
+            card.className = `approval-item ${normalizedStatus}`;
+            card.style.cursor = 'pointer';
+            card.onclick = () => goToDetail(item.type, item.id);
+
+      card.innerHTML = `
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="flex:1">
+          <div class="item-header">
+            <span class="item-type">${item.type.toUpperCase()}</span>
+            <span class="item-date">${item.date}</span>
+          </div>
+          <div class="item-title">${item.title}</div>
+          <div class="item-user"><i class="material-icons" style="font-size:14px">person</i> ${item.name}</div>
+          <div class="status-badge status-${normalizedStatus}">â— ${getStatusLabel(normalizedStatus)}</div>
+          </div>
+        </div>
+      `;
+            container.appendChild(card);
+        });
+    }
+
+   window.updateStatus = function(cat, id, newStatus, isDummy) {
+    if(isDummy) {
+        alert("Status berhasil diperbarui (Simulasi Data Dummy)");
+        // Opsional: Anda bisa menghapus item dummy dari UI setelah aksi
+    } else {
+        // Ini akan langsung mengubah warna di kalender menjadi warna 'borrowed' (sedang dipinjam)
+        db.ref(`pengajuan/${cat}/${id}`).update({ 
+            status: newStatus 
+        }).then(() => {
+            alert("Status berhasil diperbarui ke: " + newStatus);
+            // Jika disetujui, user bisa langsung cek kalender
+            if(newStatus === 'approved' && confirm("Lihat perubahan di kalender?")) {
+                window.location.href = 'calender_baa.html';
+            }
+        });
+    }
+};
+
+    fetchData();
+  </script>
+</body>
+</html>

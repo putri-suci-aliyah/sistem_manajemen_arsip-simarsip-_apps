@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <title>Verifikasi BAA - SIMARSIP Admin</title>
+    <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { background: #f4f7fb; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+
+        /* Header Biru (Melengkung) */
+        .blue-header {
+            background: linear-gradient(180deg, #2f8bff, #1e73ff);
+            color: white;
+            padding: 16px 20px 36px 20px;
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-title { font-size: 18px; font-weight: bold; }
+        .user-chip {
+            background: rgba(255,255,255,0.18);
+            padding: 8px 12px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        /* Area Konten Utama */
+        .content-container {
+            padding: 16px 20px 100px 20px;
+        }
+
+        .section { margin-bottom: 20px; }
+        .section-title { color: #1e73ff; font-weight: 700; margin-bottom: 12px; font-size: 14px; }
+
+        /* Search */
+        .search-box {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-box input {
+            width: 100%;
+            border: none;
+            padding: 10px;
+            font-size: 14px;
+            outline: none;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+
+        /* Filter Row */
+        .filter-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .date-filter {
+            flex: 1;
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .date-filter input {
+            width: 100%;
+            border: none;
+            padding: 10px;
+            font-size: 14px;
+            outline: none;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .tab-btn {
+            padding: 8px 14px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: #1e73ff;
+            color: white;
+            border-color: #1e73ff;
+        }
+
+        /* List Card Item */
+        .request-card {
+            background: white;
+            border-radius: 18px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 5px solid #ffb300; /* Warna kuning default pending */
+            display: flex;
+            gap: 15px;
+        }
+        .card-content { flex: 1; }
+        .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .user-name { font-weight: bold; font-size: 16px; color: #333; }
+        .status-pill {
+            background: #fff3e0;
+            color: #ef6c00;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+        .details-text { color: #777; font-size: 13px; margin: 10px 0; line-height: 1.6; }
+        .btn-detail {
+            background: #e8efff;
+            color: #2196f3;
+            border: none;
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Bottom Toolbar (4 Menu Lengkap) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+            z-index: 1000;
+        }
+        .nav-item {
+            text-decoration: none;
+            color: #bbb;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .nav-item.active { color: #2196f3; }
+        .nav-item i { font-size: 24px; margin-bottom: 2px; }
+
+        /* Checkbox & Bulk Action Styles */
+        .request-card {
+            position: relative;
+        }
+        
+        .card-checkbox {
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .card-content {
+            padding-left: 40px;
+        }
+        
+        .bulk-action-bar {
+            position: fixed;
+            bottom: 70px;
+            left: 0;
+            right: 0;
+            background: #007aff;
+            padding: 12px 16px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 999;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .bulk-action-bar.show {
+            display: flex;
+        }
+        
+        .bulk-info {
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            flex: 1;
+        }
+        
+        .bulk-btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .bulk-approve {
+            background: #00c082;
+            color: white;
+        }
+        
+        .bulk-reject {
+            background: #ff3b30;
+            color: white;
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+    <div class="blue-header">
+        <div class="header-title">Verifikasi BAA</div>
+        <div class="user-chip" onclick="window.location.href='profile.html'">
+            Halo, Admin! <i class="material-icons user-icon">admin_panel_settings</i>
+        </div>
+    </div>
+
+    <div class="content-container">
+        <div class="section">
+            <div class="section-title">📋 Daftar Permintaan BAA</div>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Cari nama pengaju..." onkeyup="applyFilters()">
+            </div>
+            
+            <div class="filter-row">
+                <div class="date-filter">
+                    <input type="date" id="filterDate" onchange="applyFilters()">
+                </div>
+            </div>
+            
+            <div class="filter-tabs">
+                <button class="tab-btn active" onclick="changeTab('all', this)">Semua</button>
+                <button class="tab-btn" onclick="changeTab('pending', this)">Menunggu</button>
+                <button class="tab-btn" onclick="changeTab('approved', this)">Disetujui</button>
+                <button class="tab-btn" onclick="changeTab('rejected', this)">Ditolak</button>
+            </div>
+        </div>
+
+        <div id="requestList">
+        </div>
+
+        <div class="bulk-action-bar" id="bulkActionBar">
+            <div class="bulk-info">
+                <span id="selectedCount">0</span> dipilih
+            </div>
+            <button class="bulk-btn bulk-approve" onclick="bulkApprove()">
+                ✓ Setujui Semua
+            </button>
+            <button class="bulk-btn bulk-reject" onclick="bulkReject()">
+                ✗ Tolak Semua
+            </button>
+        </div>
+
+    <nav class="bottom-nav">
+        <a href="index_admin.html" class="nav-item">
+            <i class="material-icons">grid_view</i>
+            <span>Dashboard</span>
+        </a>
+        <a href="manajemen_user.html" class="nav-item">
+            <i class="material-icons">people</i>
+            <span>User</span>
+        </a>
+        <a href="verifikasi_baa.html" class="nav-item active">
+            <i class="material-icons">verified</i>
+            <span>Verifikasi</span>
+        </a>
+        <a href="manajemen_kampus.html" class="nav-item">
+            <i class="material-icons">business</i>
+            <span>Kampus</span>
+        </a>
+    </nav>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+        authDomain: "simarsip-apk.firebaseapp.com",
+        databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "simarsip-apk",
+        storageBucket: "simarsip-apk.firebasestorage.app",
+        messagingSenderId: "707332524030",
+        appId: "1:707332524030:web:d91551b5f199df489622af"
+    };
+
+    // Init Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    const db = firebase.database();
+
+    let rawData = [];
+    let currentStatus = 'all';
+
+    // =========================
+    // LOAD DATA PENGAJUAN BAA
+    // =========================
+    function initData() {
+
+        db.ref('baa_pending_approvals').on('value', snapshot => {
+
+            const data = snapshot.val() || {};
+
+            rawData = Object.entries(data).map(([id, item]) => ({
+                id: id,
+                userName: item.userName || 'Tanpa Nama',
+                userEmail: item.userEmail || '-',
+                position: item.position || '-',
+                campus: item.campus || '-',
+                description: item.description || '',
+                status: item.status || 'pending',
+                createdAt: item.createdAt || new Date().toISOString(),
+                reviewed: item.reviewed || false,
+                ...item
+            }));
+
+            // SORT TERBARU
+            rawData.sort((a, b) => {
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+
+            applyFilters();
+
+        }, err => {
+            console.error('Error loading BAA requests:', err);
+        });
+    }
+
+    // =========================
+    // FILTER DATA
+    // =========================
+    function applyFilters() {
+
+        const search =
+            document.getElementById('searchInput')
+            .value
+            .toLowerCase();
+
+        const date =
+            document.getElementById('filterDate')
+            .value;
+
+        const filtered = rawData.filter(item => {
+
+            // FILTER STATUS
+            const matchStatus =
+                currentStatus === 'all'
+                || item.status === currentStatus;
+
+            // FILTER SEARCH
+            const matchSearch =
+                (item.userName || '')
+                .toLowerCase()
+                .includes(search);
+
+            // FILTER DATE
+            let matchDate = true;
+
+            if (date) {
+
+                const itemDate =
+                    new Date(item.createdAt)
+                    .toISOString()
+                    .split('T')[0];
+
+                matchDate = itemDate === date;
+            }
+
+            return (
+                matchStatus
+                && matchSearch
+                && matchDate
+            );
+        });
+
+        renderUI(filtered);
+    }
+
+    // =========================
+    // RENDER UI
+    // =========================
+    function renderUI(list) {
+
+        const container =
+            document.getElementById('requestList');
+
+        if (list.length === 0) {
+
+            container.innerHTML = `
+                <div style="
+                    text-align:center;
+                    color:#999;
+                    margin-top:40px;
+                    font-size:14px;
+                ">
+                    Belum ada pengajuan BAA
+                </div>
+            `;
+
+            return;
+        }
+
+        container.innerHTML = list.map(item => {
+
+            let borderColor = '#ffb300';
+            let statusColor = '#ef6c00';
+            let statusBg = '#fff3e0';
+
+            if (item.status === 'approved') {
+                borderColor = '#00c853';
+                statusColor = '#00c853';
+                statusBg = '#e8f5e9';
+            }
+
+            if (item.status === 'rejected') {
+                borderColor = '#f44336';
+                statusColor = '#f44336';
+                statusBg = '#ffebee';
+            }
+
+            return `
+                <div class="request-card"
+                    style="border-left-color:${borderColor}">
+
+                    <input type="checkbox" class="card-checkbox" 
+                        value="${item.id}" 
+                        onchange="updateBulkActionBar()">
+
+                    <div class="card-content">
+
+                        <div class="card-top">
+
+                            <span class="user-name">
+                                ${item.userName}
+                            </span>
+
+                            <span class="status-pill"
+                                style="
+                                    background:${statusBg};
+                                    color:${statusColor};
+                                ">
+                                ${item.status.toUpperCase()}
+                            </span>
+
+                        </div>
+
+                        <div class="details-text">
+                            <b>Jabatan:</b> ${item.position}<br>
+                            <b>Kampus:</b> ${item.campus}<br>
+                            <b>Email:</b> ${item.userEmail}<br>
+                            <b>Tanggal:</b>
+                            ${new Date(item.createdAt)
+                                .toLocaleDateString('id-ID')}
+                        </div>
+
+                        <button class="btn-detail"
+                            onclick="openDetail('${item.id}')">
+
+                            Lihat Detail
+
+                        </button>
+
+                    </div>
+                </div>
+            `;
+
+        }).join('');
+    }
+
+    // =========================
+    // TAB FILTER
+    // =========================
+    function changeTab(status, el) {
+
+        currentStatus = status;
+
+        document
+            .querySelectorAll('.tab-btn')
+            .forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+        el.classList.add('active');
+
+        applyFilters();
+    }
+
+    // =========================
+    // UPDATE BULK ACTION BAR
+    // =========================
+    function updateBulkActionBar() {
+        const checkboxes = document.querySelectorAll('.card-checkbox:checked');
+        const bar = document.getElementById('bulkActionBar');
+        const count = document.getElementById('selectedCount');
+        
+        count.textContent = checkboxes.length;
+        
+        if (checkboxes.length > 0) {
+            bar.classList.add('show');
+        } else {
+            bar.classList.remove('show');
+        }
+    }
+
+    // =========================
+    // BULK APPROVE
+    // =========================
+    function bulkApprove() {
+        const checkboxes = document.querySelectorAll('.card-checkbox:checked');
+        
+        if (checkboxes.length === 0) {
+            alert('Pilih minimal 1 pengajuan');
+            return;
+        }
+        
+        if (!confirm(`Setujui ${checkboxes.length} pengajuan?`)) return;
+        
+        let processed = 0;
+        checkboxes.forEach(checkbox => {
+            const id = checkbox.value;
+            const itemData = rawData.find(d => d.id === id);
+            
+            if (itemData && itemData.status === 'pending') {
+                const userId = itemData.userId;
+                
+                db.ref('users/' + userId).update({
+                    role: 'BAA',
+                    baaStatus: 'approved',
+                    jabatan: itemData.position || '',
+                    approvedAt: new Date().toISOString()
+                }).then(() => {
+                    return db.ref('baa_pending_approvals/' + id).update({
+                        status: 'approved',
+                        reviewed: true,
+                        approvedAt: new Date().toISOString()
+                    });
+                }).then(() => {
+                    return db.ref('baa_applications/' + id).update({
+                        status: 'approved',
+                        reviewed: true,
+                        approvedAt: new Date().toISOString()
+                    });
+                }).then(() => {
+                    processed++;
+                    if (processed === checkboxes.length) {
+                        alert(`✓ ${processed} pengajuan berhasil disetujui`);
+                        applyFilters();
+                    }
+                }).catch(err => {
+                    alert('Error: ' + err.message);
+                });
+            }
+        });
+    }
+
+    // =========================
+    // BULK REJECT
+    // =========================
+    function bulkReject() {
+        const checkboxes = document.querySelectorAll('.card-checkbox:checked');
+        
+        if (checkboxes.length === 0) {
+            alert('Pilih minimal 1 pengajuan');
+            return;
+        }
+        
+        const reason = prompt(`Alasan menolak ${checkboxes.length} pengajuan:\n(atau kosongkan untuk membatalkan)`);
+        if (reason === null || reason.trim() === '') return;
+        
+        let processed = 0;
+        checkboxes.forEach(checkbox => {
+            const id = checkbox.value;
+            const itemData = rawData.find(d => d.id === id);
+            
+            if (itemData && itemData.status === 'pending') {
+                const userId = itemData.userId;
+                
+                db.ref('users/' + userId).update({
+                    baaStatus: 'rejected',
+                    rejectionReason: reason,
+                    rejectedAt: new Date().toISOString()
+                }).then(() => {
+                    return db.ref('baa_pending_approvals/' + id).update({
+                        status: 'rejected',
+                        reviewed: true,
+                        rejectionReason: reason,
+                        rejectedAt: new Date().toISOString()
+                    });
+                }).then(() => {
+                    return db.ref('baa_applications/' + id).update({
+                        status: 'rejected',
+                        reviewed: true,
+                        rejectionReason: reason,
+                        rejectedAt: new Date().toISOString()
+                    });
+                }).then(() => {
+                    processed++;
+                    if (processed === checkboxes.length) {
+                        alert(`✗ ${processed} pengajuan berhasil ditolak`);
+                        applyFilters();
+                    }
+                }).catch(err => {
+                    alert('Error: ' + err.message);
+                });
+            }
+        });
+    }
+
+    // =========================
+    // DETAIL PAGE
+    // =========================
+    function openDetail(id) {
+
+        window.location.href =
+            'detail_verifikasi.html?id=' + id;
+    }
+
+    // =========================
+    // START
+    // =========================
+    initData();
+</script>
+</body>
+</html>

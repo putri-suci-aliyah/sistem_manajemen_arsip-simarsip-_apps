@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Data Ruangan - BAA</title>
+    <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body { background: #f4f7fb; font-family: -apple-system, sans-serif; margin: 0; }
+        .app-header { background: linear-gradient(135deg, #007aff 0%, #0056b3 100%); color: white; padding: 15px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+        .search-container { padding: 12px 16px; background: white; border-bottom: 1px solid #eee; position: sticky; top: 56px; z-index: 99; }
+        .search-input { width: 100%; border: none; background: #f0f2f5; padding: 12px; border-radius: 12px; outline: none; font-size: 14px; box-sizing: border-box; }
+        .section { padding: 16px; padding-bottom: 100px; }
+        
+        /* Room Card Styling */
+        .room-card { background: white; border-radius: 18px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid transparent; transition: all 0.3s; }
+        .room-info h4 { margin: 0; font-size: 18px; color: #333; font-weight: 800; }
+        .room-info p { margin: 6px 0 10px; font-size: 13px; color: #666; line-height: 1.5; }
+        
+        /* Status Badges */
+        .status-badge { padding: 6px 14px; border-radius: 10px; font-size: 11px; font-weight: 800; text-transform: uppercase; display: inline-block; }
+        .status-tersedia { background: #e8f5e9; color: #2e7d32; }
+        .status-dipinjam { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; } /* Merah untuk Sedang Dipinjam */
+        .status-perbaikan { background: #fff3e0; color: #ef6c00; }
+        
+        /* Buttons */
+        .btn-mini-edit { color: #007aff; cursor: pointer; font-size: 24px; background: #eef6ff; padding: 6px; border-radius: 10px; }
+        .btn-mini-delete { color: #ff3b30; cursor: pointer; font-size: 24px; background: #fff1f0; padding: 6px; border-radius: 10px; margin-left: 8px; }
+        .action-btns { display: flex; align-items: center; }
+        
+        .fab-add { position: fixed; bottom: 30px; right: 25px; width: 60px; height: 60px; background: #00eb9f; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 6px 20px rgba(0, 235, 159, 0.4); cursor: pointer; z-index: 999; }
+        
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; z-index: 1000; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(4px); }
+        .modal-content { background: white; width: 100%; max-width: 400px; border-radius: 25px; padding: 25px; box-sizing: border-box; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h3 { margin: 0; font-size: 20px; font-weight: 800; color: #333; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 700; color: #555; margin-bottom: 8px; }
+        .form-control { width: 100%; border: 1.5px solid #eee; padding: 12px; border-radius: 12px; font-size: 14px; box-sizing: border-box; outline: none; transition: border-color 0.3s; }
+        .form-control:focus { border-color: #007aff; }
+        .btn-save { width: 100%; background: #007aff; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+
+<body>
+    <div class="app-header">
+        <i class="material-icons" style="cursor:pointer" onclick="window.location.href='index_baa.html'">arrow_back</i>
+        <div style="font-weight:700; font-size:18px;">Data Ruangan</div>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Cari nama atau lokasi ruangan..." onkeyup="filterData()">
+    </div>
+
+    <div class="section" id="room-list">
+        <div style="text-align:center; padding:50px; color:#999;">Mengambil data ruangan...</div>
+    </div>
+
+    <div class="fab-add" onclick="openModal()">
+        <i class="material-icons" style="font-size: 30px;">add</i>
+    </div>
+
+    <div class="modal-overlay" id="modalForm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Tambah Ruangan</h3>
+                <i class="material-icons" onclick="closeModal()" style="cursor:pointer; color:#ccc;">close</i>
+            </div>
+            <input type="hidden" id="editId">
+            <div class="form-group"><label>Nama Ruangan *</label><input type="text" id="formNama" class="form-control"></div>
+            <div class="form-group"><label>Kapasitas *</label><input type="number" id="formKapasitas" class="form-control"></div>
+            <div class="form-group"><label>Lokasi *</label><input type="text" id="formLokasi" class="form-control"></div>
+            <div class="form-group"><label>Status Manual</label>
+                <select id="formStatus" class="form-control">
+                    <option value="Tersedia">Tersedia</option>
+                    <option value="Dalam Perbaikan">Dalam Perbaikan</option>
+                </select>
+            </div>
+            <button class="btn-save" onclick="saveData()">Simpan Data</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+            authDomain: "simarsip-apk.firebaseapp.com",
+            databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "simarsip-apk"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const ruanganNyata = [
+            { id: 'rn-1', nama: "Lab. Komputer", lokasi: "Lantai 1", kapasitas: "30", statusMaster: "Tersedia", kampus: "IDE LPKIA" },
+            { id: 'rn-2', nama: "Ruang 101", lokasi: "Gedung A", kapasitas: "40", statusMaster: "Tersedia", kampus: "IDE LPKIA" },
+            { id: 'rn-3', nama: "Ruang 102", lokasi: "Gedung A", kapasitas: "40", statusMaster: "Tersedia", kampus: "IDE LPKIA" },
+            { id: 'rn-4', nama: "Ruang 103", lokasi: "Gedung A", kapasitas: "40", statusMaster: "Tersedia", kampus: "IDE LPKIA" },
+            { id: 'rn-5', nama: "Ruang 104", lokasi: "Gedung A", kapasitas: "40", statusMaster: "Tersedia", kampus: "IDE LPKIA" },
+            { id: 'rn-6', nama: "Ruang 105", lokasi: "Gedung A", kapasitas: "40", statusMaster: "Tersedia", kampus: "IDE LPKIA" },
+            { id: 'rn-7', nama: "Ruang 111", lokasi: "Gedung B", kapasitas: "50", statusMaster: "Tersedia", kampus: "IDE LPKIA" },
+            { id: 'rn-8', nama: "Ruang 112", lokasi: "Gedung B", kapasitas: "50", statusMaster: "Tersedia", kampus: "IDE LPKIA" },
+            { id: 'rn-9', nama: "Ruang 113", lokasi: "Gedung B", kapasitas: "50", statusMaster: "Tersedia", kampus: "IDE LPKIA" },
+            { id: 'rn-10', nama: "Ruang 114", lokasi: "Gedung B", kapasitas: "50", statusMaster: "Tersedia", kampus: "IDE LPKIA" },
+            { id: 'rn-11', nama: "Ruang 115", lokasi: "Gedung B", kapasitas: "50", statusMaster: "Tersedia", kampus: "IDE LPKIA" },
+            { id: 'rn-12', nama: "GSG", lokasi: "Lantai Dasar", kapasitas: "200", statusMaster: "Tersedia", kampus: "IDE LPKIA" }
+        ];
+
+        let processedData = [];
+
+        function loadData() {
+            // Get user kampus untuk filter
+            const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+            const userKampus = loggedUser && loggedUser.kampus ? String(loggedUser.kampus).trim().toLowerCase() : null;
+            
+            if (!userKampus) {
+                alert('Kampus Anda tidak terdeteksi. Silakan login ulang.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Realtime Sync dengan data pengajuan
+            db.ref('pengajuan/ruangan').on('value', snapUsage => {
+                const currentUsage = [];
+                snapUsage.forEach(c => { currentUsage.push(c.val()); });
+
+                // Ambil data master tambahan dari Firebase
+                db.ref('master_ruangan').on('value', snapMaster => {
+                    const fbMaster = [];
+                    snapMaster.forEach(c => {
+                        const room = { id: c.key, ...c.val(), statusMaster: c.val().status };
+                        // Filter hanya ruangan dari kampus user
+                        const roomKampus = room.kampus ? String(room.kampus).trim().toLowerCase() : null;
+                        if (roomKampus === userKampus) {
+                            fbMaster.push(room);
+                        }
+                    });
+
+                    // Gabung Ruangan Nyata (filter per kampus) dan Ruangan Manual
+                    const ruanganNyataFiltered = ruanganNyata.filter(rn => {
+                        const rnKampus = rn.kampus ? String(rn.kampus).trim().toLowerCase() : null;
+                        return rnKampus === userKampus && !fbMaster.some(fm => fm.id === rn.id);
+                    });
+                    const allRooms = [...ruanganNyataFiltered, ...fbMaster];
+
+                    // TANGGAL HARI INI (Sesuai 2026-01-15)
+                    const today = new Date();
+                    const y = today.getFullYear();
+                    const m = String(today.getMonth() + 1).padStart(2, '0');
+                    const d = String(today.getDate()).padStart(2, '0');
+                    const dateToday = `${y}-${m}-${d}`;
+
+                    processedData = allRooms.map(room => {
+                        let finalStatus = room.statusMaster || "Tersedia";
+                        
+                        // LOGIKA PINJAM OTOMATIS:
+                        // Jika ada data pengajuan 'approved' untuk ruangan ini di tanggal hari ini
+                        const isBooked = currentUsage.find(b => 
+                            b.room && 
+                            b.room.toLowerCase() === room.nama.toLowerCase() && 
+                            b.date === dateToday && 
+                            b.status === 'approved'
+                        );
+
+                        if (isBooked) {
+                            finalStatus = "Sedang Dipinjam";
+                        }
+                        
+                        return { ...room, status: finalStatus };
+                    });
+                    
+                    render(processedData);
+                });
+            });
+        }
+
+        function render(data) {
+            const list = document.getElementById('room-list');
+            if (!list) return;
+            
+            if (data.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding:50px; color:#999;">Ruangan tidak ditemukan.</div>';
+                return;
+            }
+
+            list.innerHTML = data.map(r => {
+                const sClass = r.status === 'Sedang Dipinjam' ? 'status-dipinjam' : 
+                               (r.status === 'Dalam Perbaikan' ? 'status-perbaikan' : 'status-tersedia');
+                
+                // Proteksi Ruangan Nyata: Jika ID start dengan 'rn-', jangan munculkan tombol delete
+                const deleteBtn = !String(r.id).startsWith('rn-') ? 
+                    `<i class="material-icons btn-mini-delete" onclick="deleteRoom('${r.id}')">delete</i>` : '';
+                
+                return `
+                <div class="room-card">
+                    <div class="room-info">
+                        <h4>${r.nama}</h4>
+                        <p>${r.lokasi} • Kapasitas: ${r.kapasitas}</p>
+                        <span class="status-badge ${sClass}">${r.status}</span>
+                    </div>
+                    <div class="action-btns">
+                        <i class="material-icons btn-mini-edit" onclick="openModal('${r.id}')">edit</i>
+                        ${deleteBtn}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function saveData() {
+            const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+            const userKampus = loggedUser.kampus;
+            
+            const id = document.getElementById('editId').value;
+            const payload = {
+                nama: document.getElementById('formNama').value,
+                kapasitas: document.getElementById('formKapasitas').value,
+                lokasi: document.getElementById('formLokasi').value,
+                status: document.getElementById('formStatus').value,
+                kampus: userKampus
+            };
+            
+            if (!payload.nama || !payload.lokasi) return alert("Mohon lengkapi data!");
+            
+            const ref = id ? db.ref('master_ruangan').child(id) : db.ref('master_ruangan').push();
+            ref.update(payload).then(() => {
+                closeModal();
+                alert("Data Ruangan Berhasil Diperbarui!");
+            });
+        }
+
+        function deleteRoom(id) {
+            if (confirm("Hapus ruangan manual ini?")) {
+                db.ref('master_ruangan').child(id).remove().then(() => alert("Berhasil Dihapus!"));
+            }
+        }
+
+        function openModal(id = null) {
+            document.getElementById('modalForm').style.display = 'flex';
+            if (id) {
+                document.getElementById('modalTitle').textContent = "Edit Ruangan";
+                const item = processedData.find(i => i.id === id);
+                document.getElementById('editId').value = id;
+                document.getElementById('formNama').value = item.nama;
+                document.getElementById('formKapasitas').value = item.kapasitas;
+                document.getElementById('formLokasi').value = item.lokasi;
+                document.getElementById('formStatus').value = item.statusMaster || "Tersedia";
+            } else {
+                document.getElementById('modalTitle').textContent = "Tambah Ruangan";
+                document.getElementById('editId').value = "";
+                document.getElementById('formNama').value = "";
+                document.getElementById('formKapasitas').value = "";
+                document.getElementById('formLokasi').value = "";
+                document.getElementById('formStatus').value = "Tersedia";
+            }
+        }
+
+        function closeModal() { document.getElementById('modalForm').style.display = 'none'; }
+        
+        function filterData() {
+            const val = document.getElementById('searchInput').value.toLowerCase();
+            render(processedData.filter(r => 
+                r.nama.toLowerCase().includes(val) || 
+                r.lokasi.toLowerCase().includes(val)
+            ));
+        }
+
+        loadData();
+    </script>
+</body>
+</html>

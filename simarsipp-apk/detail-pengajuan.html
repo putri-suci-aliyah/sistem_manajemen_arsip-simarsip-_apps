@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Pengajuan - SIMARSIP</title>
+
+    <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        background: #f4f7fb;
+        margin: 0 auto;
+        max-width: 480px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* PREMIUM HEADER STYLE */
+    .page-header {
+        background: linear-gradient(135deg, #007aff 0%, #005bb5 100%);
+        padding: 16px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 4px 12px rgba(0, 91, 181, 0.15);
+    }
+
+    .back-btn {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.15);
+        border: none;
+        color: white;
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        transition: background 0.2s;
+    }
+    
+    .back-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    .page-content {
+        padding: 20px 16px;
+        padding-bottom: 60px;
+    }
+
+    .loading, .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #718096;
+        font-weight: 500;
+    }
+
+    /* BADGE STATUS UTAMA */
+    .status-section {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 16px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 20px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+
+    .status-pending { background: #fff3e0; color: #ef6c00; border: 1px solid #ffe0b2; }
+    .status-approved { background: #e0f9f1; color: #00875a; border: 1px solid #b9f6ca; }
+    .status-rejected { background: #ffebee; color: #dc2626; border: 1px solid #ffcdd2; }
+    .status-revision { background: #e8f1ff; color: #0061f2; border: 1px solid #d2e4ff; }
+
+    /* MODERN CARD DESIGN */
+    .card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        margin-bottom: 16px;
+    }
+
+    .section-title {
+        font-size: 13px;
+        font-weight: 800;
+        color: #4a5568;
+        padding: 16px 20px 4px 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .section-title .material-icons {
+        font-size: 18px;
+        color: #007aff;
+    }
+
+    /* KOP SURAT ASLI (TIDAK BERUBAH) */
+    .surat-container {
+        background: white;
+        padding: 24px;
+        font-family: "Times New Roman", Times, serif;
+        line-height: 1.6;
+        color: black;
+        width: 100%;
+        font-size: 13px;
+    }
+
+    .header-kop {
+        text-align: center;
+        border-bottom: 3px double black;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .header-kop h1 {
+        margin: 0;
+        font-size: 18px;
+        color: #003366;
+        font-weight: bold;
+    }
+
+    .header-kop h2 {
+        margin: 5px 0 0 0;
+        font-size: 14px;
+        font-weight: normal;
+    }
+
+    .header-kop p {
+        margin: 5px 0 0 0;
+        font-size: 10px;
+        font-style: italic;
+    }
+
+    .isi-surat {
+        margin-top: 20px;
+        text-align: justify;
+    }
+
+    .table-detail {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+    }
+
+    .table-detail th, .table-detail td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+        color: black !important;
+    }
+
+    .table-detail th {
+        background: #f2f2f2;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .ttd-container {
+        margin-top: 30px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+            "ketua sekretaris"
+            "baa baa";
+        row-gap: 35px;
+        column-gap: 10px;
+        text-align: center;
+        justify-items: center;
+    }
+
+    .ttd-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 260px;
+        width: auto;
+    }
+
+    .ttd-box.ketua { grid-area: ketua; }
+    .ttd-box.sekretaris { grid-area: sekretaris; }
+    .ttd-box.baa-box {
+        grid-area: baa;
+        justify-self: center;
+        width: min(220px, 100%);
+    }
+
+    .ttd-space {
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ttd-space img {
+        max-height: 65px;
+        max-width: 120px;
+        object-fit: contain;
+    }
+
+    .ttd-nama {
+        font-weight: bold;
+        border-bottom: 1px solid #000;
+        min-width: 120px;
+        font-size: 11px;
+        min-height: 20px;
+        color: black !important;
+    }
+
+    /* KOTAK NOTIFIKASI KOMENTAR BAA (REJECTED / REVISION) */
+    .baa-comment-box {
+        padding: 16px;
+        border-radius: 14px;
+        margin-bottom: 16px;
+        border: 1px solid transparent;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .baa-comment-box.rejected {
+        background: #fef2f2;
+        border-color: #fee2e2;
+        border-left: 5px solid #ef4444;
+    }
+
+    .baa-comment-box.revision {
+        background: #eff6ff;
+        border-color: #dbeafe;
+        border-left: 5px solid #3b82f6;
+    }
+
+    .baa-comment-title {
+        font-weight: 800;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .rejected .baa-comment-title { color: #991b1b; }
+    .revision .baa-comment-title { color: #1e40af; }
+
+    .baa-comment-text {
+        font-size: 13.5px;
+        line-height: 1.5;
+    }
+    .rejected .baa-comment-text { color: #7f1d1d; }
+    .revision .baa-comment-text { color: #1e3a8a; }
+
+    /* LAYOUT TOMBOL AKSI EKSPOR PDF */
+    .action-buttons {
+        padding: 12px 20px 20px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn {
+        width: 100%;
+        height: 46px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: background 0.15s ease;
+    }
+
+    .btn-primary {
+        background: #007aff;
+        color: white;
+    }
+    .btn-primary:hover { background: #0063ce; }
+
+    /* BANNER APPROVAL INFO */
+    .approved-box {
+        background: #ecfdf5;
+        border: 1px solid #d1fae5;
+        padding: 14px;
+        border-radius: 12px;
+        color: #065f46;
+        font-size: 13.5px;
+        line-height: 1.5;
+        margin: 12px 20px 20px 20px;
+    }
+
+    @media (max-width: 520px) {
+        .surat-container { padding: 16px; }
+        .header-kop h1 { font-size: 16px; }
+        .header-kop h2 { font-size: 13px; }
+        .ttd-container { grid-template-columns: 1fr; row-gap: 24px; }
+        .ttd-box.baa-box { width: 100%; }
+    }
+
+ /* ATURAN PRINT PREMIUM: BENAR-BENAR HANYA SURAT SAJA */
+    @media print {
+        /* 1. Sembunyikan TOTAL semua elemen luar, tombol, komentar, dan BANNER INFO DISETUJUI */
+        .page-header, 
+        .status-section, 
+        .baa-comment-box, 
+        .section-title, 
+        .action-buttons,
+        .approved-box, /* Menyembunyikan teks box hijau */
+        .card + .card, /* Menyembunyikan kartu-kartu setelah kartu surat */
+        #content > .card:nth-child(n+3) { /* Proteksi tambahan untuk menyembunyikan card bawah */
+            display: none !important;
+        }
+
+        /* 2. Bersihkan background & padding halaman utama browser */
+        body, .page-content {
+            background: white !important;
+            color: black !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+        }
+
+        /* 3. Buat card pembungkus surat menjadi transparan total */
+        .card {
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: visible !important;
+        }
+
+        /* 4. Paksa lembar kop surat presisi di atas kertas */
+        .surat-container {
+            display: block !important;
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: white !important;
+        }
+
+        /* 5. Atur teks & tabel hitam pekat standar dokumen legal */
+        .surat-container, 
+        .table-detail th, 
+        .table-detail td, 
+        .ttd-nama {
+            color: #000000 !important;
+        }
+    }
+    </style>
+    <script src="js/campus-utils.js"></script>
+    <script>
+        // Robust kop population that fills kop-code and recipient campus too
+        document.addEventListener('DOMContentLoaded', function(){
+            if (typeof getLoggedUser !== 'function') return;
+            const u = getLoggedUser(); if (!u) return;
+            const org = u.organisasi || u.organization || null;
+            const kampus = u.kampus || u.campus || null;
+            if (org) { const el = document.getElementById('kop-org'); if (el) el.textContent = org.toUpperCase(); }
+            if (kampus) {
+                const campusRaw = String(kampus || '').trim();
+                const short = (campusRaw.match(/\(([^)]+)\)/) || [])[1] || (campusRaw.indexOf(' - ') !== -1 ? campusRaw.split(' - ')[0] : campusRaw);
+                const address = campusRaw.indexOf(' - ') !== -1 ? campusRaw.split(' - ')[1].trim() : campusRaw.replace(/\([^)]*\)/,'').trim();
+                const h1 = document.getElementById('kop-nama') || document.getElementById('kop-org'); if (h1 && short) h1.textContent = short.trim();
+                const elAlamat = document.getElementById('kop-alamat'); if (elAlamat && address) elAlamat.textContent = address;
+                const codeEl = document.getElementById('kop-code'); if (codeEl) codeEl.textContent = (short || '').replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+                const recEl = document.getElementById('kop-recipient-campus'); if (recEl && short) recEl.textContent = short.trim();
+            }
+        });
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
+</head>
+
+<body>
+
+<div class="page-header">
+    <button class="back-btn" onclick="goBack()">
+        <i class="material-icons">arrow_back</i>
+    </button>
+    <div style="font-weight:700; font-size:18px;">Detail Pengajuan</div>
+</div>
+
+<div class="page-content">
+    <div id="loading" class="loading">
+        <div class="preloader color-blue" style="margin-bottom: 8px;"></div>
+        <div>Memuat data...</div>
+    </div>
+
+    <div id="content" style="display:none;"></div>
+    <div id="error" class="empty-state" style="display:none;"></div>
+</div>
+
+<script>
+let db;
+let storage;
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+    authDomain: "simarsip-apk.firebaseapp.com",
+    databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "simarsip-apk",
+    storageBucket: "simarsip-apk.firebasestorage.app"
+};
+
+try {
+    if(!firebase.apps.length){
+        firebase.initializeApp(firebaseConfig);
+    }
+    db = firebase.database();
+    storage = firebase.storage();
+} catch(err) {
+    console.error(err);
+}
+
+function goBack(){
+    window.history.back();
+}
+
+function getUrlParam(param){
+    const params = new URLSearchParams(window.location.search);
+    return params.get(param);
+}
+
+function formatDate(dateStr){
+    if(!dateStr) return '-';
+    return new Date(dateStr).toLocaleDateString('id-ID',{
+        year:'numeric',
+        month:'long',
+        day:'numeric'
+    });
+}
+
+// FUNGSI UNTUK MEREMRENDER DAN MENGEKSPOR LAYOUT MENJADI PDF INSTAN
+function eksporKePDF() {
+    window.print();
+}
+
+function renderDetail(data){
+    const contentDiv = document.getElementById('content');
+    const type = getUrlParam('type');
+
+    const chairTtdUrl = data.ttd && data.ttd.ormawa ? data.ttd.ormawa : (data.ttd_ormawa || null);
+    const secretaryTtdUrl = data.ttd && data.ttd.sekretaris ? data.ttd.sekretaris : (data.ttd_sekretaris || null);
+    const baaSignatureUrl = data.baa_signature_url || (data.ttd && data.ttd.baa) || data.baa_signature || null;
+    
+    const chairTtdHtml = chairTtdUrl ? `<img src="${chairTtdUrl}">` : '';
+    const secretaryTtdHtml = secretaryTtdUrl ? `<img src="${secretaryTtdUrl}">` : '';
+    const baaTtdHtml = baaSignatureUrl ? `<img src="${baaSignatureUrl}">` : '';
+
+    let statusBadgeClass = `status-${data.status}`;
+    let statusText = {
+        pending: 'MENUNGGU',
+        approved: 'DISETUJUI',
+        rejected: 'DITOLAK',
+        revision: 'REVISI'
+    }[data.status] || data.status;
+
+    // 1. GENERATE BADGE STATUS UTAMA
+    let html = `
+        <div class="status-section">
+            <div class="status-badge ${statusBadgeClass}">
+                <i class="material-icons" style="font-size:14px;">
+                    ${data.status === 'approved' ? 'check_circle' : data.status === 'rejected' ? 'cancel' : data.status === 'revision' ? 'rate_review' : 'schedule'}
+                </i>
+                <span>${statusText}</span>
+            </div>
+        </div>
+    `;
+
+    // 2. KOTAK DINAMIS KOMENTAR BAA (JIKA REJECTED ATAU REVISION)
+    if (data.status === 'rejected' && data.rejection_reason) {
+        html += `
+            <div class="baa-comment-box rejected">
+                <div class="baa-comment-title">
+                    <i class="material-icons">cancel</i> Alasan Penolakan BAA:
+                </div>
+                <div class="baa-comment-text">${data.rejection_reason}</div>
+            </div>
+        `;
+    } else if (data.status === 'revision' && data.rejection_reason) {
+        html += `
+            <div class="baa-comment-box revision">
+                <div class="baa-comment-title">
+                    <i class="material-icons">rate_review</i> Catatan Revisi BAA:
+                </div>
+                <div class="baa-comment-text">${data.rejection_reason}</div>
+            </div>
+        `;
+    }
+
+    // 3. SURAT CONTAINER CARD (KOP SURAT ASLI)
+    html += `
+        <div class="card">
+            <div class="surat-container">
+                <div class="header-kop">
+                    <h2 id="kop-org">${(data.organisasi || 'YAYASAN LPKIA').toUpperCase()}</h2>
+                    <h1 id="kop-nama">INSTITUT DIGITAL EKONOMI LPKIA</h1>
+                    <p id="kop-alamat">${data.kampus || 'Jl. Soekarno-Hatta No.456 Bandung'}</p>
+                </div>
+
+                <p style="text-align:right;">Bandung, ${formatDate(data.createdAt)}</p>
+
+                <div style="margin-top:20px;">
+                    Nomor : ___/<span id="kop-code">LPKIA</span>/BKM/2026<br>
+                    Hal : <b>
+                        ${
+                            type === 'ruangan' ? 'Permohonan Peminjaman Ruangan'
+                            : type === 'peralatan' ? 'Permohonan Peminjaman Peralatan'
+                            : 'Permohonan Dispensasi'
+                        }
+                    </b>
+                </div>
+
+                <div style="margin-top:20px;">
+                    Kepada Yth.<br>
+                    <b>Bagian Administrasi Akademik (BAA)</b><br>
+                    <span id="kop-recipient-campus">Institut Digital Ekonomi LPKIA</span>
+                </div>
+
+                <div class="isi-surat">
+    `;
+
+    if(type === 'ruangan'){
+        html += `
+            <p>Dengan hormat, kami mengajukan permohonan peminjaman ruangan untuk kegiatan <b>${data.title || '-'}</b>.</p>
+            <table class="table-detail">
+                <tr><th>Ruangan</th><th>Tanggal</th><th>Waktu</th></tr>
+                <tr><td>${data.room || '-'}</td><td>${formatDate(data.date)}</td><td>${data.start || '-'} - ${data.end || '-'}</td></tr>
+            </table>
+            <p>Demikian surat permohonan ini kami sampaikan. Atas perhatian dan izin yang diberikan, kami ucapkan terima kasih.</p>
+        `;
+    } else if(type === 'peralatan'){
+        html += `
+            <p>Dengan hormat, kami mengajukan permohonan peminjaman peralatan untuk kegiatan <b>${data.title || '-'}</b>.</p>
+            <table class="table-detail">
+                <tr><th>Nama Peralatan</th><th>Jumlah</th><th>Tanggal</th></tr>
+                <tr><td>${data.equipmentName || '-'}</td><td>${data.quantity || '1'} Unit</td><td>${formatDate(data.borrowDate || data.date)}</td></tr>
+            </table>
+            <p>Demikian surat permohonan ini kami sampaikan. Atas perhatian dan izin yang diberikan, kami ucapkan terima kasih.</p>
+        `;
+    } else if(type === 'dispensasi'){
+        html += `
+            <p>Dengan hormat, kami mengajukan permohonan dispensasi untuk kegiatan <b>${data.title || '-'}</b>.</p>
+            <table class="table-detail">
+                <tr><th>Mata Kuliah</th><td>${data.course || '-'}</td></tr>
+                <tr><th>Dosen</th><td>${data.lecturer || '-'}</td></tr>
+                <tr><th>Tanggal</th><td>${formatDate(data.date)}</td></tr>
+                <tr><th>Mahasiswa</th><td>${data.students && Array.isArray(data.students) ? data.students.join(', ') : '-'}</td></tr>
+            </table>
+            ${data.notes ? `<p><b>Catatan:</b><br>${data.notes}</p>` : ''}
+            <p>Demikian surat permohonan ini kami sampaikan. Atas perhatian dan kebijaksanaan Bapak/Ibu, kami ucapkan terima kasih.</p>
+        `;
+    }
+
+    html += `
+                </div>
+
+                <div class="ttd-container">
+                    <div class="ttd-box ketua">
+                        <div>Ketua Ormawa,</div>
+                        <div class="ttd-space">${chairTtdHtml}</div>
+                        <div class="ttd-nama">${data.ormawa || data.name || '................'}</div>
+                    </div>
+
+                    <div class="ttd-box sekretaris">
+                        <div>Sekretaris,</div>
+                        <div class="ttd-space">${secretaryTtdHtml}</div>
+                        <div class="ttd-nama">${data.sekretaris || data.lecturer || '................'}</div>
+                    </div>
+
+                    <div class="ttd-box baa-box">
+                        <div>Menyetujui,<br>BAA</div>
+                        <div class="ttd-space">${baaTtdHtml}</div>
+                        <div class="ttd-nama">__________________</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // 4. KOTAK BERKAS YANG SINKRON DENGAN ALUR EKSPOR (AKTIF BISA DIKLIK OLEH SIAPA SAJA)
+    html += `
+        <div class="card">
+            <div class="section-title">
+                <i class="material-icons">picture_as_pdf</i> Cetak & Ekspor Dokumen
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="eksporKePDF()">
+                    <i class="material-icons">download</i> Ekspor ke File PDF
+                </button>
+            </div>
+        </div>
+    `;
+
+    // 5. BANNER INFO JIKA STATUS DISETUJUI
+    if(data.status === 'approved'){
+        html += `
+            <div class="card">
+                <div class="section-title" style="color:#059669;">
+                    <i class="material-icons" style="color:#10b981;">check_circle</i> Status Validasi Pengajuan
+                </div>
+                <div class="approved-box">
+                    Pengajuan telah divalidasi dan disetujui secara resmi oleh BAA pada tanggal <b>${formatDate(data.approvedAt || data.createdAt)}</b>.
+                </div>
+            </div>
+        `;
+    }
+
+    contentDiv.innerHTML = html;
+}
+
+function loadDetail(){
+    const type = getUrlParam('type');
+    const id = getUrlParam('id');
+
+    const loadingDiv = document.getElementById('loading');
+    const contentDiv = document.getElementById('content');
+    const errorDiv = document.getElementById('error');
+
+    if(!type || !id){
+        errorDiv.textContent = 'Parameter tidak valid';
+        errorDiv.style.display = 'block';
+        loadingDiv.style.display = 'none';
+        return;
+    }
+
+    db.ref(`pengajuan/${type}/${id}`)
+    .once('value')
+    .then(snapshot=>{
+        const data = snapshot.val();
+        if(data){
+            renderDetail(data);
+            contentDiv.style.display = 'block';
+        }else{
+            errorDiv.textContent = 'Data tidak ditemukan';
+            errorDiv.style.display = 'block';
+        }
+        loadingDiv.style.display = 'none';
+    })
+    .catch(err=>{
+        console.error(err);
+        errorDiv.textContent = 'Gagal memuat data';
+        errorDiv.style.display = 'block';
+        loadingDiv.style.display = 'none';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', loadDetail);
+</script>
+
+</body>
+</html>

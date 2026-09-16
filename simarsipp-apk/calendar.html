@@ -1,0 +1,246 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Kalender HMIF - SIMARSIP</title>
+  <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    /* VISUAL ASLI HMIF - TIDAK DIRUBAH */
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background: #fafafa; max-width: 480px; margin-left: auto; margin-right: auto; }
+    .app-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px 12px; color: white; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .page { padding: 16px 12px; padding-bottom: 100px; }
+    .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    #title { font-weight: 700; font-size: 18px; color: #333; text-align: center; flex: 1; }
+    .nav-btn { background: transparent; border: none; font-size: 24px; color: #667eea; cursor: pointer; padding: 0 10px; }
+    #grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; padding: 12px; background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    #grid .day { aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: 600; border-radius: 12px; cursor: pointer; background: #f5f5f5; color: #666; }
+    
+    /* WARNA STATUS TETAP */
+    #grid .day.available { background: #a8e6cf; color: #2d5016; }
+    #grid .day.pending { background: #ffd3b6; color: #8b4513; }
+    #grid .day.borrowed { background: #ffaaa5; color: #6b0000; }
+    #grid .day.returned { background: #aa96da; color: #3d1a5f; }
+
+    .calendar-legend { background: white; padding: 12px; border-radius: 16px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 12px; margin-top: 15px; }
+    .legend-box { width: 16px; height: 16px; border-radius: 6px; display: inline-block; vertical-align: middle; margin-right: 5px; }
+    .legend-box.available { background: #a8e6cf; }
+    .legend-box.pending { background: #ffd3b6; }
+    .legend-box.borrowed { background: #ffaaa5; }
+    .legend-box.returned { background: #aa96da; }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; }
+    .modal-overlay.visible { opacity: 1; pointer-events: auto; }
+    .modal-content { background: white; padding: 20px; border-radius: 20px; width: 340px; max-height: 80vh; overflow-y: auto; }
+    .booking-item { padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+    .booking-item strong { display: block; font-size: 15px; color: #764ba2; margin-bottom: 5px; }
+    .detail-row { display: flex; font-size: 13px; margin-bottom: 3px; }
+    .detail-row .label { color: #888; width: 85px; flex-shrink: 0; }
+    .detail-row .value { color: #333; font-weight: 600; }
+
+    /* FAB & TOOLBAR TETAP */
+    .fab-container { position: fixed; right: 16px; bottom: 85px; z-index: 200; }
+    .fab { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; width: 56px; height: 56px; border-radius: 16px; font-size: 28px; cursor: pointer; }
+    .fab-menu { position: absolute; right: 0; bottom: 70px; background: white; border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); opacity: 0; pointer-events: none; transition: 0.2s; }
+    .fab-menu.visible { opacity: 1; pointer-events: auto; }
+
+    .custom-toolbar { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: white; display: flex; border-top: 1px solid #eee; z-index: 1000; }
+    .tab-link { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: #999; }
+    .tab-link.active { color: #667eea; }
+    .tab-link i { font-size: 24px; }
+    .tab-link span { font-size: 11px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <div style="font-weight:700; font-size:18px;">Kalender</div>
+  </header>
+
+  <main class="page">
+    <div class="calendar-header">
+      <button id="prev" class="nav-btn">❮</button>
+      <div id="title">...</div>
+      <button id="next" class="nav-btn">❯</button>
+    </div>
+    <div id="grid"></div>
+    <div class="calendar-legend">
+      <div><span class="legend-box available"></span> Tersedia</div>
+      <div><span class="legend-box pending"></span> Pending</div>
+      <div><span class="legend-box borrowed"></span> Dipinjam/Aktif</div>
+      <div><span class="legend-box returned"></span> Sudah dikembalikan</div>
+    </div>
+  </main>
+
+  <div class="fab-container">
+    <div id="fabMenu" class="fab-menu">
+      <button onclick="location.href='peminjaman.html'" style="border:none;background:none;color:#2b6cb0"><i class="material-icons">domain</i></button>
+      <button onclick="location.href='dispensasi.html'" style="border:none;background:none;color:#b07b2b"><i class="material-icons">description</i></button>
+      <button onclick="location.href='peralatan.html'" style="border:none;background:none;color:#2f855a"><i class="material-icons">devices</i></button>
+    </div>
+    <button id="fab" class="fab">+</button>
+  </div>
+
+  <div id="infoModal" class="modal-overlay">
+    <div class="modal-content">
+      <div id="modalHeader" style="font-weight:800; text-align:center; border-bottom:1px solid #eee; padding-bottom:12px; margin-bottom:15px;">Info Tanggal</div>
+      <div id="modalBody"></div>
+      <button style="width:100%; padding:12px; border-radius:12px; border:none; background:#f0f0f0; font-weight:700; margin-top:15px;" onclick="closePopup()">Tutup</button>
+    </div>
+  </div>
+
+  <nav class="custom-toolbar">
+    <a href="index.html" class="tab-link"><i class="material-icons">home</i><span>Beranda</span></a>
+    <a href="calendar.html" class="tab-link active"><i class="material-icons">calendar_today</i><span>Kalender</span></a>
+    <a href="notifikasi.html" class="tab-link"><i class="material-icons">notifications</i><span>Notifikasi</span></a>
+  </nav>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+  <script src="js/campus-utils.js"></script>
+
+  <script>
+    (function () {
+      const grid = document.getElementById('grid'), title = document.getElementById('title');
+      const infoModal = document.getElementById('infoModal'), modalBody = document.getElementById('modalBody');
+      let current = new Date(), today = new Date(); today.setHours(0,0,0,0);
+      let firebaseData = {};
+      const monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+        authDomain: "simarsip-apk.firebaseapp.com",
+        databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "simarsip-apk"
+      };
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+
+  const loggedUser = getLoggedUser();
+  const userCampus = getUserCampus(loggedUser);
+
+      // MENGHUBUNGKAN SELURUH DATA DARI NODE 'pengajuan' (filtered by user's campus when known)
+      db.ref('pengajuan').on('value', snap => {
+        const data = snap.val() || {};
+        firebaseData = {};
+        Object.keys(data).forEach(type => {
+          Object.keys(data[type]).forEach(key => {
+            const item = data[type][key];
+            // Use centralized matching: if userCampus set, only include items that belong to that campus
+            if (typeof belongsToUserCampusOrOrg === 'function') {
+              if (!belongsToUserCampusOrOrg(item, userCampus, getUserOrg(loggedUser))) return;
+            } else {
+              const itemCampus = normalizeCampus(item.campus || item.kampus || null);
+              if (userCampus && itemCampus && itemCampus !== userCampus) return;
+            }
+
+            const targetDate = item.date || item.borrowDate;
+            if (targetDate) {
+              if (!firebaseData[targetDate]) firebaseData[targetDate] = [];
+              firebaseData[targetDate].push({ ...item, key: key, type: type });
+            }
+          });
+        });
+        render(current);
+      });
+
+      function render(date) {
+        grid.innerHTML = '';
+        const year = date.getFullYear(), month = date.getMonth();
+        title.textContent = monthNames[month] + ' ' + year;
+
+        ['Min','Sen','Sel','Rab','Kam','Jum','Sab'].forEach(w => {
+          let h = document.createElement('div'); h.className = 'day'; h.style.background='transparent'; h.textContent = w; grid.appendChild(h);
+        });
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const lastDate = new Date(year, month + 1, 0).getDate();
+
+        for (let i = 0; i < firstDay; i++) {
+          let e = document.createElement('div'); e.className = 'day'; e.style.background = 'transparent'; grid.appendChild(e);
+        }
+
+        for (let d = 1; d <= lastDate; d++) {
+          const ymd = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          const cellDate = new Date(year, month, d);
+          const allItems = firebaseData[ymd] || [];
+          
+          // STATUS AKTIF (Bukan Rejected & Bukan Sudah dikembalikan)
+          const activeItems = allItems.filter(item => item.status !== 'rejected' && item.status !== 'Sudah dikembalikan');
+
+          let statusClass = 'available';
+          if (cellDate < today) {
+            statusClass = 'available'; // Tanggal lalu paksa Hijau
+          } else {
+            if (activeItems.length > 0) {
+              if (activeItems.some(b => b.status === 'pending')) statusClass = 'pending';
+              else if (activeItems.some(b => b.status === 'approved')) statusClass = 'borrowed';
+            } else if (allItems.some(item => item.status === 'Sudah dikembalikan')) {
+              statusClass = 'returned'; // Ungu jika sudah selesai
+            }
+          }
+
+          const cell = document.createElement('div');
+          cell.className = `day ${statusClass}`;
+          cell.innerHTML = `<strong>${d}</strong>`;
+          
+          // KLIK: Hanya muncul pop-up jika ada data aktif (Sesuai Logika BAA)
+          cell.onclick = () => { if (activeItems.length > 0) showPopUp(ymd, activeItems); };
+          grid.appendChild(cell);
+        }
+      }
+
+      function showPopUp(date, displayList) {
+        const dateParts = date.split('-');
+        document.getElementById('modalHeader').textContent = `Agenda ${dateParts[2]} ${monthNames[parseInt(dateParts[1]) - 1]}`;
+
+        modalBody.innerHTML = displayList.map(item => {
+          let detailHTML = '';
+          let labelTipe = '';
+          let colorTipe = '';
+          
+          // Logika Penentuan Label Keterangan
+          if(item.type === 'dispensasi') {
+            labelTipe = 'DISPENSASI';
+            colorTipe = '#7b1fa2'; // Ungu
+            if(item.lecturer) detailHTML += `<div class="detail-row"><div class="label">Dosen</div><div class="value">: ${item.lecturer}</div></div>`;
+            if(item.course) detailHTML += `<div class="detail-row"><div class="label">MK</div><div class="value">: ${item.course}</div></div>`;
+          } 
+          else if(item.type === 'peralatan') {
+            labelTipe = 'PERALATAN';
+            colorTipe = '#ef6c00'; // Oranye Tua
+            if(item.equipmentName) detailHTML += `<div class="detail-row"><div class="label">Alat</div><div class="value">: ${item.equipmentName}</div></div>`;
+            if(item.quantity) detailHTML += `<div class="detail-row"><div class="label">Jumlah</div><div class="value">: ${item.quantity}</div></div>`;
+          } 
+          else {
+            labelTipe = 'RUANGAN';
+            colorTipe = '#007aff'; // Biru
+            detailHTML += `<div class="detail-row"><div class="label">Ruangan</div><div class="value">: ${item.room || '-'}</div></div>`;
+            detailHTML += `<div class="detail-row"><div class="label">Catatan</div><div class="value">: ${item.note || '-'}</div></div>`;
+            const waktuRuangan = (item.start && item.end) ? `${item.start} - ${item.end}` : (item.waktu || '-');
+            detailHTML += `<div class="detail-row"><div class="label">Waktu</div><div class="value" style="color:#e91e63;">: ${waktuRuangan}</div></div>`;
+          }
+
+          return `
+            <div class="booking-item">
+                <span style="font-size: 9px; padding: 2px 6px; border-radius: 4px; background: ${colorTipe}22; color: ${colorTipe}; font-weight: 800; margin-bottom: 5px; display: inline-block;">${labelTipe}</span>
+                <strong>${item.title || 'Tanpa Judul'}</strong>
+                ${detailHTML}
+                <div class="detail-row"><div class="label">Status</div><div class="value">: ${(item.status || 'pending').toUpperCase()}</div></div>
+            </div>`;
+        }).join('');
+        infoModal.classList.add('visible');
+      }
+
+      window.closePopup = () => infoModal.classList.remove('visible');
+      document.getElementById('prev').onclick = () => { current.setMonth(current.getMonth() - 1); render(current); };
+      document.getElementById('next').onclick = () => { current.setMonth(current.getMonth() + 1); render(current); };
+      document.getElementById('fab').onclick = (e) => { e.stopPropagation(); document.getElementById('fabMenu').classList.toggle('visible'); };
+      document.addEventListener('click', () => document.getElementById('fabMenu').classList.remove('visible'));
+    })();
+  </script>
+</body>
+</html>

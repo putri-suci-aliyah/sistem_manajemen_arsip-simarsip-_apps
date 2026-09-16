@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <title>SIMARSIP APP - BAA</title>
+
+    <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+
+    <style>
+        .btn-group { display: flex; gap: 8px; margin-top: 15px; }
+        .btn {
+            flex: 1; border: none; padding: 10px; border-radius: 12px; color: white;
+            font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s;
+        }
+        .btn:active { opacity: 0.8; transform: scale(0.98); }
+        .btn-approve { background: #00eb9f; }
+        .btn-reject { background: #ff4b5c; }
+        
+        .page-content {
+            padding-top: 16px !important;
+            padding-bottom: 80px;
+            background: #f4f7fb;
+        }
+
+        .approval-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            border-left: 6px solid #ffc107;
+            cursor: pointer; /* Memberi indikasi bisa diklik */
+        }
+        .approval-title { font-weight: 800; font-size: 16px; color: #333; margin-bottom: 4px; }
+        .approval-sub { font-size: 12px; color: #888; font-weight: 600; }
+        .status-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 6px;
+        }
+        .status-tag.pending { background: #fff3cd; color: #856404; }
+        
+        .history-link {
+            display: flex;
+            align-items: center; justify-content: center;
+            width: 100%; text-decoration: none; color: #007aff;
+            background: white; border-radius: 12px;
+            font-weight: 700; font-size: 14px; margin-top: 12px;
+            padding: 12px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <header class="app-header">
+            <div class="app-header-inner">
+                <div class="app-title">SIMARSIP BAA</div>
+                <div class="user-chip" onclick="window.location.href='profile.html'">
+                    <span class="user-name">Halo, BAA!</span>
+                    <i class="material-icons user-icon">account_circle</i>
+                </div>
+            </div>
+
+            <div class="welcome-card">
+                <div class="welcome-title">Selamat Datang!</div>
+                <div class="welcome-sub">Kelola persetujuan surat dan peminjaman dengan mudah</div>
+            </div>
+        </header>
+
+        <div class="view view-main">
+            <div class="page page-home">
+                <div class="page-content">
+
+                    <div class="section">
+                        <div class="section-title">Manajemen Data Master</div>
+                        <div class="row actions-row">
+                            <div class="col-33" onclick="window.location.href='ruangan.html'">
+                                <div class="action-card">
+                                    <div class="action-icon"><i class="material-icons">meeting_room</i></div>
+                                    <div class="action-label">Data Ruangan</div>
+                                </div>
+                            </div>
+                            <div class="col-33" onclick="window.location.href='data_peralatan.html'">
+                                <div class="action-card">
+                                    <div class="action-icon"><i class="material-icons">important_devices</i></div>
+                                    <div class="action-label">Data Peralatan</div>
+                                </div>
+                            </div>
+                            <div class="col-33" onclick="window.location.href='surat.html'">
+                                <div class="action-card">
+                                    <div class="action-icon"><i class="material-icons">verified_user</i></div>
+                                    <div class="action-label">Riwayat Surat</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Dukungan Pengguna</div>
+                        <div class="row actions-row">
+                            <div class="col-33" onclick="window.location.href='help-center-admin.html'">
+                                <div class="action-card">
+                                    <div class="action-icon"><i class="material-icons">support_agent</i></div>
+                                    <div class="action-label">Pusat Bantuan</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Permintaan Persetujuan Baru</div>
+                        <div id="approval-list">
+                            <div style="text-align:center; padding:20px; color:#aaa;">Memuat data...</div>
+                        </div>
+                        <div id="detail-btn-area">
+                            <a href="dashboard_baa.html" class="history-link">
+                                Lihat Seluruh Dashboard
+                                <i class="material-icons" style="margin-left: 4px; font-size: 18px;">chevron_right</i>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="toolbar toolbar-bottom app-toolbar">
+            <div class="toolbar-inner">
+                <a href="index_baa.html" class="link active">
+                    <i class="material-icons">home</i>
+                    <span class="tabbar-label">Beranda</span>
+                </a>
+                <a href="calender_baa.html" class="link">
+                    <i class="material-icons">calendar_today</i>
+                    <span class="tabbar-label">Kalender</span>
+                </a>
+                <a href="laporan_baa.html" class="link">
+                    <i class="material-icons">assignment</i>
+                    <span class="tabbar-label">Laporan</span>
+                </a>
+                <a href="notifikasi_baa.html" class="link">
+                    <i class="material-icons">notifications</i>
+                    <span class="tabbar-label">Notifikasi</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Entry point protection - jika akses langsung, redirect ke splash
+        const fromSplashBAA = sessionStorage.getItem("fromSplash");
+        if (!fromSplashBAA) {
+            window.location.href = "splash.html";
+        }
+
+        // Auto-redirect check untuk login
+        const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+        if (!loggedUser) {
+            window.location.href = "splash.html";
+        } else if (loggedUser.role && loggedUser.role !== "BAA") {
+            // Jika role bukan BAA, redirect sesuai role
+            if (loggedUser.role === "HMIF") {
+                window.location.href = "index.html";
+            } else if (loggedUser.role === "Admin Simarsip" || loggedUser.role === "super_admin") {
+                window.location.href = "index_admin.html";
+            }
+        }
+
+        const sharedDummyData = [
+            { id: 'dummy-1', type: 'ruangan', title: 'Rapat BEM', room: 'Aula', date: '2026-01-05', status: 'pending' },
+            { id: 'dummy-2', type: 'peralatan', title: 'Peminjaman Proyektor', equipmentName: 'Proyektor Epson', date: '2026-01-27', status: 'pending' },
+            { id: 'dummy-5', type: 'peralatan', title: 'Peminjaman Kamera', equipmentName: 'Kamera DSLR Canon', date: '2026-01-28', status: 'pending' }
+        ];
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+            authDomain: "simarsip-apk.firebaseapp.com",
+            databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "simarsip-apk"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Navigasi ke detail
+        window.goToDetail = function(type, id) {
+            window.location.href = `detail_data.html?type=${type}&id=${id}`;
+        };
+
+        function renderApproval(fbData) {
+            const wrap = document.getElementById('approval-list');
+            wrap.innerHTML = ''; 
+            
+            let pendingItems = [];
+
+            // Ambil data kampus dari BAA yang sedang login
+            const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+            const baaKampusRaw = loggedUser && loggedUser.kampus ? String(loggedUser.kampus).trim() : null;
+            if (!baaKampusRaw) {
+                alert('Profil BAA Anda belum lengkap. Silakan lengkapi kolom Kampus pada Profil.');
+                window.location.href = 'profile.html';
+                return;
+            }
+            const baaCampus = baaKampusRaw.toLowerCase();
+            
+            // Ambil data dummy hanya jika Firebase benar-benar kosong
+            const hasReal = fbData && Object.keys(fbData).some(cat => fbData[cat] && Object.keys(fbData[cat]||{}).length>0);
+            if (!hasReal) {
+                sharedDummyData.forEach(item => { 
+                    if(item.status === 'pending') {
+                        pendingItems.push({...item, isDummy: true, sortId: '00000-' + item.id}); 
+                    }
+                });
+            }
+
+            if (fbData) {
+                Object.keys(fbData).forEach(type => {
+                    Object.keys(fbData[type] || {}).forEach(id => {
+                        const submission = fbData[type][id];
+                 
+                        // Normalisasi teks kampus (agar "Serang" dan "serang" tetap cocok)
+                        const subKampus = submission.campus || submission.kampus ? String(submission.campus || submission.kampus).trim().toLowerCase() : null;
+                        const belongsToThisKampus = subKampus && (subKampus === baaCampus);
+
+                        // ----------------------------------------------------
+                        // FILTER KETAT: Hanya meloloskan data yang berstatus PENDING
+                        // ----------------------------------------------------
+                        if (submission.status === 'pending' && belongsToThisKampus) {
+                            pendingItems.push({ 
+                                ...submission, 
+                                type, 
+                                id, 
+                                isDummy: false,
+                                sortId: String(id) // Menggunakan ID acak Firebase sebagai penanda waktu global
+                            });
+                        }
+                    });
+                });
+            }
+
+            // ========================================================
+            // URUTKAN DATA PENDING: YANG BARU DIINPUT ADA DI ATAS
+            // ========================================================
+            // Mengurutkan string ID Firebase secara terbalik (Z ke A).
+            // Karena ID Firebase dibuat berdasarkan waktu, ID data baru akan selalu lebih besar dari data lama.
+            pendingItems.sort((a, b) => b.sortId.localeCompare(a.sortId));
+
+            // Ambil maksimal 5 data pending teratas yang paling baru dibuat
+            const showItems = pendingItems.slice(0, 5);
+            
+            if (showItems.length === 0) {
+                wrap.innerHTML = '<div style="text-align:center;color:#aaa;padding:20px;">Belum ada antrian baru (Pending) untuk kampus Anda.</div>';
+                return;
+            }
+            // ========================================================
+
+            showItems.forEach(item => {
+                // Mengatasi perbedaan key nama ruangan/peralatan di 3 form Anda
+                const subText = item.room || item.equipmentName || "Umum";
+                const displayDate = item.date || item.borrowDate || "-";
+
+                wrap.innerHTML += `
+                    <div class="approval-card" id="card-${item.id}" onclick="goToDetail('${item.type}', '${item.id}')">
+                        <div class="approval-title">${item.title || "Pengajuan Baru"}</div>
+                        <div class="approval-sub">${item.type.toUpperCase()} • ${subText} • ${displayDate}</div>
+                        <div class="status-tag pending">MENUNGGU</div>
+                        
+                        <div style="text-align: right; margin-top: 12px; font-size: 13px; font-weight: bold; color: #007aff;">
+                            Lihat Detail & Proses <i class="material-icons" style="font-size: 14px; vertical-align: middle;">arrow_forward</i>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        db.ref('pengajuan').on('value', snap => renderApproval(snap.val()));
+
+        window.updateStatus = function(type, id, status, isDummy) {
+            if(isDummy) {
+                alert("Berhasil! Status data dummy diubah ke: " + status);
+                const el = document.getElementById('card-' + id);
+                if(el) el.style.display = 'none';
+            } else {
+                // 1. Update status pengajuan di node 'pengajuan'
+                db.ref(`pengajuan/${type}/${id}`).update({ 
+                    status: status,
+                    actionDate: new Date().toISOString()
+                }).then(() => {
+                    
+                    // 2. LOGIKA OTOMATIS: Jika yang disetujui adalah RUANGAN
+                    if (status === 'approved' && type === 'ruangan') {
+                        // Ambil dulu detail pengajuan untuk tahu nama ruangannya
+                        db.ref(`pengajuan/${type}/${id}`).once('value', snapshot => {
+                            const dataPengajuan = snapshot.val();
+                            const namaRuanganDipinjam = dataPengajuan.room; // pastikan HMIF menyimpan dengan key 'room'
+
+                            if (namaRuanganDipinjam) {
+                                // Cari di master_ruangan yang namanya cocok
+                                db.ref('master_ruangan').orderByChild('nama').equalTo(namaRuanganDipinjam)
+                                .once('value', snapMaster => {
+                                    snapMaster.forEach(child => {
+                                        // Update status di Master Data menjadi Sedang Dipinjam
+                                        db.ref(`master_ruangan/${child.key}`).update({
+                                            status: 'Sedang Dipinjam'
+                                        });
+                                    });
+                                });
+                            }
+                        });
+                    }
+
+                    alert("Status pengajuan berhasil diperbarui dan Master Data telah disinkronkan!");
+                }).catch(err => {
+                    alert("Gagal memperbarui status: " + err.message);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

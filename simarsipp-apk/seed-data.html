@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Seed Firebase Data - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+            padding: 20px;
+            background: #f5f5f5;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 10px;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: #007aff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056d2;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .status.info {
+            background: #e7f3ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+            display: block;
+        }
+
+        .log {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #666;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .data-summary {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 8px;
+            border-left: 4px solid #007aff;
+        }
+
+        .data-summary h3 {
+            margin: 0 0 10px 0;
+            color: #007aff;
+            font-size: 14px;
+        }
+
+        .data-summary ul {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .data-summary li {
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔧 Firebase Seed Data</h1>
+        <p class="subtitle">Tambahkan dummy data ke Firebase untuk testing dashboard admin</p>
+
+        <button class="btn btn-primary" onclick="seedAllData()" id="seedBtn">📥 Seed Semua Data</button>
+        <button class="btn btn-secondary" onclick="clearAllData()" id="clearBtn">🗑️ Hapus Semua Data</button>
+
+        <div id="status" class="status"></div>
+        <div id="log" class="log"></div>
+
+        <div class="data-summary">
+            <h3>📊 Data yang akan ditambahkan:</h3>
+            <ul>
+                <li><strong>15 Users:</strong> 1 Admin, 8 HMIF (berbagai jabatan), 4 BAA</li>
+                <li><strong>20 Submissions:</strong> 8 Pending, 8 Approved, 4 Rejected</li>
+                <li><strong>Lokasi Firebase:</strong> `/pengajuan/ruangan`, `/pengajuan/dispensasi`, `/pengajuan/peralatan`</li>
+                <li><strong>3 Kampus:</strong> Kampus Pusat, Cipacing, Cirebon</li>
+                <li><strong>5 BAA Approvals:</strong> Pending requests untuk admin BAA baru</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+
+    <script>
+        let db;
+        let logMessages = [];
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+            authDomain: "simarsip-apk.firebaseapp.com",
+            databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "simarsip-apk",
+            storageBucket: "simarsip-apk.firebasestorage.app",
+            messagingSenderId: "707332524030",
+            appId: "1:707332524030:web:d91551b5f199df489622af"
+        };
+
+        try {
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            log('✅ Firebase terkoneksi');
+        } catch (err) {
+            log('❌ Error Firebase: ' + err.message, 'error');
+        }
+
+        function log(msg, type = 'info') {
+            console.log(msg);
+            logMessages.push(msg);
+            updateLog();
+        }
+
+        function updateLog() {
+            document.getElementById('log').textContent = logMessages.join('\n');
+            document.getElementById('log').scrollTop = document.getElementById('log').scrollHeight;
+        }
+
+        function showStatus(msg, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.className = 'status ' + type;
+            statusEl.textContent = msg;
+        }
+
+        async function seedAllData() {
+            if (!db) {
+                showStatus('❌ Firebase tidak terkoneksi', 'error');
+                return;
+            }
+
+            logMessages = [];
+            log('🚀 Memulai seed data...');
+            document.getElementById('seedBtn').disabled = true;
+
+            try {
+                await seedUsers();
+                await seedSubmissions();
+                await seedBaaApprovals();
+                await seedKampus();
+
+                showStatus('✅ Berhasil menambahkan semua data!', 'success');
+                log('✨ Seed selesai - Data siap untuk ditest');
+            } catch (err) {
+                showStatus('❌ Error: ' + err.message, 'error');
+                log('❌ Error: ' + err.message);
+            } finally {
+                document.getElementById('seedBtn').disabled = false;
+            }
+        }
+
+        async function seedUsers() {
+            log('\n📝 Menambahkan Users...');
+            
+            const users = [
+                // Admin
+                { name: 'Admin Simarsip', email: 'admin@example.com', role: 'Admin Simarsip', jabatan: 'Admin', status: 'Aktif', kampus: 'Admin', organisasi: 'Admin' },
+
+                // HMIF Members - Kampus Pusat
+                { name: 'Budi Santoso', email: 'budi@hmif.com', role: 'organisasi', jabatan: 'Ketua', status: 'Aktif', kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { name: 'Siti Nurhaliza', email: 'siti@hmif.com', role: 'organisasi', jabatan: 'Wakil Ketua', status: 'Aktif', kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { name: 'Ahmad Ridho', email: 'ahmad@hmif.com', role: 'organisasi', jabatan: 'Sekretaris', status: 'Aktif', kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { name: 'Rina Wijaya', email: 'rina@hmif.com', role: 'organisasi', jabatan: 'Bendahara', status: 'Aktif', kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { name: 'Doni Hermawan', email: 'doni@hmif.com', role: 'organisasi', jabatan: 'Koordinator Acara', status: 'Aktif', kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { name: 'Lestari Putri', email: 'lestari@hmif.com', role: 'organisasi', jabatan: 'Koordinator Inventaris', status: 'Aktif', kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { name: 'Ricky Pratama', email: 'ricky@hmif.com', role: 'organisasi', jabatan: 'Anggota', status: 'Aktif', kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { name: 'Maya Salsabila', email: 'maya@hmif.com', role: 'organisasi', jabatan: 'Anggota', status: 'Aktif', kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+
+                // BAA Staff - Kampus Pusat
+                { name: 'Drajat Wijaya', email: 'drajat@baa.com', role: 'BAA', jabatan: 'Admin BAA', status: 'Aktif', kampus: 'Kampus Pusat', organisasi: 'BAA' },
+                { name: 'Hendra Kusuma', email: 'hendra@baa.com', role: 'BAA', jabatan: 'Staff BAA', status: 'Aktif', kampus: 'Kampus Pusat', organisasi: 'BAA' },
+                { name: 'Novita Sari', email: 'novita@baa.com', role: 'BAA', jabatan: 'Staff BAA', status: 'Aktif', kampus: 'Kampus Pusat', organisasi: 'BAA' },
+                { name: 'Bambang Irawan', email: 'bambang@baa.com', role: 'BAA', jabatan: 'Staff BAA', status: 'Aktif', kampus: 'Kampus Pusat', organisasi: 'BAA' },
+            ];
+
+            let count = 0;
+            for (const user of users) {
+                try {
+                    const newRef = db.ref('users').push();
+                    await newRef.set({
+                        ...user,
+                        createdAt: new Date().toISOString()
+                    });
+                    count++;
+                    log(`  ✓ ${user.name} (${user.role})`);
+                } catch (err) {
+                    log(`  ✗ Error adding ${user.name}: ${err.message}`, 'error');
+                }
+            }
+            log(`✅ Selesai menambahkan ${count} users`);
+        }
+
+        async function seedSubmissions() {
+            log('\n📋 Menambahkan Submissions...');
+
+            const today = new Date();
+            const submissions = [
+                // Pending
+                { type: 'ruangan', title: 'Rapat Koordinasi BEM', room: 'Ruang 101', date: '2026-04-15', status: 'pending', userId: '1', createdAt: new Date(today.getTime() - 5*24*60*60*1000).toISOString(), note: 'Rapat persiapan acara tahunan', kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'peralatan', title: 'Peminjaman Proyektor', equipmentName: 'Proyektor Epson', quantity: 2, date: '2026-04-16', status: 'pending', userId: '2', createdAt: new Date(today.getTime() - 4*24*60*60*1000).toISOString(), note: 'Untuk presentasi workshop', kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'dispensasi', title: 'Dispensasi Lomba Debat', purpose: 'Kompetisi Debat Nasional', date: '2026-04-18', status: 'pending', userId: '3', createdAt: new Date(today.getTime() - 3*24*60*60*1000).toISOString(), kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'ruangan', title: 'Workshop Fotografi', room: 'Lab Komputer', date: '2026-04-20', status: 'pending', userId: '4', createdAt: new Date(today.getTime() - 2*24*60*60*1000).toISOString(), note: 'Dibutuhkan 5 unit PC', kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'peralatan', title: 'Peminjaman Sound System', equipmentName: 'Sound System', quantity: 1, date: '2026-04-22', status: 'pending', userId: '5', createdAt: new Date(today.getTime() - 1*24*60*60*1000).toISOString(), kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'ruangan', title: 'Acara Gathering HMIF', room: 'Aula', date: '2026-05-01', status: 'pending', userId: '6', createdAt: new Date().toISOString(), kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'dispensasi', title: 'Dispensasi Seminar Internasional', purpose: 'Seminar AI & Machine Learning', date: '2026-05-05', status: 'pending', userId: '7', createdAt: new Date().toISOString(), kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'peralatan', title: 'Peminjaman Kamera DSLR', equipmentName: 'Kamera Canon 5D', quantity: 3, date: '2026-05-10', status: 'pending', userId: '8', createdAt: new Date().toISOString(), kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+
+                // Approved
+                { type: 'ruangan', title: 'Rapat BEM Bulanan', room: 'Ruang 102', date: '2026-04-01', status: 'approved', userId: '1', createdAt: new Date(today.getTime() - 15*24*60*60*1000).toISOString(), kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'peralatan', title: 'Peminjaman Laptop', equipmentName: 'Laptop Lenovo', quantity: 5, date: '2026-04-05', status: 'approved', userId: '2', createdAt: new Date(today.getTime() - 14*24*60*60*1000).toISOString(), kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'ruangan', title: 'Seminar Teknologi', room: 'Aula', date: '2026-04-08', status: 'approved', userId: '3', createdAt: new Date(today.getTime() - 13*24*60*60*1000).toISOString(), kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'dispensasi', title: 'Dispensasi Kerja Praktik', purpose: 'Internship di PT Maju', date: '2026-04-10', status: 'approved', userId: '4', createdAt: new Date(today.getTime() - 12*24*60*60*1000).toISOString(), kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'ruangan', title: 'Workshop Web Development', room: 'Lab Komputer', date: '2026-04-12', status: 'approved', userId: '5', createdAt: new Date(today.getTime() - 11*24*60*60*1000).toISOString(), kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'peralatan', title: 'Peminjaman Proyektor', equipmentName: 'Proyektor Sony', quantity: 1, date: '2026-04-14', status: 'approved', userId: '6', createdAt: new Date(today.getTime() - 10*24*60*60*1000).toISOString(), kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'ruangan', title: 'Rapat Departemen', room: 'Ruang 103', date: '2026-03-28', status: 'approved', userId: '7', createdAt: new Date(today.getTime() - 20*24*60*60*1000).toISOString(), kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'dispensasi', title: 'Dispensasi Kompetisi Coding', purpose: 'Hackathon Regional', date: '2026-03-25', status: 'approved', userId: '8', createdAt: new Date(today.getTime() - 25*24*60*60*1000).toISOString(), kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+
+                // Rejected
+                { type: 'ruangan', title: 'Peminjaman Ruang Jam Tidak Sesuai', room: 'Ruang 104', date: '2026-04-03', status: 'rejected', userId: '1', createdAt: new Date(today.getTime() - 12*24*60*60*1000).toISOString(), reason: 'Jam peminjaman bentrok dengan acara lain', kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'peralatan', title: 'Peminjaman Terlalu Banyak', equipmentName: 'Proyektor', quantity: 10, date: '2026-04-06', status: 'rejected', userId: '2', createdAt: new Date(today.getTime() - 11*24*60*60*1000).toISOString(), reason: 'Stok tidak mencukupi', kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'dispensasi', title: 'Dispensasi Tidak Lengkap', purpose: 'Kegiatan Lain', date: '2026-04-09', status: 'rejected', userId: '3', createdAt: new Date(today.getTime() - 10*24*60*60*1000).toISOString(), reason: 'Dokumen pendukung tidak lengkap', kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+                { type: 'ruangan', title: 'Peminjaman Ruang Khusus', room: 'Lab Khusus', date: '2026-04-11', status: 'rejected', userId: '4', createdAt: new Date(today.getTime() - 9*24*60*60*1000).toISOString(), reason: 'Ruang sedang dalam maintenance', kampus: 'Kampus Pusat', organisasi: 'HMIF' },
+            ];
+
+            let count = 0;
+            for (const submission of submissions) {
+                try {
+                    // Simpan ke kategori yang sesuai: pengajuan/ruangan, pengajuan/dispensasi, pengajuan/peralatan
+                    const newRef = db.ref(`pengajuan/${submission.type}`).push();
+                    await newRef.set({
+                        ...submission,
+                        createdAt: submission.createdAt
+                    });
+                    
+                    // Create admin notification for pending submissions only
+                    if (submission.status === 'pending') {
+                        try {
+                            const typeLabel = {
+                                'ruangan': 'Peminjaman Ruangan',
+                                'peralatan': 'Peminjaman Peralatan',
+                                'dispensasi': 'Surat Dispensasi',
+                                'surat': 'Surat Baru'
+                            }[submission.type] || 'Pengajuan Baru';
+                            
+                            const notifId = `notif_${submission.type}_${newRef.key.substring(0, 10)}_${Date.now()}`;
+                            await db.ref(`notifications/admins/${notifId}`).set({
+                                id: notifId,
+                                title: `${typeLabel} Baru (Test Data)`,
+                                message: `Pengajuan ${typeLabel}: ${submission.title}`,
+                                relatedId: newRef.key,
+                                type: `submission_${submission.type}`,
+                                createdAt: submission.createdAt,
+                                read: false,
+                                submissionType: submission.type
+                            });
+                        } catch (notifErr) {
+                            log(`  ⚠ Notification creation skipped for ${submission.title}`, 'warn');
+                        }
+                    }
+                    
+                    count++;
+                    log(`  ✓ ${submission.title} (${submission.status})`);
+                } catch (err) {
+                    log(`  ✗ Error: ${err.message}`, 'error');
+                }
+            }
+            log(`✅ Selesai menambahkan ${count} submissions`);
+        }
+
+        async function seedBaaApprovals() {
+            log('\n👤 Menambahkan BAA Pending Approvals...');
+
+            const approvals = [
+                { title: 'Permintaan Menjadi Admin BAA', user: 'Hendra Kusuma', email: 'hendra.new@example.com', date: '2026-04-10', status: 'pending' },
+                { title: 'Permintaan Menjadi Admin BAA', user: 'Putri Lestari', email: 'putri@example.com', date: '2026-04-09', status: 'pending' },
+                { title: 'Permintaan Menjadi Admin BAA', user: 'Bambang Ahmad', email: 'bambang.ahmad@example.com', date: '2026-04-08', status: 'pending' },
+                { title: 'Permintaan Menjadi Admin BAA', user: 'Rini Wijaya', email: 'rini.w@example.com', date: '2026-04-07', status: 'approved' },
+                { title: 'Permintaan Menjadi Admin BAA', user: 'Doni Hermawan', email: 'doni.h@example.com', date: '2026-04-06', status: 'pending' },
+            ];
+
+            let count = 0;
+            for (const approval of approvals) {
+                try {
+                    const newRef = db.ref('baa_pending_approvals').push();
+                    await newRef.set({
+                        ...approval,
+                        createdAt: new Date().toISOString()
+                    });
+                    count++;
+                    log(`  ✓ ${approval.user} (${approval.status})`);
+                } catch (err) {
+                    log(`  ✗ Error: ${err.message}`, 'error');
+                }
+            }
+            log(`✅ Selesai menambahkan ${count} BAA approvals`);
+        }
+
+        async function seedKampus() {
+            log('\n🏢 Menambahkan Master Data Kampus...');
+
+            const kampus = [
+                { nama: 'Kampus Pusat', alamat: 'Jl. Pendidikan No. 20, Bandung', kota: 'Bandung', deskripsi: 'Kampus utama dengan 5 gedung academic' },
+                { nama: 'Kampus Cipacing', alamat: 'Jl. Cipacing No. 50, Bandung', kota: 'Bandung', deskripsi: 'Kampus satelit untuk program khusus dan engineering' },
+                { nama: 'Kampus Cirebon', alamat: 'Jl. Siliwangi No. 10, Cirebon', kota: 'Cirebon', deskripsi: 'Kampus regional di Cirebon untuk jangkauan wilayah' },
+            ];
+
+            let count = 0;
+
+            for (const item of kampus) {
+                try {
+                    const newRef = db.ref('kampus/main').push();
+                    await newRef.set(item);
+                    count++;
+                    log(`  ✓ Kampus: ${item.nama}`);
+                } catch (err) {
+                    log(`  ✗ Error: ${err.message}`, 'error');
+                }
+            }
+
+            log(`✅ Selesai menambahkan ${count} kampus`);
+        }
+
+        async function clearAllData() {
+            if (!confirm('Yakin ingin menghapus SEMUA data? Ini tidak bisa dibatalkan!')) {
+                return;
+            }
+
+            log('\n🗑️ Menghapus semua data...');
+            document.getElementById('clearBtn').disabled = true;
+
+            try {
+                await db.ref('users').remove();
+                log('  ✓ Users dihapus');
+                
+                await db.ref('pengajuan').remove();
+                log('  ✓ Pengajuan (ruangan, dispensasi, peralatan) dihapus');
+                
+                await db.ref('baa_pending_approvals').remove();
+                log('  ✓ BAA Approvals dihapus');
+                
+                await db.ref('kampus/main').remove();
+                log('  ✓ Kampus data dihapus');
+
+                showStatus('✅ Semua data berhasil dihapus', 'success');
+                log('✨ Clear selesai');
+            } catch (err) {
+                showStatus('❌ Error: ' + err.message, 'error');
+                log('❌ Error: ' + err.message);
+            } finally {
+                document.getElementById('clearBtn').disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>

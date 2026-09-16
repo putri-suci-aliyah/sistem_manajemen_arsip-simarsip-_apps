@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <title>Register SIMARSIP</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideUp 0.5s ease-in-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .register-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 35px 30px 25px;
+            text-align: center;
+            color: white;
+        }
+
+        .register-icon {
+            font-size: 50px;
+            margin-bottom: 12px;
+        }
+
+        .register-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .register-subtitle {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .register-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 12px;
+            color: #333;
+            margin-bottom: 7px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 11px 13px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: white;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .password-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-container .form-input {
+            width: 100%;
+            padding-right: 45px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .password-toggle:hover {
+            color: #333;
+        }
+
+        .password-requirement {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-register:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .register-footer {
+            padding: 18px 30px;
+            text-align: center;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .register-footer p {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .btn-login-link {
+            width: 100%;
+            padding: 11px;
+            background: #f5f5f5;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login-link:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .error-message {
+            background: #ff5252;
+            color: white;
+            padding: 10px 13px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .success-message {
+            background: #4caf50;
+            color: white;
+            padding: 10px 13px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header">
+            <div class="register-icon">✍️</div>
+            <div class="register-title">Daftar</div>
+            <div class="register-subtitle">Buat akun SIMARSIP baru</div>
+        </div>
+
+        <div class="register-body">
+            <div class="error-message" id="errorMsg"></div>
+            <div class="success-message" id="successMsg"></div>
+
+            <form onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label class="form-label">👤 Nama Lengkap</label>
+                    <input type="text" id="nameInput" class="form-input" placeholder="Nama lengkap Anda" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">📧 Email</label>
+                    <input type="email" id="emailInput" class="form-input" placeholder="Email Anda" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">🔐 Password</label>
+                    <div class="password-container">
+                        <input type="password" id="passwordInput" class="form-input" placeholder="Min. 6 karakter" required>
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('passwordInput')">👁️</button>
+                    </div>
+                    <div class="password-requirement">Password minimal 6 karakter</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">✔️ Konfirmasi Password</label>
+                    <div class="password-container">
+                        <input type="password" id="confirmPasswordInput" class="form-input" placeholder="Ulangi password" required>
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('confirmPasswordInput')">👁️</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">🏫 Kampus</label>
+                    <select id="kampusInput" class="form-select" required onchange="handleKampusChange()">
+                        <option value="">Pilih Kampus</option>
+                        <option value="Kampus Pusat">Kampus Pusat</option>
+                        <option value="Kampus Cipacing">Kampus Cipacing</option>
+                        <option value="Kampus Cirebon">Kampus Cirebon</option>
+                        <option value="IDE LPKIA">IDE LPKIA - Jl. Soekarno-Hatta No.456</option>
+                        <option value="+ Kampus Lain">+ Tambah Kampus Baru</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="customKampusGroup" style="display: none;">
+                    <label class="form-label">📍 Nama Kampus Baru</label>
+                    <input type="text" id="customKampusInput" class="form-input" placeholder="Contoh: Kampus Bandung Barat" maxlength="50">
+                    <div style="font-size: 11px; color: #999; margin-top: 4px;">Kampus baru akan ditambahkan ke sistem</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">🏢 Organisasi <span style="color:#999;">(Wajib)</span></label>
+                    <input type="text" id="organisasiInput" class="form-input" placeholder="Cth: Akuntan, BEM, HMIF, dll" required>
+                </div>
+
+                <button type="submit" class="btn-register" id="registerBtn">Daftar Sekarang</button>
+            </form>
+        </div>
+
+        <div class="register-footer">
+            <p>Sudah punya akun?</p>
+            <button class="btn-login-link" onclick="window.location.href='login.html'">
+                Masuk di sini
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Clear session flag jika akses register langsung (bukan dari splash)
+        const fromSplashReg = sessionStorage.getItem("fromSplash");
+        if (!fromSplashReg) {
+            // Akses langsung ke register, untuk konsistensi clear sessionStorage
+            sessionStorage.removeItem("fromSplash");
+        }
+
+        // Jika sudah login, langsung redirect ke dashboard
+        const alreadyLoggedInReg = JSON.parse(localStorage.getItem("loggedUser"));
+        if (alreadyLoggedInReg) {
+            if (alreadyLoggedInReg.role === "Admin Simarsip" || alreadyLoggedInReg.role === "super_admin") {
+                window.location.href = "index_admin.html";
+            } else if (alreadyLoggedInReg.role === "BAA") {
+                window.location.href = "index_baa.html";
+            } else {
+                window.location.href = "index.html";
+            }
+        }
+
+        // Firebase Config
+        let db;
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+            authDomain: "simarsip-apk.firebaseapp.com",
+            databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "simarsip-apk",
+            storageBucket: "simarsip-apk.firebasestorage.app",
+            messagingSenderId: "707332524030",
+            appId: "1:707332524030:web:d91551b5f199df489622af"
+        };
+
+        try {
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            loadKampusOptions(); // Load kampus from Firebase
+        } catch (err) {
+            console.error('Firebase init error:', err);
+        }
+
+        // Load kampus options dari Firebase atau gunakan default
+        function loadKampusOptions() {
+            const kampusSelect = document.getElementById('kampusInput');
+            
+            if (db) {
+                db.ref('kampus/main').once('value', snapshot => {
+                    const kampusFromDb = snapshot.val();
+                    
+                    // Jika ada kampus di Firebase, tambahkan ke dropdown
+                    if (kampusFromDb) {
+                        Object.entries(kampusFromDb).forEach(([id, kampus]) => {
+                            // Pastikan tidak duplikat
+                            const existingOption = Array.from(kampusSelect.options).find(opt => opt.value === (kampus.nama || kampus.name));
+                            if (!existingOption) {
+                                const option = document.createElement('option');
+                                option.value = kampus.nama || kampus.name;
+                                option.textContent = kampus.nama || kampus.name;
+                                // Insert sebelum "+ Kampus Lain"
+                                const lastOption = kampusSelect.options[kampusSelect.options.length - 1];
+                                kampusSelect.insertBefore(option, lastOption);
+                            }
+                        });
+                    }
+                }).catch(err => {
+                    console.log('Kampus dari Firebase tidak tersedia, gunakan default');
+                });
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMsg');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+            document.getElementById('successMsg').classList.remove('show');
+            setTimeout(() => {
+                errorDiv.classList.remove('show');
+            }, 4000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMsg');
+            successDiv.textContent = message;
+            successDiv.classList.add('show');
+            document.getElementById('errorMsg').classList.remove('show');
+            setTimeout(() => {
+                successDiv.classList.remove('show');
+                // Redirect ke login setelah 2 detik
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            }, 3000);
+        }
+
+        function handleKampusChange() {
+            const kampusValue = document.getElementById('kampusInput').value;
+            const customKampusGroup = document.getElementById('customKampusGroup');
+            const customKampusInput = document.getElementById('customKampusInput');
+
+            if (kampusValue === '+ Kampus Lain') {
+                customKampusGroup.style.display = 'block';
+                customKampusInput.setAttribute('required', 'required');
+            } else {
+                customKampusGroup.style.display = 'none';
+                customKampusInput.removeAttribute('required');
+                customKampusInput.value = '';
+            }
+        }
+
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const button = event.target;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '👁️‍🗨️';
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️';
+            }
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('nameInput').value.trim();
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const confirmPassword = document.getElementById('confirmPasswordInput').value;
+            let kampus = document.getElementById('kampusInput').value;
+            const organisasi = document.getElementById('organisasiInput').value.trim();
+
+            // Jika memilih "+ Kampus Lain", ambil dari custom input
+            if (kampus === '+ Kampus Lain') {
+                const customKampus = document.getElementById('customKampusInput').value.trim();
+                if (!customKampus) {
+                    showError('Silakan masukkan nama kampus baru');
+                    return;
+                }
+                kampus = customKampus;
+            }
+
+            // Validasi
+            if (!name || !email || !password || !kampus || !organisasi) {
+                showError('Silakan isi semua field yang wajib');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('Password minimal 6 karakter');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('Password dan konfirmasi password tidak sesuai');
+                return;
+            }
+
+            document.getElementById('registerBtn').disabled = true;
+
+            if (db) {
+                // Cek apakah email sudah terdaftar
+                db.ref('users').orderByChild('email').equalTo(email).once('value', snapshot => {
+                    if (snapshot.exists()) {
+                        showError('Email sudah terdaftar. Gunakan email lain atau masuk');
+                        document.getElementById('registerBtn').disabled = false;
+                        return;
+                    }
+
+                    // Generate UID sederhana
+                    const uid = 'user_' + Date.now();
+
+                    // Save user ke Firebase
+                    const userData = {
+                        name: name,
+                        email: email,
+                        password: password, // NOTE: Not best practice - use Firebase Auth in production
+                        kampus: kampus,
+                        organisasi: organisasi,
+                        role: 'organisasi', // Role sebagai 'organisasi'
+                        status: 'Aktif',
+                        createdAt: new Date().toISOString(),
+                        baaStatus: 'Belum'
+                    };
+
+                    db.ref('users/' + uid).set(userData, (error) => {
+                        if (error) {
+                            showError('Terjadi error: ' + error.message);
+                            document.getElementById('registerBtn').disabled = false;
+                        } else {
+                            // Jika kampus custom (bonus dari "+ Kampus Lain"), tambahkan ke database kampus
+                            const predefinedKampus = ['Kampus Pusat', 'Kampus Cipacing', 'Kampus Cirebon', 'IDE LPKIA'];
+                            if (!predefinedKampus.includes(kampus)) {
+                                const kampusId = 'kampus_' + Date.now();
+                                db.ref('kampus/main/' + kampusId).set({
+                                    nama: kampus,
+                                    name: kampus,
+                                    createdBy: email,
+                                    createdAt: new Date().toISOString(),
+                                    status: 'Aktif'
+                                });
+                            }
+
+                            // Buat notifikasi untuk admin agar tahu ada user baru terdaftar
+                            try {
+                                const notifId = `user_reg_${uid}_${Date.now()}`;
+                                db.ref('notifications/admins/' + notifId).set({
+                                    id: notifId,
+                                    title: 'Pengguna Baru Terdaftar',
+                                    message: `${name} terdaftar sebagai ${userData.role} di ${kampus}`,
+                                    userId: uid,
+                                    email: email,
+                                    role: userData.role,
+                                    kampus: kampus,
+                                    createdAt: new Date().toISOString(),
+                                    read: false
+                                }).catch(() => {});
+                            } catch (e) { /* ignore */ }
+
+                            showSuccess('Akun berhasil dibuat! Silakan login...');
+                        }
+                    });
+                }).catch(err => {
+                    showError('Error: ' + err.message);
+                    document.getElementById('registerBtn').disabled = false;
+                });
+            } else {
+                // Fallback jika Firebase tidak tersedia
+                showError('Sistem sedang tidak tersedia, silakan coba lagi');
+                document.getElementById('registerBtn').disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

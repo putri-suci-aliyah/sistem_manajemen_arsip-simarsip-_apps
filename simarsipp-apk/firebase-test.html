@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firebase Test</title>
+</head>
+<body>
+    <h1>Firebase Connection Test</h1>
+    <div id="status">Testing...</div>
+    <button onclick="testConnection()">Test Connection</button>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+            authDomain: "simarsip-apk.firebaseapp.com",
+            databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "simarsip-apk"
+        };
+
+        let db;
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.database();
+            document.getElementById('status').innerText = 'Firebase initialized successfully';
+        } catch (error) {
+            document.getElementById('status').innerText = 'Firebase init error: ' + error.message;
+            console.error('Firebase init error:', error);
+        }
+
+        function testConnection() {
+            if (!db) {
+                alert('Firebase not available');
+                return;
+            }
+
+            document.getElementById('status').innerText = 'Testing connection...';
+
+            db.ref('test').set({
+                timestamp: new Date().toISOString(),
+                message: 'Test connection'
+            }).then(() => {
+                document.getElementById('status').innerText = '✅ Connection successful!';
+                console.log('Test data saved successfully');
+            }).catch(error => {
+                document.getElementById('status').innerText = '❌ Connection failed: ' + error.message;
+                console.error('Test failed:', error);
+            });
+        }
+    </script>
+</body>
+</html>

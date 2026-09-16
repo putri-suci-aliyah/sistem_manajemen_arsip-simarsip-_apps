@@ -1,0 +1,725 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Profil - SIMARSIP</title>
+
+  <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<style>
+  body {
+    background: #f4f4f4;
+    margin: 0 auto;
+    max-width: 480px;
+    font-family: -apple-system, Roboto, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  .app-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 16px;
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 150;
+  }
+
+  .back-btn {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: opacity 0.2s;
+  }
+
+  .back-btn:active {
+    opacity: 0.5;
+  }
+
+  .profile-card {
+    background: white;
+    margin: 20px;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+
+  .profile-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: #ddd;
+    object-fit: cover;
+    margin-bottom: 12px;
+    border: 4px solid #667eea;
+  }
+
+  .profile-name {
+    font-size: 22px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 8px;
+  }
+
+  .profile-email {
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 3px;
+  }
+
+  .profile-campus {
+    font-size: 13px;
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  .profile-info-card {
+    background: white;
+    margin: 15px;
+    padding: 18px;
+    border-radius: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .info-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .info-icon {
+    color: #667eea;
+    font-size: 24px;
+  }
+
+  .info-label {
+    font-weight: 600;
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+  }
+
+  .info-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .btn-baa {
+    margin: 15px;
+    padding: 14px;
+    width: calc(100% - 30px);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 14px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+    display: none;
+  }
+
+  .btn-baa:active {
+    transform: scale(0.98);
+  }
+
+  .btn-baa.show {
+    display: block;
+  }
+
+  .logout-btn {
+    margin: 15px;
+    padding: 14px;
+    width: calc(100% - 30px);
+    background: linear-gradient(135deg, #ff7676 0%, #ff4d4d 100%);
+    border: none;
+    border-radius: 14px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .logout-btn:active {
+    transform: scale(0.98);
+  }
+
+  /* BAA Status */
+  .baa-status {
+    margin: 15px;
+    padding: 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .baa-status.error {
+    background: #ffebee;
+    color: #c62828;
+    border-left: 4px solid #c62828;
+  }
+
+  .baa-status.success {
+    background: #e8f5e8;
+    color: #2e7d32;
+    border-left: 4px solid #2e7d32;
+  }
+
+  .baa-status.info {
+    background: #e3f2fd;
+    color: #1565c0;
+    border-left: 4px solid #1565c0;
+  }
+
+  /* ========================= */
+  /* MODAL FIXED */
+  /* ========================= */
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 1000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition: all 0.25s ease;
+  }
+
+  .modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .modal-content {
+    background: #fff;
+    width: 100%;
+    max-width: 420px;
+
+    border-radius: 20px;
+
+    max-height: 90vh;
+    overflow-y: auto;
+
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(25px) scale(0.97);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+
+    padding: 18px 20px;
+
+    border-radius: 20px 20px 0 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 26px;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-label {
+    display: block;
+
+    font-weight: 700;
+    font-size: 12px;
+
+    color: #555;
+
+    margin-bottom: 8px;
+
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .form-input,
+  .form-textarea {
+    width: 100%;
+
+    padding: 14px;
+
+    border: 1px solid #d8dce8;
+    border-radius: 14px;
+
+    font-size: 14px;
+    font-family: inherit;
+
+    background: #f8f9ff;
+
+    transition: all 0.25s ease;
+  }
+
+  .form-input:focus,
+  .form-textarea:focus {
+    outline: none;
+
+    border-color: #667eea;
+
+    background: #fff;
+
+    box-shadow: 0 0 0 4px rgba(102,126,234,0.12);
+  }
+
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: #9aa1b3;
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+  }
+
+  .btn-submit {
+    width: 100%;
+
+    padding: 14px;
+
+    border: none;
+    border-radius: 14px;
+
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102,126,234,0.18);
+  }
+
+  .btn-submit:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .message {
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    margin-bottom: 18px;
+    display: none;
+  }
+
+  .message.success {
+    background: #e8f5e9;
+    color: #1b5e20;
+  }
+
+  .message.error {
+    background: #ffebee;
+    color: #b71c1c;
+  }
+
+  .message.show {
+    display: block;
+  }
+
+  /* RESPONSIVE */
+
+  @media (max-width: 480px) {
+    .modal-overlay {
+      padding: 14px;
+    }
+
+    .modal-content {
+      border-radius: 18px;
+    }
+
+    .modal-header {
+      padding: 16px;
+    }
+
+    .modal-body {
+      padding: 16px;
+    }
+
+    .form-input,
+    .form-textarea {
+      font-size: 16px;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+  <header class="app-header">
+    <a href="javascript:void(0)" onclick="goBack()" class="back-btn">
+      <i class="material-icons" style="font-size:26px">arrow_back</i>
+    </a>
+    Profil Saya
+  </header>
+
+  <div class="profile-card">
+    <img src="img/user.png" class="profile-img" id="profilePicture">
+    <div class="profile-name" id="profileName">Loading...</div>
+    <div class="profile-email" id="profileEmail">...</div>
+    <div class="profile-campus" id="profileCampus">...</div>
+  </div>
+
+  <div class="profile-info-card">
+    <div class="info-item">
+      <i class="material-icons info-icon">email</i>
+      <div>
+        <div class="info-label">Email</div>
+        <div class="info-value" id="infoEmail">-</div>
+      </div>
+    </div>
+
+    <div class="info-item">
+      <i class="material-icons info-icon">business</i>
+      <div>
+        <div class="info-label">Kampus</div>
+        <div class="info-value" id="infoCampus">-</div>
+      </div>
+    </div>
+
+    <div class="info-item">
+      <i class="material-icons info-icon">verified_user</i>
+      <div>
+        <div class="info-label">Role</div>
+        <div class="info-value" id="infoRole">-</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-baa" id="btnBAA" onclick="openBAAModal()">
+    ✨ Ajukan sebagai BAA
+  </button>
+
+  <button class="logout-btn" onclick="logoutUser()">
+    Keluar
+  </button>
+
+  <!-- BAA Modal -->
+  <div class="modal-overlay" id="baaModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📋 Ajukan sebagai BAA</h3>
+        <button class="close-btn" onclick="closeBAAModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="message" id="modalMessage"></div>
+
+        <form onsubmit="submitBAAForm(event)">
+          <div class="form-group">
+            <label class="form-label">👤 Nama Lengkap</label>
+            <input type="text" id="baaName" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">💼 Jabatan</label>
+            <input type="text" id="baaPosition" class="form-input" placeholder="Contoh: Ketua HMIF" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">🏫 Nama Kampus</label>
+            <input type="text" id="baaCampus" class="form-input" placeholder="Contoh: Institut Digital Ekonomi LPKIA" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">📧 Email Kampus</label>
+            <input type="email" id="baaEmail" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">📄 Deskripsi <span style="color:#999;">(Opsional)</span></label>
+            <textarea id="baaDescription" class="form-textarea" placeholder="Alasan mengapa ingin menjadi BAA..."></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit" id="submitBAABtn">
+            Kirim Pengajuan
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+
+  <script>
+    let db;
+    const firebaseConfig = {
+      apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+      authDomain: "simarsip-apk.firebaseapp.com",
+      databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "simarsip-apk",
+      storageBucket: "simarsip-apk.firebasestorage.app",
+      messagingSenderId: "707332524030",
+      appId: "1:707332524030:web:d91551b5f199df489622af"
+    };
+
+    try {
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      db = firebase.database();
+    } catch (err) {
+      console.error('Firebase init error:', err);
+    }
+
+    const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+
+    // Proteksi Halaman
+    if (!loggedUser) {
+      window.location.href = "login.html";
+    } else {
+      // Tampilkan Data
+      document.getElementById("profileName").textContent = loggedUser.name || "User";
+      document.getElementById("profileEmail").textContent = loggedUser.email || "-";
+      document.getElementById("profileCampus").textContent = loggedUser.kampus || "-";
+      
+      document.getElementById("infoEmail").textContent = loggedUser.email || "-";
+      document.getElementById("infoCampus").textContent = loggedUser.kampus || "-";
+      
+      // Display role dengan badge khusus untuk Super Admin
+      let roleDisplay = loggedUser.role || "-";
+      if (loggedUser.role === "super_admin") {
+        roleDisplay = "👑 Super Admin";
+      }
+      document.getElementById("infoRole").textContent = roleDisplay;
+
+      if (loggedUser.photo && loggedUser.photo !== "") {
+        document.getElementById("profilePicture").src = loggedUser.photo;
+      }
+
+      // Tampilkan tombol BAA hanya untuk organisasi users (belum menjadi BAA)
+      if (loggedUser.role === "organisasi") {
+        document.getElementById("btnBAA").classList.add("show");
+        // Populate form dengan data user
+        document.getElementById("baaName").value = loggedUser.name || "";
+        document.getElementById("baaPosition").value = "";
+        document.getElementById("baaCampus").value = loggedUser.kampus || "";
+        document.getElementById("baaEmail").value = loggedUser.email || "";
+        document.getElementById("baaDescription").value = "";
+
+        // Cek status pengajuan BAA
+        checkBAAStatus();
+      }
+    }
+
+    function checkBAAStatus() {
+      if (!db || !loggedUser.id) return;
+
+      db.ref('baa_applications').orderByChild('userId').equalTo(loggedUser.id).once('value', snapshot => {
+        const applications = snapshot.val();
+        if (applications) {
+          const appKeys = Object.keys(applications);
+          const latestApp = applications[appKeys[appKeys.length - 1]]; // Ambil yang terbaru
+
+          if (latestApp.status === 'rejected') {
+            showBAAStatus('Pengajuan BAA Anda ditolak. Alasan: ' + (latestApp.rejection_reason || 'Tidak ada alasan spesifik.'), 'error');
+          } else if (latestApp.status === 'approved') {
+            showBAAStatus('Selamat! Pengajuan BAA Anda disetujui.', 'success');
+          } else if (latestApp.status === 'pending') {
+            showBAAStatus('Pengajuan BAA Anda sedang diproses.', 'info');
+          }
+        }
+      });
+    }
+
+    function showBAAStatus(message, type) {
+      const statusEl = document.createElement('div');
+      statusEl.className = `baa-status ${type}`;
+      statusEl.innerHTML = `<i class="material-icons">${type === 'error' ? 'error' : type === 'success' ? 'check_circle' : 'info'}</i> ${message}`;
+      document.querySelector('.profile-card').appendChild(statusEl);
+    }
+
+    function goBack() {
+      if (!loggedUser) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      if (loggedUser.role === "Admin Simarsip" || loggedUser.role === "super_admin") {
+        window.location.href = "index_admin.html";
+      } else if (loggedUser.role === "BAA") {
+        window.location.href = "index_baa.html";
+      } else if (loggedUser.role === "organisasi") {
+        window.location.href = "index.html";
+      } else {
+        window.location.href = "index.html";
+      }
+    }
+
+    function logoutUser() {
+      localStorage.removeItem("loggedUser");
+      sessionStorage.removeItem("fromSplash");
+      window.location.href = "splash.html";
+    }
+
+    function openBAAModal() {
+      document.getElementById("baaModal").classList.add("show");
+    }
+
+    function closeBAAModal() {
+      document.getElementById("baaModal").classList.remove("show");
+      // Reset form
+      document.getElementById("baaName").value = loggedUser.name || "";
+      document.getElementById("baaPosition").value = "";
+      document.getElementById("baaCampus").value = loggedUser.kampus || "";
+      document.getElementById("baaEmail").value = loggedUser.email || "";
+      document.getElementById("baaDescription").value = "";
+      document.getElementById("modalMessage").classList.remove("show", "success", "error");
+    }
+
+    function submitBAAForm(event) {
+      event.preventDefault();
+
+      const name = document.getElementById("baaName").value.trim();
+      const position = document.getElementById("baaPosition").value.trim();
+      const campus = document.getElementById("baaCampus").value.trim();
+      const email = document.getElementById("baaEmail").value.trim();
+      const description = document.getElementById("baaDescription").value.trim();
+
+      if (!name || !position || !campus || !email) {
+        showMessage("Silakan isi semua field wajib", "error");
+        return;
+      }
+
+      document.getElementById("submitBAABtn").disabled = true;
+
+      if (!db) {
+        showMessage("Sistem sedang tidak tersedia", "error");
+        document.getElementById("submitBAABtn").disabled = false;
+        return;
+      }
+
+      const baaApplicationId = 'baa_' + Date.now();
+      const baaData = {
+        userId: loggedUser.id,
+        userName: name,
+        userEmail: email,
+        position: position,
+        campus: campus,
+        description: description || "",
+        status: "Menunggu Review",
+        createdAt: new Date().toISOString(),
+        reviewed: false
+      };
+
+      // Save application record
+      db.ref('baa_applications/' + baaApplicationId).set(baaData, (error) => {
+        if (error) {
+          showMessage("Error: " + error.message, "error");
+          document.getElementById("submitBAABtn").disabled = false;
+        } else {
+          // Also add to pending approvals so admin UI (verifikasi_baa.html) will pick it up
+          const pendingRef = db.ref('baa_pending_approvals/' + baaApplicationId);
+          pendingRef.set({
+            id: baaApplicationId,
+            ...baaData,
+            status: 'pending'
+          }).catch(err => console.warn('Could not write to baa_pending_approvals:', err.message));
+
+          // Write a simple admin notification entry so admins can be alerted
+          try {
+            const notifId = 'baa_app_' + Date.now();
+            db.ref('notifications/admins/' + notifId).set({
+              id: notifId,
+              title: 'Permintaan Admin BAA Baru',
+              message: `${name} mengajukan permintaan menjadi Admin BAA.`,
+              relatedId: baaApplicationId,
+              type: 'baa_application',
+              createdAt: new Date().toISOString(),
+              read: false
+            });
+          } catch (err) {
+            console.warn('Failed to write admin notification', err.message);
+          }
+
+          showMessage("Pengajuan berhasil dikirim! Admin akan meninjau dalam waktu dekat.", "success");
+          setTimeout(() => {
+            closeBAAModal();
+          }, 2000);
+        }
+      });
+    }
+
+    function showMessage(msg, type) {
+      const msgEl = document.getElementById("modalMessage");
+      msgEl.textContent = msg;
+      msgEl.classList.remove("success", "error");
+      msgEl.classList.add("show", type);
+      setTimeout(() => {
+        msgEl.classList.remove("show");
+      }, 4000);
+    }
+  </script>
+
+</body>
+</html>

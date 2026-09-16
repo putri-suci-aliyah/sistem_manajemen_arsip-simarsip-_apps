@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halaman Notifikasi - Admin</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/framework7@5.7.10/css/framework7.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f4f7fb; max-width: 480px; margin-left: auto; margin-right: auto; }
+        .app-header { background: linear-gradient(135deg, #1e73ff, #3f83ff); color: white; padding: 16px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
+        .back-btn { background: rgba(255,255,255,0.18); border: none; color: white; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .header-title { font-size: 18px; font-weight: 700; flex: 1; }
+        .page-content { padding: 16px; padding-bottom: 90px; }
+        .summary-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+        .summary-card { background: white; border-radius: 16px; padding: 16px; flex: 1; min-width: 140px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+        .summary-label { font-size: 12px; color: #666; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; }
+        .summary-value { font-size: 28px; font-weight: 800; color: #222; }
+        .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+        .btn { flex: 1; min-width: 140px; border: none; padding: 12px 14px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-primary { background: #1e73ff; color: white; }
+        .btn-secondary { background: #e0e7ff; color: #1e3a8a; }
+        .notif-container { display: flex; flex-direction: column; gap: 12px; }
+        .notif-category-title { font-size: 13px; font-weight: 700; color: #1e73ff; text-transform: uppercase; margin-bottom: 8px; }
+        .notif-item { background: white; border-radius: 14px; padding: 14px; display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 3px 10px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .notif-item:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(0,0,0,0.12); }
+        .notif-item.unread { background: #eef5ff; }
+        .notif-icon { flex-shrink: 0; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
+        .notif-icon.admin { background: #1e73ff; }
+        .notif-icon.mail { background: #0a84ff; }
+        .notif-icon.warning { background: #ff9800; }
+        .notif-content { flex: 1; }
+        .notif-title { font-size: 15px; font-weight: 800; margin: 0 0 6px; color: #1f2937; }
+        .notif-message { font-size: 13px; color: #4b5563; line-height: 1.5; margin: 0 0 8px; }
+        .notif-time { font-size: 11px; color: #8b96a5; }
+        .notif-badge { width: 10px; height: 10px; border-radius: 999px; background: #ff3b30; align-self: center; margin-left: 4px; }
+        .empty-state { text-align: center; padding: 40px 16px; color: #667085; }
+        .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: rgba(20,20,20,0.92); color: white; padding: 12px 16px; border-radius: 12px; box-shadow: 0 18px 35px rgba(0,0,0,0.18); z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; max-width: 92%; text-align: center; }
+        .toast.show { opacity: 1; pointer-events: auto; }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <button class="back-btn" onclick="window.location.href='index_admin.html'"><i class="material-icons">arrow_back</i></button>
+        <div class="header-title">Notifikasi Admin</div>
+        <button class="btn btn-secondary" style="min-width: auto; padding: 10px 12px;" onclick="markAllRead()">Tandai Semua</button>
+    </header>
+    <main class="page-content">
+        <div class="summary-row">
+            <div class="summary-card">
+                <div class="summary-label">Belum Dibaca</div>
+                <div id="unreadCount" class="summary-value">0</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Total Notifikasi</div>
+                <div id="totalCount" class="summary-value">0</div>
+            </div>
+        </div>
+        <div class="actions">
+            <button class="btn btn-primary" id="refreshBtn" onclick="refreshNotifications()">Muat Ulang</button>
+        </div>
+        <div id="notifList" class="notif-container"></div>
+    </main>
+    <div id="toast" class="toast"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+            authDomain: "simarsip-apk.firebaseapp.com",
+            databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "simarsip-apk"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        function safeText(id, value) {
+            try {
+                const el = document.getElementById(id);
+                if (el) el.textContent = value;
+            } catch (e) {
+                console.warn('safeText failed for', id, e && e.message);
+            }
+        }
+        let notifications = [];
+        const NOTIF_BATCH_SIZE = 30;
+        let oldestLoadedCreatedAt = null;
+        let oldestLoadedId = null;
+        let hasMoreOlder = false;
+
+        function formatTime(value) {
+            const date = new Date(value);
+            if (!value || isNaN(date)) return '-';
+            return date.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function getIconType(type) {
+            if (!type) return 'warning';
+            if (type === 'baa_application' || type === 'baa_approved' || type === 'campus_added') return 'admin';
+            if (type.startsWith('submission_') || type === 'new_submission' || type === 'submission' || type === 'surat_baru') return 'mail';
+            return 'warning';
+        }
+
+        function getIconText(type) {
+            if (!type) return 'notifications';
+            if (type === 'baa_application' || type === 'baa_approved' || type === 'campus_added') return 'person';
+            if (type.startsWith('submission_') || type === 'new_submission' || type === 'submission' || type === 'surat_baru') return 'description';
+            return 'notifications';
+        }
+
+        function showToast(message, duration = 3500) {
+            const toast = document.getElementById('toast');
+            if (!toast) {
+                console.warn('showToast: #toast element not found. Message skipped:', message);
+                return;
+            }
+            try {
+                toast.textContent = message;
+                if (toast.classList) toast.classList.add('show');
+                clearTimeout(toast.hideTimeout);
+                toast.hideTimeout = setTimeout(() => {
+                    if (toast.classList) toast.classList.remove('show');
+                }, duration);
+            } catch (err) {
+                console.warn('showToast: failed to show toast', err);
+            }
+        }
+
+        function normalizeNotifications(snapshot) {
+            const items = [];
+            snapshot.forEach(child => {
+                const val = child.val();
+                if (val && typeof val === 'object') {
+                    items.push({ id: child.key, ...val });
+                }
+            });
+            console.log('Normalized items count:', items.length, 'Sample:', items.slice(0, 2));
+            return items;
+        }
+
+        function sortNotifications(list) {
+            return list.sort((a, b) => {
+                const timeA = new Date(a.createdAt || a.timestamp || 0).getTime();
+                const timeB = new Date(b.createdAt || b.timestamp || 0).getTime();
+                if (timeA === timeB) {
+                    return String(b.id).localeCompare(String(a.id));
+                }
+                return timeB - timeA;
+            });
+        }
+
+        function refreshNotifications() {
+            console.log('refreshNotifications called');
+            const btn = document.querySelector('[onclick*="refreshNotifications"]');
+            if (btn) btn.disabled = true;
+            
+            const query = db.ref('notifications/admins').orderByChild('createdAt').limitToLast(NOTIF_BATCH_SIZE);
+            query.once('value').then(snapshot => {
+                console.log('Refresh snapshot exists:', snapshot.exists(), 'num_children:', snapshot.numChildren());
+                if (snapshot.exists()) {
+                    handleNotificationSnapshot(snapshot, true);
+                    showToast('✓ Daftar notifikasi diperbarui');
+                } else {
+                    console.warn('No data in notifications/admins');
+                    renderNotifications();
+                }
+            }).catch(err => {
+                console.warn('Failed to refresh admin notifications:', err);
+                showToast('Error: ' + err.message);
+                renderNotifications();
+            }).finally(() => {
+                if (btn) btn.disabled = false;
+            });
+        }
+
+                /*
+                 Firebase performance recommendation:
+                 Your code queries: db.ref('notifications/admins').orderByChild('createdAt')
+                 For better performance and to remove the client warning, add an index on
+                 the Realtime Database rules for '/notifications/admins' like:
+
+                 {
+                     "rules": {
+                         "notifications": {
+                             "admins": {
+                                 ".indexOn": ["createdAt"]
+                             }
+                         }
+                     }
+                 }
+
+                 This is a rules snippet to paste into your Realtime Database rules (or
+                 configure via Firebase Console > Realtime Database > Indexes).
+                */
+
+        function handleNotificationSnapshot(snapshot, isInitialLoad = false) {
+            const loadedItems = normalizeNotifications(snapshot);
+            console.log('handleNotificationSnapshot - loaded:', loadedItems.length, 'initial:', isInitialLoad);
+            const sortedItems = sortNotifications(loadedItems);
+            if (isInitialLoad) {
+                notifications = sortedItems;
+            } else {
+                const existingIds = new Set(notifications.map(n => n.id));
+                sortedItems.forEach(item => {
+                    if (!existingIds.has(item.id)) notifications.push(item);
+                });
+                notifications = sortNotifications(notifications);
+            }
+
+            if (notifications.length > 0) {
+                const lastItem = notifications[notifications.length - 1];
+                oldestLoadedCreatedAt = lastItem.createdAt || lastItem.timestamp || null;
+                oldestLoadedId = lastItem.id;
+                hasMoreOlder = sortedItems.length === NOTIF_BATCH_SIZE;
+            } else {
+                oldestLoadedCreatedAt = null;
+                oldestLoadedId = null;
+                hasMoreOlder = false;
+            }
+
+            console.log('Notifications after handle:', notifications.length);
+            renderNotifications();
+            updateSummary();
+        }
+
+        function renderNotifications() {
+            const container = document.getElementById('notifList');
+            container.innerHTML = '';
+            if (!notifications.length) {
+                container.innerHTML = '<div class="empty-state">Belum ada notifikasi.</div>';
+                return;
+            }
+
+            const unreadItems = notifications.filter(n => n.read !== true && n.read !== 'true');
+            const readItems = notifications.filter(n => n.read === true || n.read === 'true');
+
+            if (unreadItems.length > 0) {
+                const section = document.createElement('div');
+                section.innerHTML = '<div class="notif-category-title">Baru</div>';
+                unreadItems.forEach(item => section.innerHTML += createNotificationHtml(item));
+                container.appendChild(section);
+            }
+            if (readItems.length > 0) {
+                const section = document.createElement('div');
+                section.innerHTML = '<div class="notif-category-title">Telah Dibaca</div>';
+                readItems.forEach(item => section.innerHTML += createNotificationHtml(item));
+                container.appendChild(section);
+            }
+
+            // Attach event listeners
+            container.querySelectorAll('.notif-item').forEach(el => {
+                el.addEventListener('click', function(e) {
+                    const id = this.dataset.id;
+                    console.log('Notif clicked:', id);
+                    const item = notifications.find(n => n.id === id);
+                    if (item) openNotification(item);
+                });
+            });
+
+            if (hasMoreOlder) {
+                const loadMore = document.createElement('div');
+                loadMore.style.textAlign = 'center';
+                loadMore.style.marginTop = '16px';
+                loadMore.innerHTML = '<button class="btn btn-secondary" id="loadMoreBtn">Muat Lebih Banyak</button>';
+                container.appendChild(loadMore);
+                document.getElementById('loadMoreBtn').addEventListener('click', loadOlderNotifications);
+            }
+        }
+
+        function createNotificationHtml(item) {
+            const typeClass = getIconType(item.type || 'default');
+            const iconText = getIconText(item.type || 'default');
+            const unreadClass = item.read !== true && item.read !== 'true' ? ' unread' : '';
+            const badge = item.read !== true && item.read !== 'true' ? '<div class="notif-badge"></div>' : '';
+            const title = item.title || 'Notifikasi Baru';
+            const message = item.message || 'Tidak ada deskripsi.';
+            const time = formatTime(item.createdAt || item.timestamp || new Date().toISOString());
+            return `
+                <div class="notif-item${unreadClass}" data-id="${item.id}">
+                    <div class="notif-icon ${typeClass}"><i class="material-icons">${iconText}</i></div>
+                    <div class="notif-content">
+                        <div class="notif-title">${title}</div>
+                        <div class="notif-message">${message}</div>
+                        <div class="notif-time">${time}</div>
+                    </div>
+                    ${badge}
+                </div>`;
+        }
+
+        function updateSummary() {
+            const totalCount = notifications.length;
+            const unreadCount = notifications.filter(n => n.read !== true && n.read !== 'true').length;
+            safeText('totalCount', totalCount);
+            safeText('unreadCount', unreadCount);
+        }
+
+        function markAllRead() {
+            console.log('markAllRead called');
+            const btn = document.querySelector('[onclick*="markAllRead"]');
+            if (btn) btn.disabled = true;
+            
+            db.ref('notifications/admins').once('value').then(snapshot => {
+                console.log('Got snapshot for markAllRead');
+                const updates = {};
+                snapshot.forEach(child => {
+                    const item = child.val();
+                    if (item && item.read !== true && item.read !== 'true') {
+                        updates[child.key + '/read'] = true;
+                    }
+                });
+                console.log('Updates to apply:', Object.keys(updates).length);
+                if (Object.keys(updates).length === 0) {
+                    showToast('✓ Semua notifikasi sudah dibaca');
+                    if (btn) btn.disabled = false;
+                    return Promise.resolve();
+                }
+                return db.ref('notifications/admins').update(updates);
+            }).then(() => {
+                console.log('markAllRead completed successfully');
+                showToast('✓ Semua notifikasi ditandai sebagai dibaca');
+                notifications.forEach(n => n.read = true);
+                renderNotifications();
+                updateSummary();
+            }).catch(err => {
+                console.error('Error in markAllRead:', err);
+                showToast('❌ Error: ' + err.message);
+            }).finally(() => {
+                if (btn) btn.disabled = false;
+            });
+        }
+
+        function openNotification(item) {
+            if (!item) return;
+            if (item.read !== true && item.read !== 'true') {
+                db.ref(`notifications/admins/${item.id}`).update({ read: true }).catch(err => console.warn(err));
+                item.read = true;
+                updateSummary();
+            }
+            renderNotifications();
+            if (item.type === 'baa_application' || item.type === 'baa_approved') {
+                window.location.href = 'verifikasi_baa.html';
+                return;
+            }
+            if (item.submissionType && item.relatedId) {
+                window.location.href = `detail_data.html?type=${encodeURIComponent(item.submissionType)}&id=${encodeURIComponent(item.relatedId)}`;
+                return;
+            }
+            if (item.relatedId) {
+                window.location.href = `detail_data.html?id=${encodeURIComponent(item.relatedId)}`;
+                return;
+            }
+            showToast('Notifikasi dibuka');
+        }
+
+        function loadOlderNotifications() {
+            if (!oldestLoadedCreatedAt || !oldestLoadedId) return;
+            const query = db.ref('notifications/admins')
+                .orderByChild('createdAt')
+                .endAt(oldestLoadedCreatedAt, oldestLoadedId)
+                .limitToLast(NOTIF_BATCH_SIZE + 1);
+
+            query.once('value').then(snapshot => {
+                const loadedItems = [];
+                snapshot.forEach(child => {
+                    if (child.key === oldestLoadedId) return;
+                    loadedItems.push({ id: child.key, ...child.val() });
+                });
+
+                if (!loadedItems.length) {
+                    hasMoreOlder = false;
+                    renderNotifications();
+                    return;
+                }
+
+                const sortedItems = sortNotifications(loadedItems);
+                notifications = notifications.concat(sortedItems);
+                notifications = sortNotifications(notifications);
+
+                const lastItem = notifications[notifications.length - 1];
+                oldestLoadedCreatedAt = lastItem.createdAt || lastItem.timestamp || null;
+                oldestLoadedId = lastItem.id;
+                hasMoreOlder = sortedItems.length === NOTIF_BATCH_SIZE;
+
+                renderNotifications();
+                updateSummary();
+            }).catch(err => console.warn(err));
+        }
+
+        function initNotifications() {
+            console.log('initNotifications called - db available:', !!db);
+            
+            // Expose functions to global scope
+            window.markAllRead = markAllRead;
+            window.refreshNotifications = refreshNotifications;
+            
+            refreshNotifications();
+            const notifRef = db.ref('notifications/admins').orderByChild('createdAt').limitToLast(1);
+            notifRef.on('child_added', snap => {
+                const item = snap.val();
+                if (!item) return;
+                const id = snap.key;
+                if (!notifications.some(n => n.id === id)) {
+                    console.log('New notification detected:', id);
+                    showToast(item.title || 'Notifikasi baru masuk');
+                    refreshNotifications();
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded fired');
+            initNotifications();
+        });
+    </script>
+</body>
+</html>

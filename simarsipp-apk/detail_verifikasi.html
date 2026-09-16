@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>Detail Verifikasi - SIMARSIP</title>
+    <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body { background: #f4f7fb; padding: 0; font-family: sans-serif; margin: 0; }
+
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 16px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 150;
+        }
+
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: opacity 0.2s;
+        }
+        .back-btn:active { opacity: 0.5; }
+
+        .content-container {
+            padding: 20px;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .card-detail { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .label { color: #888; font-size: 12px; margin-top: 10px; }
+        .value { font-weight: bold; font-size: 16px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-approve { background: #00c082; color: white; }
+        .btn-reject { background: #ff3b30; color: white; }
+        .reject-box { background: #fee2e2; padding: 10px; border-radius: 8px; margin-top: 10px; color: #7f1d1d; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .modal-title { font-size: 18px; font-weight: bold; }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        .form-group { margin-bottom: 15px; }
+        .form-label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: #ff3b30;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <a href="javascript:window.history.back()" class="back-btn">
+            <i class="material-icons">arrow_back</i>
+        </a>
+        <span>Detail Verifikasi BAA</span>
+    </header>
+
+    <div class="content-container">
+        <div class="card-detail" id="detailContent">
+            <p>Memuat data...</p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="rejectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Tolak Pengajuan</h3>
+                <button class="close-btn" onclick="closeRejectModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="submitReject(event)">
+                    <div class="form-group">
+                        <label class="form-label">Alasan Penolakan</label>
+                        <textarea id="rejectReason" class="form-textarea" rows="4" placeholder="Jelaskan mengapa pengajuan ditolak..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">Tolak Pengajuan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+        authDomain: "simarsip-apk.firebaseapp.com",
+        databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "simarsip-apk"
+    };
+
+    // INIT FIREBASE
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    const db = firebase.database();
+
+    // AMBIL ID DARI URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const requestId = urlParams.get('id');
+
+    let currentData = null;
+
+    // =========================
+    // LOAD DETAIL
+    // =========================
+    if (requestId) {
+
+        db.ref('baa_pending_approvals/' + requestId)
+        .on('value', snapshot => {
+
+            const data = snapshot.val();
+
+            if (!data) {
+                document.getElementById('detailContent').innerHTML = `
+                    <div style="text-align:center; color:#999; padding:30px;">
+                        Data pengajuan tidak ditemukan
+                    </div>
+                `;
+                return;
+            }
+
+            currentData = data;
+
+            const status = data.status || 'pending';
+
+            let statusText = 'Menunggu';
+            let statusColor = '#ff9800';
+
+            if (status === 'approved') {
+                statusText = 'Disetujui';
+                statusColor = '#00c853';
+            }
+
+            if (status === 'rejected') {
+                statusText = 'Ditolak';
+                statusColor = '#f44336';
+            }
+
+            document.getElementById('detailContent').innerHTML = `
+                <div class="label">Nama Lengkap</div>
+                <div class="value">${data.userName || '-'}</div>
+
+                <div class="label">Jabatan</div>
+                <div class="value">${data.position || '-'}</div>
+
+                <div class="label">Organisasi/Himpunan</div>
+                <div class="value">${data.organisasi || data.description || '-'}</div>
+
+                <div class="label">Kampus</div>
+                <div class="value">${data.campus || '-'}</div>
+
+                <div class="label">Email</div>
+                <div class="value">${data.userEmail || '-'}</div>
+
+                <div class="label">Tanggal Pengajuan</div>
+                <div class="value">${new Date(data.createdAt).toLocaleDateString('id-ID')}</div>
+
+                <div class="label">Status</div>
+                <div class="value" style="color:${statusColor}; font-weight:bold;">${statusText}</div>
+
+                ${data.rejectionReason ? `
+                    <div class="label">Alasan Penolakan</div>
+                    <div class="reject-box">${data.rejectionReason}</div>
+                ` : ''}
+
+                ${status === 'pending' ? `
+                    <div class="btn-group">
+                        <button class="btn btn-approve" id="approveBtn" onclick="approveBAA()">
+                            Setujui
+                        </button>
+                        <button class="btn btn-reject" onclick="promptReject()">
+                            Tolak
+                        </button>
+                    </div>
+                ` : ''}
+            `;
+        });
+    }
+
+    // =========================
+    // SETUJUI BAA
+    // =========================
+    function approveBAA() {
+        if (!currentData) return;
+
+        const userId = currentData.userId;
+
+        // UPDATE USER ROLE
+        db.ref('users/' + userId).update({
+            role: 'BAA',
+            baaStatus: 'approved',
+            jabatan: currentData.position || '',
+            approvedAt: new Date().toISOString()
+        }).then(() => {
+            // UPDATE PENGAJUAN
+            return db.ref('baa_pending_approvals/' + requestId).update({
+                status: 'approved',
+                reviewed: true,
+                approvedAt: new Date().toISOString()
+            });
+        }).then(() => {
+            // UPDATE HISTORY
+            return db.ref('baa_applications/' + requestId).update({
+                status: 'approved',
+                reviewed: true,
+                approvedAt: new Date().toISOString()
+            });
+        }).then(() => {
+            alert('✅ Pengajuan berhasil disetujui');
+            window.location.href = 'verifikasi_baa.html';
+        }).then(() => {
+            // Buat notifikasi untuk user bahwa permintaan BAA disetujui
+            try {
+                const notifId = `baa_approved_${requestId}_${Date.now()}`;
+                db.ref('notifications/users/' + (currentData.userId || 'unknown') + '/' + notifId).set({
+                    id: notifId,
+                    title: 'Permintaan BAA Disetujui',
+                    message: 'Pengajuan Anda sebagai BAA telah disetujui.',
+                    relatedRequest: requestId,
+                    type: 'baa_approval',
+                    createdAt: new Date().toISOString(),
+                    read: false
+                }).catch(() => {});
+            } catch (e) { /* ignore */ }
+        }).catch(err => {
+            console.error(err);
+            alert('❌ Error: ' + err.message);
+        });
+    }
+
+    // =========================
+    // MODAL TOLAK
+    // =========================
+    function promptReject() {
+        document.getElementById('rejectModal').classList.add('show');
+    }
+
+    function closeRejectModal() {
+        document.getElementById('rejectModal').classList.remove('show');
+        document.getElementById('rejectReason').value = '';
+    }
+
+    // =========================
+    // SUBMIT TOLAK
+    // =========================
+    function submitReject(event) {
+        event.preventDefault();
+
+        const reason = document.getElementById('rejectReason').value.trim();
+
+        if (!reason) {
+            alert('Harap isi alasan penolakan');
+            return;
+        }
+
+        if (!currentData) return;
+
+        const userId = currentData.userId;
+
+        // UPDATE USER
+        db.ref('users/' + userId).update({
+            baaStatus: 'rejected',
+            rejectionReason: reason,
+            rejectedAt: new Date().toISOString()
+        }).then(() => {
+            // UPDATE PENDING
+            return db.ref('baa_pending_approvals/' + requestId).update({
+                status: 'rejected',
+                reviewed: true,
+                rejectionReason: reason,
+                rejectedAt: new Date().toISOString()
+            });
+        }).then(() => {
+            // UPDATE HISTORY
+            return db.ref('baa_applications/' + requestId).update({
+                status: 'rejected',
+                reviewed: true,
+                rejectionReason: reason,
+                rejectedAt: new Date().toISOString()
+            });
+        }).then(() => {
+            alert('❌ Pengajuan ditolak');
+            closeRejectModal();
+            window.location.href = 'verifikasi_baa.html';
+        }).catch(err => {
+            console.error(err);
+            alert('❌ Error: ' + err.message);
+        });
+    }
+</script>
+</body>
+</html>

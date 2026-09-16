@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <title>Login SIMARSIP</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideUp 0.5s ease-in-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 30px 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .login-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .login-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .login-subtitle {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .login-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: white;
+        }
+
+        .password-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-container .form-input {
+            width: 100%;
+            padding-right: 45px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #666;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .password-toggle:hover {
+            color: #333;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .login-footer {
+            padding: 20px 30px;
+            text-align: center;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .login-footer p {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 12px;
+            background: #f5f5f5;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-register:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .error-message {
+            background: #ff5252;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-icon">📋</div>
+            <div class="login-title">SIMARSIP</div>
+            <div class="login-subtitle">Sistem Manajemen Surat & Pengajuan</div>
+        </div>
+
+        <div class="login-body">
+            <div class="error-message" id="errorMsg"></div>
+
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">📧 Email</label>
+                    <input type="email" id="emailInput" class="form-input" placeholder="Masukkan email Anda" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">🔐 Password</label>
+                    <div class="password-container">
+                        <input type="password" id="passwordInput" class="form-input" placeholder="Masukkan password Anda" required>
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('passwordInput')">👁️</button>
+                    </div>
+                    <div style="font-size: 12px; text-align: right; margin-top: 5px;">
+                        <a href="forgot-password.html" style="color: #667eea; text-decoration: none; font-weight: 500;">Lupa password?</a>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login" id="loginBtn">Masuk</button>
+            </form>
+        </div>
+
+        <div class="login-footer">
+            <p>Belum punya akun?</p>
+            <button class="btn-register" onclick="window.location.href='register.html'">
+                Daftar Sekarang
+            </button>
+        </div>
+    </div>
+
+    <!-- BAGIAN ATAS TIDAK DIUBAH -->
+
+<script>
+    const fromSplashLogin = sessionStorage.getItem("fromSplash");
+    if (!fromSplashLogin) {
+        sessionStorage.removeItem("fromSplash");
+    }
+
+    const alreadyLoggedIn = JSON.parse(localStorage.getItem("loggedUser"));
+ if (alreadyLoggedIn) {
+    // PERBAIKAN: Tambahkan kondisi super_admin di bawah ini
+    if (alreadyLoggedIn.role === "Admin Simarsip" || alreadyLoggedIn.role === "super_admin") {
+        window.location.href = "index_admin.html";
+    } else if (alreadyLoggedIn.role === "BAA") {
+        window.location.href = "index_baa.html";
+    } else {
+        window.location.href = "index.html";
+    }
+}
+
+    // Firebase Config
+    let db;
+    const firebaseConfig = {
+        apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+        authDomain: "simarsip-apk.firebaseapp.com",
+        databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "simarsip-apk",
+        storageBucket: "simarsip-apk.firebasestorage.app",
+        messagingSenderId: "707332524030",
+        appId: "1:707332524030:web:d91551b5f199df489622af"
+    };
+
+    try {
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+    } catch (err) {
+        console.error('Firebase init error:', err);
+    }
+
+    function showError(message) {
+        const errorDiv = document.getElementById('errorMsg');
+        errorDiv.textContent = message;
+        errorDiv.classList.add('show');
+        setTimeout(() => {
+            errorDiv.classList.remove('show');
+        }, 4000);
+    }
+
+    function togglePasswordVisibility(inputId) {
+        const input = document.getElementById(inputId);
+        const button = event.target;
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            button.textContent = '👁️‍🗨️';
+        } else {
+            input.type = 'password';
+            button.textContent = '👁️';
+        }
+    }
+
+    function handleLogin(event) {
+        event.preventDefault();
+        
+        const email = document.getElementById('emailInput').value.trim().toLowerCase();
+        const password = document.getElementById('passwordInput').value;
+        
+        if (!email || !password) {
+            showError('Silakan isi email dan password');
+            return;
+        }
+
+        document.getElementById('loginBtn').disabled = true;
+
+        if (db) {
+            db.ref('users').orderByChild('email').equalTo(email).once('value', snapshot => {
+                const users = snapshot.val();
+                
+                if (!users) {
+                    showError('Email tidak terdaftar');
+                    document.getElementById('loginBtn').disabled = false;
+                    return;
+                }
+
+                let foundUser = null;
+
+                Object.entries(users).forEach(([id, user]) => {
+                    // Verifikasi password - jika match, ambil user dan kampusnya
+                    if (user.password === password) {
+                        foundUser = { id, ...user };
+                    }
+                });
+
+                if (!foundUser) {
+                    showError('Password salah');
+                    document.getElementById('loginBtn').disabled = false;
+                    return;
+                }
+
+                localStorage.setItem('loggedUser', JSON.stringify(foundUser));
+
+                // Buat notifikasi untuk admin bahwa ada user baru login
+                try {
+                    if (db) {
+                        const notifId = `user_login_${foundUser.id || foundUser.email}_${Date.now()}`;
+                        db.ref('notifications/admins/' + notifId).set({
+                            id: notifId,
+                            title: 'User Login',
+                            message: `${foundUser.name || foundUser.email} melakukan login`,
+                            userId: foundUser.id || null,
+                            email: foundUser.email || null,
+                            role: foundUser.role || null,
+                            kampus: foundUser.kampus || null,
+                            createdAt: new Date().toISOString(),
+                            read: false
+                        }).catch(() => {});
+                    }
+                } catch (e) { /* ignore */ }
+
+                if (foundUser.role === 'super_admin' || foundUser.role === 'Admin Simarsip') {
+                    window.location.href = 'index_admin.html';
+                } else if (foundUser.role === 'BAA') {
+                    window.location.href = 'index_baa.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
+
+            }).catch(err => {
+                showError('Error: ' + err.message);
+                document.getElementById('loginBtn').disabled = false;
+            });
+        }
+    }
+</script>
+</body>
+</html>

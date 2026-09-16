@@ -1,0 +1,277 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Kalender BAA - SIMARSIP</title>
+  <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background: #f4f7fb; max-width: 480px; margin-left: auto; margin-right: auto; }
+    .app-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px 16px; color: white; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); height: 60px; }
+    .app-header-title { font-weight: 700; font-size: 18px; margin: 0; }
+    .page { padding: 16px 12px; padding-bottom: 100px; }
+    .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    #title { font-weight: 700; font-size: 18px; color: #333; text-align: center; flex: 1; }
+    .nav-btn { background: transparent; border: none; font-size: 24px; color: #667eea; cursor: pointer; padding: 0 10px; }
+    #grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; padding: 12px; background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); margin-bottom: 20px; }
+    #grid .day { aspect-ratio: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 12px; font-weight: 600; border-radius: 12px; cursor: pointer; background: #f5f5f5; color: #666; transition: 0.2s; }
+    .day-header { background: transparent !important; color: #6b7a95 !important; font-weight: 700 !important; cursor: default !important; }
+    
+    #grid .day.available { background: #a8e6cf; color: #2d5016; }
+    #grid .day.pending { background: #ffd3b6; color: #8b4513; }
+    #grid .day.borrowed { background: #ffaaa5; color: #6b0000; }
+    #grid .day.returned { background: #aa96da; color: #3d1a5f; }
+
+    .calendar-legend { background: white; padding: 12px; border-radius: 16px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
+    .legend-item { display: flex; align-items: center; gap: 8px; color: #666; }
+    .legend-box { width: 16px; height: 16px; border-radius: 6px; flex-shrink: 0; }
+    .legend-box.available { background: #a8e6cf; }
+    .legend-box.pending { background: #ffd3b6; }
+    .legend-box.borrowed { background: #ffaaa5; }
+    .legend-box.returned { background: #aa96da; }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; }
+    .modal-overlay.visible { opacity: 1; pointer-events: auto; }
+    .modal-content { background: white; padding: 20px; border-radius: 20px; width: 340px; max-width: 90%; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); }
+    #modalBody { overflow-y: auto; flex: 1; padding-right: 5px; }
+    .modal-header { font-weight: 800; font-size: 17px; border-bottom: 1px solid #eee; padding-bottom: 12px; margin-bottom: 15px; text-align: center; }
+    .booking-item { padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+    .booking-item strong { display: block; font-size: 15px; margin-bottom: 5px; color: #764ba2; }
+    .booking-item .detail-row { display: flex; font-size: 13px; margin-bottom: 3px; }
+    .booking-item .label { color: #888; width: 85px; flex-shrink: 0; }
+    .booking-item .value { color: #333; font-weight: 600; }
+
+    .custom-toolbar { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: white; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; z-index: 1000; }
+    .tab-link { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #999; flex: 1; }
+    .tab-link.active { color: #007aff; }
+    .tab-link i { font-size: 24px; }
+    .tab-link span { font-size: 11px; font-weight: 600; }
+    
+    .type-badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; margin-bottom: 4px; display: inline-block; font-weight: 800; }
+    .badge-ruangan { background: #eef6ff; color: #007aff; }
+    .badge-peralatan { background: #fff3e0; color: #ef6c00; }
+    .badge-dispensasi { background: #f3e5f5; color: #7b1fa2; }
+  </style>
+</head>
+
+<body>
+  <header class="app-header">
+    <div class="app-header-title">Kalender</div>
+  </header>
+
+  <main class="page">
+    <div class="calendar-header">
+      <button id="prev" class="nav-btn">❮</button>
+      <div id="title">...</div>
+      <button id="next" class="nav-btn">❯</button>
+    </div>
+    <div id="grid"></div>
+    <div class="calendar-legend">
+      <div class="legend-item"><span class="legend-box available"></span> Tersedia</div>
+      <div class="legend-item"><span class="legend-box pending"></span> Pending</div>
+      <div class="legend-item"><span class="legend-box borrowed"></span> Dipinjam/Aktif</div>
+      <div class="legend-item"><span class="legend-box returned"></span> Sudah dikembalikan</div>
+    </div>
+  </main>
+
+  <div id="infoModal" class="modal-overlay">
+    <div class="modal-content">
+      <div id="modalHeader" class="modal-header">Info Tanggal</div>
+      <div id="modalBody"></div>
+      <div class="modal-footer" id="modalFooter">
+         <button class="btn-tutup" style="width:100%; padding: 12px; border-radius: 12px; border: none; background: #f0f0f0; font-weight: 700; margin-top: 15px;" onclick="closePopup()">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="custom-toolbar">
+    <a href="index_baa.html" class="tab-link"><i class="material-icons">home</i><span>Beranda</span></a>
+    <a href="calender_baa.html" class="tab-link active"><i class="material-icons">calendar_today</i><span>Kalender</span></a>
+    <a href="laporan_baa.html" class="tab-link"><i class="material-icons">assignment</i><span>Laporan</span></a>
+    <a href="notifikasi_baa.html" class="tab-link"><i class="material-icons">notifications</i><span>Notifikasi</span></a>
+  </nav>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+  <script src="js/campus-utils.js"></script>
+
+  <script>
+    (function () {
+      const grid = document.getElementById('grid');
+      const title = document.getElementById('title');
+      const infoModal = document.getElementById('infoModal');
+      const modalBody = document.getElementById('modalBody');
+      const modalHeader = document.getElementById('modalHeader');
+
+      let current = new Date();
+      const today = new Date();
+      today.setHours(0,0,0,0);
+
+      let firebaseData = {};
+      const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+        authDomain: "simarsip-apk.firebaseapp.com",
+        databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "simarsip-apk"
+      };
+
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+
+  // Use centralized utils
+  const loggedUser = getLoggedUser();
+  const baaCampus = getUserCampus(loggedUser);
+
+      db.ref('pengajuan').on('value', snap => {
+        const data = snap.val() || {};
+        firebaseData = {};
+        Object.keys(data).forEach(type => {
+          Object.keys(data[type]).forEach(key => {
+            const item = data[type][key];
+            // Skip items that don't belong to this BAA's campus when campus is known
+            // Use centralized matching: if baaCampus set, only include items that belong to that campus
+            if (typeof belongsToUserCampusOrOrg === 'function') {
+              if (!belongsToUserCampusOrOrg(item, baaCampus, getUserOrg(loggedUser))) return;
+            } else {
+              const itemCampus = normalizeCampus(item.campus || item.kampus || null);
+              if (baaCampus && itemCampus && itemCampus !== baaCampus) return; // filter out other campuses
+            }
+
+            const targetDate = item.date || item.borrowDate;
+            if (targetDate) {
+              if (!firebaseData[targetDate]) firebaseData[targetDate] = [];
+              firebaseData[targetDate].push({ ...item, key: key, type: type });
+            }
+          });
+        });
+        render(current);
+      });
+
+      function render(date) {
+        grid.innerHTML = '';
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        title.textContent = monthNames[month] + ' ' + year;
+
+        ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].forEach(w => {
+          let h = document.createElement('div'); h.className = 'day day-header'; h.textContent = w; grid.appendChild(h);
+        });
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const lastDate = new Date(year, month + 1, 0).getDate();
+
+        for (let i = 0; i < firstDay; i++) {
+          let e = document.createElement('div'); e.className = 'day'; e.style.background = 'transparent'; grid.appendChild(e);
+        }
+
+        for (let d = 1; d <= lastDate; d++) {
+          const ymd = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          const cellDate = new Date(year, month, d);
+          const allItems = firebaseData[ymd] || [];
+          const activeItems = allItems.filter(item => item.status !== 'rejected' && item.status !== 'Sudah dikembalikan');
+
+          let statusClass = 'available';
+          if (cellDate < today) {
+            statusClass = 'available';
+          } else {
+            if (activeItems.length > 0) {
+              if (activeItems.some(b => b.status === 'pending')) statusClass = 'pending';
+              else if (activeItems.some(b => b.status === 'approved')) statusClass = 'borrowed';
+            } else if (allItems.some(item => item.status === 'Sudah dikembalikan')) {
+              statusClass = 'returned';
+            }
+          }
+
+          const cell = document.createElement('div');
+          cell.className = `day ${statusClass}`;
+          cell.innerHTML = `<strong>${d}</strong>`;
+          cell.onclick = () => { if (activeItems.length > 0) showPopUp(ymd, activeItems); };
+          grid.appendChild(cell);
+        }
+      }
+
+      function showPopUp(date, displayList) {
+        const dateParts = date.split('-');
+        modalHeader.textContent = `Agenda ${dateParts[2]} ${monthNames[parseInt(dateParts[1]) - 1]}`;
+        
+        // Simpan data untuk diproses secara massal jika tombol konfirmasi diklik
+        window.currentItemsToFinish = displayList.filter(i => i.status === 'approved');
+
+        modalBody.innerHTML = displayList.map(item => {
+          const s = item.status || 'pending';
+          let labelTipe = item.type.toUpperCase();
+          let badgeClass = `badge-${item.type}`;
+          let detailHTML = '';
+          let barisWaktu = '';
+
+          // DETAIL ASLI (TIDAK BERUBAH)
+          if(item.type === 'dispensasi') {
+            labelTipe = "SURAT DISPEN";
+            if(item.lecturer) detailHTML += `<div class="detail-row"><div class="label">Dosen</div><div class="value">: ${item.lecturer}</div></div>`;
+            if(item.course) detailHTML += `<div class="detail-row"><div class="label">MK</div><div class="value">: ${item.course}</div></div>`;
+            if(item.jam || item.waktu) barisWaktu = `<div class="detail-row"><div class="label">Waktu</div><div class="value" style="color:#e91e63;">: ${item.jam || item.waktu}</div></div>`;
+          } 
+          else if(item.type === 'peralatan') {
+            if(item.equipmentName) detailHTML += `<div class="detail-row"><div class="label">Alat</div><div class="value">: ${item.equipmentName}</div></div>`;
+            if(item.quantity) detailHTML += `<div class="detail-row"><div class="label">Jumlah</div><div class="value">: ${item.quantity}</div></div>`;
+            if(item.jam || item.waktu) barisWaktu = `<div class="detail-row"><div class="label">Waktu</div><div class="value" style="color:#e91e63;">: ${item.jam || item.waktu}</div></div>`;
+          } 
+          else {
+            detailHTML += `<div class="detail-row"><div class="label">Ruangan</div><div class="value">: ${item.room || '-'}</div></div>`;
+            detailHTML += `<div class="detail-row"><div class="label">Catatan</div><div class="value">: ${item.note || '-'}</div></div>`;
+            const waktuRuangan = (item.start && item.end) ? `${item.start} - ${item.end}` : (item.waktu || '-');
+            barisWaktu = `<div class="detail-row"><div class="label">Waktu</div><div class="value" style="color:#e91e63;">: ${waktuRuangan}</div></div>`;
+          }
+
+          return `
+            <div class="booking-item">
+                <span class="type-badge ${badgeClass}">${labelTipe}</span>
+                <strong>${item.title || 'Tanpa Judul'}</strong>
+                ${detailHTML}
+                ${barisWaktu}
+                <div class="detail-row"><div class="label">Status</div><div class="value">: ${s.toUpperCase()}</div></div>
+            </div>`;
+        }).join('');
+
+        // CEK APAKAH ADA ITEM YANG AKTIF (APPROVED)
+        const hasApproved = window.currentItemsToFinish.length > 0;
+
+        // UPDATE FOOTER: TUTUP DAN KONFIRMASI (BERSEBELAHAN)
+        const footer = document.getElementById('modalFooter');
+        footer.innerHTML = `
+          <div style="display:flex; gap:10px; margin-top:15px;">
+            <button style="flex:1; padding: 12px; border-radius: 12px; border: none; background: #f0f0f0; font-weight: 700; cursor:pointer;" onclick="closePopup()">Tutup</button>
+            ${hasApproved ? `<button style="flex:1; padding: 12px; border-radius: 12px; border: none; background: #00eb9f; color: white; font-weight: 700; cursor:pointer;" onclick="prosesSelesaiMassal()">Konfirmasi Selesai</button>` : ''}
+          </div>
+        `;
+
+        infoModal.classList.add('visible');
+      }
+
+      // FUNGSI LOGIKA KONFIRMASI SELESAI
+      window.prosesSelesaiMassal = () => {
+        if (!confirm("Konfirmasi semua agenda aktif di tanggal ini telah selesai?")) return;
+        
+        const updates = {};
+        window.currentItemsToFinish.forEach(item => {
+          updates[`pengajuan/${item.type}/${item.key}/status`] = 'Sudah dikembalikan';
+        });
+
+        db.ref().update(updates).then(() => {
+          closePopup();
+        }).catch(err => alert("Gagal: " + err.message));
+      };
+
+      window.closePopup = () => infoModal.classList.remove('visible');
+      document.getElementById('prev').onclick = () => { current.setMonth(current.getMonth() - 1); render(current); };
+      document.getElementById('next').onclick = () => { current.setMonth(current.getMonth() + 1); render(current); };
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Notifikasi BAA - SIMARSIP</title>
+  <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { 
+      margin: 0; padding: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: #f4f7fb; 
+      max-width: 480px; margin-left: auto; margin-right: auto;
+    }
+    
+    /* Header Gradient sesuai standar BAA */
+    .app-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px 16px; color: white;
+      display: flex; align-items: center; justify-content: flex-start;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      height: 60px;
+    }
+    .app-header-title { font-weight: 700; font-size: 18px; margin: 0; }
+
+    .page-content { padding: 16px; padding-bottom: 150px; }
+    
+    .notif-container { display: flex; flex-direction: column; gap: 12px; }
+    .notif-category { margin-bottom: 16px; }
+    .notif-category-title {
+      font-size: 13px; font-weight: 700; color: #667eea;
+      text-transform: uppercase; padding: 0 4px; margin-bottom: 8px; letter-spacing: 0.5px;
+    }
+
+    .notif-item {
+      background: white; border-radius: 12px; padding: 12px; display: flex;
+      gap: 12px; border-left: 4px solid #667eea; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      cursor: pointer; transition: all 0.2s ease; margin-bottom: 10px;
+    }
+    .notif-item.unread { background: #f8f9ff; }
+    .notif-item.approved { border-left-color: #00eb9f; }
+    .notif-item.warning { border-left-color: #ff9800; }
+    .notif-item.error { border-left-color: #ff4b5c; }
+
+    .notif-icon {
+      flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 20px; color: white;
+    }
+    .notif-icon.approved { background: #00eb9f; }
+    .notif-icon.warning { background: #ff9800; }
+    .notif-icon.error { background: #ff4b5c; }
+    .notif-icon.completed { background: #007aff; }
+
+    .notif-content { flex: 1; }
+    .notif-title { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 2px; }
+    .notif-message { font-size: 13px; color: #666; line-height: 1.4; margin-bottom: 4px; }
+    .notif-time { font-size: 11px; color: #999; }
+    .notif-badge { flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%; background: #667eea; margin-top: 4px; }
+
+    /* Action Buttons */
+    .actions {
+      position: fixed; bottom: 75px; left: 0; right: 0; background: white;
+      border-top: 1px solid #eee; padding: 12px; display: flex; gap: 8px;
+      max-width: 480px; margin: 0 auto; z-index: 50;
+    }
+    .btn {
+      flex: 1; padding: 12px; border-radius: 10px; border: none;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .btn-secondary { background: #f0f0f0; color: #444; }
+    .btn-primary { background: #667eea; color: white; }
+
+    /* TOOLBAR HORIZONTAL STANDAR SIMARSIP */
+    .custom-toolbar {
+        position: fixed; bottom: 0; left: 0; right: 0; height: 65px;
+        background: white; display: flex; flex-direction: row; 
+        justify-content: space-around; align-items: center; 
+        border-top: 1px solid #eee; z-index: 1000;
+    }
+    .tab-link { 
+        display: flex; flex-direction: column; align-items: center; 
+        justify-content: center; text-decoration: none; color: #999; 
+        flex: 1; height: 100%;
+    }
+    .tab-link.active { color: #007aff; }
+    .tab-link i { font-size: 24px; margin-bottom: 2px; }
+    .tab-link span { font-size: 11px; font-weight: 500; }
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="app-header-title">Notifikasi</div>
+  </header>
+
+  <main class="page-content" id="notifi-container">
+    </main>
+
+  <div class="actions">
+    <button class="btn btn-secondary" id="mark-all">Tandai Semua</button>
+    <button class="btn btn-primary" onclick="window.location.href='index_baa.html'">Tutup</button>
+  </div>
+
+  <nav class="custom-toolbar">
+    <a href="index_baa.html" class="tab-link">
+      <i class="material-icons">home</i>
+      <span>Beranda</span>
+    </a>
+    <a href="calender_baa.html" class="tab-link">
+      <i class="material-icons">calendar_today</i>
+      <span>Kalender</span>
+    </a>
+    <a href="laporan_baa.html" class="tab-link">
+      <i class="material-icons">assignment</i>
+      <span>Laporan</span>
+    </a>
+    <a href="notifikasi_baa.html" class="tab-link active">
+      <i class="material-icons">notifications</i>
+      <span>Notifikasi</span>
+    </a>
+  </nav>
+
+  <script>
+    var db;
+    var firebaseLoaded = false;
+
+    function loadFirebase(){
+      var script1 = document.createElement('script');
+      script1.src = 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js';
+      script1.onload = function(){
+        var script2 = document.createElement('script');
+        script2.src = 'https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js';
+        script2.onload = function(){
+          const firebaseConfig = {
+            apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+            authDomain: "simarsip-apk.firebaseapp.com",
+            databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "simarsip-apk"
+          };
+          if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+          db = firebase.database();
+          firebaseLoaded = true;
+          initNotifications();
+        };
+        document.head.appendChild(script2);
+      };
+      document.head.appendChild(script1);
+    }
+    loadFirebase();
+
+    (function(){
+      var container = document.getElementById('notifi-container');
+      var notifications = [];
+      var readStatuses = JSON.parse(localStorage.getItem('baa_notif_read') || '{}');
+
+      const sharedDummyData = [
+          { id: 'd1', type: 'ruangan', title: 'Rapat BEM', status: 'pending', createdAt: new Date().toISOString() },
+          { id: 'd2', type: 'peralatan', title: 'Peminjaman Proyektor', status: 'pending', createdAt: new Date().toISOString() }
+      ];
+
+  // Use centralized campus helpers
+  const loggedUser = getLoggedUser();
+  const baaCampus = getUserCampus(loggedUser);
+
+      window.initNotifications = function(){
+        if(firebaseLoaded && db){
+          db.ref('pengajuan').on('value', function(snap){
+            notifications = [];
+            // process dummy data but filter later when merging
+            sharedDummyData.forEach(item => processItem(item, item.id));
+            const data = snap.val() || {};
+            ['ruangan', 'peralatan', 'dispensasi'].forEach(cat => {
+              if(data[cat]) Object.keys(data[cat]).forEach(key => {
+                const item = data[cat][key];
+                // Use centralized matching helper (campus-first)
+                if (typeof belongsToUserCampusOrOrg === 'function') {
+                  if (!belongsToUserCampusOrOrg(item, baaCampus, getUserOrg(loggedUser))) return; // skip other campuses
+                } else {
+                  const itemCampus = normalizeCampus(item.campus || item.kampus || null);
+                  if (baaCampus && itemCampus && itemCampus !== baaCampus) return; // skip other campuses
+                }
+                processItem(item, `fb-${key}`, cat);
+              });
+            });
+            render();
+          });
+        }
+      };
+
+      function processItem(item, id, cat) {
+        let nType = 'warning'; 
+        if(item.status === 'approved') nType = 'approved';
+        if(item.status === 'rejected') nType = 'error';
+
+        notifications.push({
+          id: id,
+          type: nType,
+          title: item.status === 'pending' ? 'Pengajuan Baru' : 'Status Diperbarui',
+          message: `Pengajuan "${item.title || item.namaKegiatan || 'Surat'}" memerlukan perhatian Anda.`,
+          time: new Date(item.createdAt || item.date).toLocaleString('id-ID'),
+          rawDate: item.createdAt || item.date,
+          unread: !readStatuses[id]
+        });
+      }
+
+      function render(){
+        notifications.sort((a,b) => new Date(b.rawDate) - new Date(a.rawDate));
+        let html = '<div class="notif-container">';
+        
+        const unread = notifications.filter(n => n.unread);
+        const read = notifications.filter(n => !n.unread);
+
+        if(unread.length > 0){
+          html += '<div class="notif-category"><div class="notif-category-title">Baru</div>';
+          unread.forEach(n => html += createHtml(n));
+          html += '</div>';
+        }
+        if(read.length > 0){
+          html += '<div class="notif-category"><div class="notif-category-title">Sudah Dibaca</div>';
+          read.forEach(n => html += createHtml(n));
+          html += '</div>';
+        }
+        container.innerHTML = html + '</div>';
+      }
+
+      function createHtml(n){
+        let icon = n.type === 'approved' ? 'check' : (n.type === 'error' ? 'error_outline' : 'priority_high');
+        return `
+          <div class="notif-item ${n.type} ${n.unread ? 'unread' : ''}" onclick="markAsRead('${n.id}')">
+            <div class="notif-icon ${n.type}"><i class="material-icons">${icon}</i></div>
+            <div class="notif-content">
+              <div class="notif-title">${n.title}</div>
+              <div class="notif-message">${n.message}</div>
+              <div class="notif-time">${n.time}</div>
+            </div>
+            ${n.unread ? '<div class="notif-badge"></div>' : ''}
+          </div>`;
+      }
+
+      window.markAsRead = function(id){
+        readStatuses[id] = true;
+        localStorage.setItem('baa_notif_read', JSON.stringify(readStatuses));
+        render(); // Re-render instead of reload for better UX
+      };
+
+      document.getElementById('mark-all').onclick = function(){
+        notifications.forEach(n => readStatuses[n.id] = true);
+        localStorage.setItem('baa_notif_read', JSON.stringify(readStatuses));
+        render();
+      };
+    })();
+  </script>
+</body>
+</html>

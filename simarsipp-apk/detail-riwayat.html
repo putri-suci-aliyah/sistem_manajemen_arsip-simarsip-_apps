@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Detail Riwayat Surat</title>
+    <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            background: #f4f7fb;
+            font-family: -apple-system, sans-serif;
+        }
+        .page-content {
+            padding-bottom: 30px;
+        }
+        
+        /* STYLING KOP SURAT UTAMA (Eksklusif Times New Roman Tanpa Ikon) */
+        .kop-surat-card {
+            background: white;
+            margin: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 30px 24px;
+            font-family: 'Times New Roman', Times, serif;
+            color: #000;
+            line-height: 1.5;
+        }
+        .kop-header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5px;
+        }
+        .kop-text-cell {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .kop-yayasan {
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .kop-institut {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0d47a1;
+            margin: 3px 0;
+            letter-spacing: 0.5px;
+        }
+        .kop-alamat {
+            font-size: 10px;
+            font-style: italic;
+        }
+        .kop-line {
+            border: none;
+            border-top: 1px solid #000;
+            border-bottom: 3px double #000;
+            height: 4px;
+            margin-top: 8px;
+            margin-bottom: 20px;
+        }
+        .kop-tanggal-kanan {
+            text-align: right;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+        .kop-meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            font-size: 13px;
+        }
+        .kop-meta-table td {
+            padding: 2px 0;
+            vertical-align: top;
+        }
+        .kop-meta-label {
+            width: 70px;
+        }
+        .kop-meta-colon {
+            width: 15px;
+        }
+        .kop-tujuan {
+            margin-bottom: 25px;
+            font-size: 13px;
+        }
+        .kop-tujuan p {
+            margin: 2px 0;
+        }
+        .kop-isi-surat {
+            text-align: justify;
+            font-size: 13px;
+            text-indent: 30px;
+            margin-bottom: 15px;
+        }
+        .kop-detail-kegiatan {
+            margin-left: 50px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+        .kop-detail-kegiatan td {
+            padding: 3px 0;
+        }
+        .kop-penutup {
+            text-align: justify;
+            font-size: 13px;
+            text-indent: 30px;
+            margin-bottom: 35px;
+        }
+        
+        /* TATA LETAK AREA TANDA TANGAN */
+        .kop-ttd-wrapper {
+            width: 100%;
+            margin-top: 30px;
+            font-size: 13px;
+        }
+        .kop-ttd-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+        .kop-ttd-box {
+            width: 40%;
+            text-align: center;
+        }
+        .kop-ttd-space {
+            height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .kop-ttd-space img {
+            max-height: 60px;
+            max-width: 130px;
+            object-fit: contain;
+        }
+        .kop-ttd-nama {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        .kop-ttd-bawah {
+            width: 100%;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        /* AREA BUTTON DOWNLOAD */
+        .file-section {
+            padding: 16px;
+            background: #fff;
+            margin: 12px 16px 24px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .file-section .item-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #666;
+        }
+        .file-section .file-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .file-section .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+            background: #0a73ff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .rejection-box {
+            background: #fff5f5;
+            border-left: 4px solid #f44336;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px;
+        }
+        .rejection-title {
+            color: #f44336;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .rejection-reason {
+            color: #721c24;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="view view-main">
+        <header class="app-header" style="background: linear-gradient(135deg, #007aff 0%, #005bb5 100%); padding:16px; display:flex; align-items:center;">
+            <div style="display:flex; align-items:center; gap:12px">
+                <a id="back-link" style="color:#fff; text-decoration:none; display:flex; align-items:center; cursor:pointer;">
+                    <i class="material-icons">arrow_back</i>
+                </a>
+                <div style="font-weight:700; color:#fff; font-size:18px;">Detail Riwayat Surat</div>
+            </div>
+        </header>
+
+        <main class="page-content">
+            <!-- Konten diproduksi dinamis via JavaScript -->
+        </main>
+    </div>
+
+    <!-- SDK Firebase & JS-PDF Pendukung -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+            authDomain: "simarsip-apk.firebaseapp.com",
+            databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "simarsip-apk"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const params = new URLSearchParams(window.location.search);
+        const type = params.get('type');
+        const id = params.get('id');
+        let currentDetailData = null;
+        let currentDetailTypeParam = null;
+
+        const backLink = document.getElementById('back-link');
+        const from = params.get('from');
+        if (from === 'hmif') {
+            backLink.href = 'riwayat.html';
+        } else {
+            backLink.href = 'index.html';
+        }
+
+        const dummyData = [
+            { id: 'dummy-1', type: 'ruangan', title: 'Rapat BEM', room: 'A.302', date: '2026-06-09', status: 'approved', createdAt: '2026-06-09T10:00:00Z', name: 'asep', organisasi: 'Institut Digital Ekonomi LPKIA', ormawa: 'asep', kampus: 'IDE LPKIA - Jl. Soekarno-Hatta No.456', email: 'hmif.ide@lpkia.ac.id', start: '08:00', end: '12:00' }
+        ];
+
+        function loadDetail() {
+            if (!id) {
+                document.querySelector('.page-content').innerHTML = "<p style='padding:20px;text-align:center;'>Parameter tidak lengkap.</p>";
+                return;
+            }
+            let lowerType = type ? type.toLowerCase() : 'ruangan';
+            const dummy = dummyData.find(d => d.id === id);
+            if (dummy) {
+                renderDetail(dummy, dummy.type);
+                return;
+            }
+
+            db.ref(`pengajuan/${lowerType}/${id}`).on('value', snap => {
+                const data = snap.val();
+                if (data) {
+                    renderDetail(data, lowerType);
+                } else {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const fallback = {
+                        title: urlParams.get('title') || 'Permohonan Izin Peminjaman Ruangan',
+                        status: urlParams.get('status') || 'pending',
+                        date: urlParams.get('date') || '2026-06-09',
+                        createdAt: urlParams.get('createdAt') || new Date().toISOString(),
+                        name: urlParams.get('name') || 'asep',
+                        organisasi: urlParams.get('organisasi') || 'Institut Digital Ekonomi LPKIA',
+                        ormawa: urlParams.get('ormawa') || 'asep',
+                        kampus: urlParams.get('kampus') || 'IDE LPKIA - Jl. Soekarno-Hatta No.456',
+                        email: urlParams.get('email') || 'hmif.ide@lpkia.ac.id',
+                        room: urlParams.get('room') || '..........',
+                        start: urlParams.get('start') || '00:00',
+                        end: urlParams.get('end') || '00:00'
+                    };
+                    renderDetail(fallback, lowerType);
+                }
+            });
+        }
+
+        function renderDetail(data, typeParam) {
+            currentDetailData = data;
+            currentDetailTypeParam = typeParam;
+
+            const kopSuratHtml = generateKopSuratHTML(data, typeParam);
+
+            let rejectionSection = '';
+            if (data.status?.toLowerCase() === 'rejected' && (data.rejection_reason || data.rejectionReason)) {
+                rejectionSection = `
+                    <div class="rejection-box">
+                        <div class="rejection-title"><i class="material-icons">info</i>Alasan Penolakan</div>
+                        <div class="rejection-reason">${data.rejection_reason || data.rejectionReason}</div>
+                    </div>
+                `;
+            }
+
+            const fileSection = `
+                <div class="file-section">
+                    <div class="item-label">Cetak / Ekspor Dokumen</div>
+                    <div class="file-actions">
+                        <button class="btn" onclick="generateKopSuratPDF()">Unduh Format PDF Resmi</button>
+                    </div>
+                </div>
+            `;
+
+            document.querySelector('.page-content').innerHTML = `${kopSuratHtml}${rejectionSection}${fileSection}`;
+        }
+
+        function generateKopSuratHTML(data, typeParam) {
+            const tanggalSurat = formatDateIndo(data.createdAt || data.date);
+            const tanggalAcara = formatDateIndo(data.date);
+            
+            let nomorSurat = '___/LPKIA/BKM/2026';
+            let halLabel = 'Permohonan Izin Peminjaman Ruangan';
+            let tujuanLabel = 'Bagian Sarana dan Prasarana';
+            let tujuanDetail = 'IDE LPKIA';
+
+            if (typeParam === 'peralatan') {
+                nomorSurat = '___/LPKIA/ALAT/2026';
+                halLabel = 'Permohonan Peminjaman Peralatan/Barang';
+            } else if (typeParam === 'dispensasi') {
+                nomorSurat = '___/LPKIA/DISP/2026';
+                halLabel = 'Permohonan Dispensasi Mahasiswa';
+                tujuanLabel = `Bapak/Ibu Dosen Pengampu`;
+                tujuanDetail = `Mata Kuliah ${data.course || '..........'}`;
+            }
+
+            const ttdKetuaUrl = data.ttd?.ormawa || data.ttd_ormawa || data.ormawa_signature || null;
+            const ttdSekretarisUrl = data.ttd?.sekretaris || data.ttd_sekretaris || data.secretary_signature || null;
+            const ttdBaaUrl = data.baa_signature_url || data.baa_signature || data.ttd?.baa || null;
+
+            const imgKetuaHtml = ttdKetuaUrl ? `<img src="${ttdKetuaUrl}" alt="TTD">` : '........................';
+            const imgSekretarisHtml = ttdSekretarisUrl ? `<img src="${ttdSekretarisUrl}" alt="TTD">` : '........................';
+            const imgBaaHtml = ttdBaaUrl ? `<img src="${ttdBaaUrl}" alt="TTD BAA">` : '';
+
+            const namaKetuaOrmawa = data.nama_ketua || data.ketua || data.ormawa || '...................';
+            const namaSekretaris = data.nama_sekretaris || data.sekretaris || '...................';
+
+            let detailKontenHtml = '';
+            if (typeParam === 'ruangan') {
+                detailKontenHtml = `
+                    <table class="kop-detail-kegiatan">
+                        <tr><td style="width:100px;"><b>Ruangan</b></td><td style="width:15px;">:</td><td>${data.room || '..........'}</td></tr>
+                        <tr><td><b>Tanggal</b></td><td>:</td><td>${tanggalAcara}</td></tr>
+                        <tr><td><b>Waktu</b></td><td>:</td><td>${data.start || '00:00'} - ${data.end || '00:00'} WIB</td></tr>
+                    </table>
+                `;
+            } else if (typeParam === 'peralatan') {
+                detailKontenHtml = `
+                    <table class="kop-detail-kegiatan">
+                        <tr><td style="width:100px;"><b>Nama Barang</b></td><td style="width:15px;">:</td><td>${data.equipmentName || '..........'}</td></tr>
+                        <tr><td><b>Jumlah</b></td><td>:</td><td>${data.quantity || '1'} unit</td></tr>
+                        <tr><td><b>Tanggal Pakai</b></td><td>:</td><td>${tanggalAcara}</td></tr>
+                    </table>
+                `;
+            } else if (typeParam === 'dispensasi') {
+                detailKontenHtml = `
+                    <div style="margin-left:50px; margin-bottom:20px; font-size:13px;">
+                        <p><b>Nama Mahasiswa:</b> ${data.name || '..........'}</p>
+                        <p><b>NIM:</b> ${data.nim || '..........'}</p>
+                        <p><b>Mata Kuliah:</b> ${data.course || '..........'}</p>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="kop-surat-card">
+                    <table class="kop-header-table">
+                        <tr>
+                            <td class="kop-text-cell">
+                                <div class="kop-yayasan">YAYASAN LPKIA</div>
+                                <div class="kop-institut">INSTITUT DIGITAL EKONOMI LPKIA</div>
+                                <div class="kop-alamat">Jl. Soekarno-Hatta No. 456, Batununggal, Bandung, Jawa Barat 40266 | Telp: (022) 7564282</div>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <div class="kop-line"></div>
+                    
+                    <div class="kop-tanggal-kanan">Bandung, ${tanggalSurat}</div>
+                    
+                    <table class="kop-meta-table">
+                        <tr>
+                            <td class="kop-meta-label">Nomor</td>
+                            <td class="kop-meta-colon">:</td>
+                            <td>${nomorSurat}</td>
+                        </tr>
+                        <tr>
+                            <td class="kop-meta-label">Hal</td>
+                            <td class="kop-meta-colon">:</td>
+                            <td><b>${halLabel}</b></td>
+                        </tr>
+                    </table>
+                    
+                    <div class="kop-tujuan">
+                        <p>Kepada Yth.</p>
+                        <p><b>${tujuanLabel}</b></p>
+                        <p>${tujuanDetail}</p>
+                    </div>
+                    
+                    <div class="kop-isi-surat">
+                        With honor, sehubungan dengan akan dilaksanakannya kegiatan <b>${data.title || '..........'}</b>, kami memohon izin untuk mengajukan permohonan sesuai dengan rincian sebagai berikut:
+                    </div>
+                    
+                    ${detailKontenHtml}
+                    
+                    <div class="kop-penutup">
+                        Demikian permohonan ini kami sampaikan. Atas perhatian, dukungan, dan izin yang Bapak/Ibu berikan, kami ucapkan terima kasih.
+                    </div>
+                    
+                    <div class="kop-ttd-wrapper">
+                        <div class="kop-ttd-row">
+                            <div class="kop-ttd-box">
+                                <p>Ketua Ormawa,</p>
+                                <div class="kop-ttd-space">${imgKetuaHtml}</div>
+                                <div class="kop-ttd-nama">${namaKetuaOrmawa}</div>
+                            </div>
+                            <div class="kop-ttd-box">
+                                <p>Sekretaris,</p>
+                                <div class="kop-ttd-space">${imgSekretarisHtml}</div>
+                                <div class="kop-ttd-nama">${namaSekretaris}</div>
+                            </div>
+                        </div>
+                        
+                        ${ttdBaaUrl || data.status?.toLowerCase() === 'approved' || data.status?.toLowerCase() === 'disetujui' ? `
+                        <div class="kop-ttd-bawah">
+                            <p>Menyetujui,</p>
+                            <p><b>BAA</b></p>
+                            <div class="kop-ttd-space" style="height:50px;">${imgBaaHtml}</div>
+                            <p>___________________</p>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateKopSuratPDF() {
+            const data = currentDetailData;
+            const typeParam = currentDetailTypeParam;
+            if (!data) return;
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+            
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const leftMargin = 50;
+            const rightMargin = pageWidth - 50;
+            let currentY = 50;
+
+            const namaKetuaOrmawa = data.nama_ketua || data.ketua || data.ormawa || '...................';
+            const namaSekretaris = data.nama_sekretaris || data.sekretaris || '...................';
+
+            // --- KOP SURAT ---
+            doc.setFont('times', 'bold');
+            doc.setFontSize(13);
+            doc.text('YAYASAN LPKIA', pageWidth / 2, currentY, { align: 'center' });
+            
+            currentY += 18;
+            doc.setFontSize(16);
+            doc.setTextColor(13, 71, 161);
+            doc.text('INSTITUT DIGITAL EKONOMI LPKIA', pageWidth / 2, currentY, { align: 'center' });
+            
+            currentY += 15;
+            doc.setFont('times', 'italic');
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+            doc.text('Jl. Soekarno-Hatta No. 456, Batununggal, Bandung, Jawa Barat 40266 | Telp: (022) 7564282', pageWidth / 2, currentY, { align: 'center' });
+            
+            currentY += 10;
+            doc.setLineWidth(1);
+            doc.line(leftMargin, currentY, rightMargin, currentY);
+            currentY += 3;
+            doc.setLineWidth(2);
+            doc.line(leftMargin, currentY, rightMargin, currentY);
+            
+            // --- TANGGAL & SURAT META ---
+            currentY += 30;
+            doc.setFont('times', 'normal');
+            doc.setFontSize(11);
+            doc.text(`Bandung, ${formatDateIndo(data.createdAt || data.date)}`, rightMargin, currentY, { align: 'right' });
+            
+            currentY += 20;
+            let nomorSurat = typeParam === 'ruangan' ? '___/LPKIA/BKM/2026' : typeParam === 'peralatan' ? '___/LPKIA/ALAT/2026' : '___/LPKIA/DISP/2026';
+            let halLabel = typeParam === 'ruangan' ? 'Permohonan Izin Peminjaman Ruangan' : typeParam === 'peralatan' ? 'Permohonan Peminjaman Peralatan/Barang' : 'Permohonan Dispensasi Mahasiswa';
+            
+            doc.text('Nomor', leftMargin, currentY);
+            doc.text(`: ${nomorSurat}`, leftMargin + 60, currentY);
+            currentY += 15;
+            doc.text('Hal', leftMargin, currentY);
+            doc.setFont('times', 'bold');
+            doc.text(`: ${halLabel}`, leftMargin + 60, currentY);
+            
+            // --- TUJUAN ---
+            currentY += 30;
+            doc.setFont('times', 'normal');
+            doc.text('Kepada Yth.', leftMargin, currentY);
+            currentY += 15;
+            doc.setFont('times', 'bold');
+            let tujuanLabel = typeParam === 'dispensasi' ? 'Bapak/Ibu Dosen Pengampu' : 'Bagian Sarana dan Prasarana';
+            doc.text(tujuanLabel, leftMargin, currentY);
+            currentY += 15;
+            doc.setFont('times', 'normal');
+            let tujuanDetail = typeParam === 'dispensasi' ? `Mata Kuliah ${data.course || '..........'}` : 'IDE LPKIA';
+            doc.text(tujuanDetail, leftMargin, currentY);
+            
+            // --- ISI SURAT ---
+            currentY += 30;
+            const textIsi = `Dengan hormat, sehubungan dengan akan dilaksanakannya kegiatan ${data.title || '..........'}, kami memohon izin untuk mengajukan permohonan sesuai dengan rincian sebagai berikut:`;
+            const splitIsi = doc.splitTextToSize(textIsi, rightMargin - leftMargin - 30);
+            doc.text(splitIsi, leftMargin + 30, currentY);
+            currentY += (splitIsi.length * 16) + 15;
+            
+            // --- DETAIL VARIABEL KONTEN ---
+            doc.setFont('times', 'bold');
+            if (typeParam === 'ruangan') {
+                doc.text('Ruangan', leftMargin + 50, currentY); doc.setFont('times', 'normal'); doc.text(`: ${data.room || '..........'}`, leftMargin + 150, currentY); currentY += 18;
+                doc.setFont('times', 'bold'); doc.text('Tanggal', leftMargin + 50, currentY); doc.setFont('times', 'normal'); doc.text(`: ${formatDateIndo(data.date)}`, leftMargin + 150, currentY); currentY += 18;
+                doc.setFont('times', 'bold'); doc.text('Waktu', leftMargin + 50, currentY); doc.setFont('times', 'normal'); doc.text(`: ${data.start || '00:00'} - ${data.end || '00:00'} WIB`, leftMargin + 150, currentY); currentY += 18;
+            } else if (typeParam === 'peralatan') {
+                doc.text('Nama Barang', leftMargin + 50, currentY); doc.setFont('times', 'normal'); doc.text(`: ${data.equipmentName || '..........'}`, leftMargin + 150, currentY); currentY += 18;
+                doc.setFont('times', 'bold'); doc.text('Jumlah', leftMargin + 50, currentY); doc.setFont('times', 'normal'); doc.text(`: ${data.quantity || '1'} unit`, leftMargin + 150, currentY); currentY += 18;
+                doc.setFont('times', 'bold'); doc.text('Tanggal Pakai', leftMargin + 50, currentY); doc.setFont('times', 'normal'); doc.text(`: ${formatDateIndo(data.date)}`, leftMargin + 150, currentY); currentY += 18;
+            } else {
+                doc.text('Nama Mahasiswa', leftMargin + 50, currentY); doc.setFont('times', 'normal'); doc.text(`: ${data.name || '..........'}`, leftMargin + 150, currentY); currentY += 18;
+                doc.setFont('times', 'bold'); doc.text('NIM', leftMargin + 50, currentY); doc.setFont('times', 'normal'); doc.text(`: ${data.nim || '..........'}`, leftMargin + 150, currentY); currentY += 18;
+            }
+            
+            // --- PENUTUP ---
+            currentY += 15;
+            doc.setFont('times', 'normal');
+            const textPenutup = 'Demikian permohonan ini kami sampaikan. Atas perhatian, dukungan, dan izin yang Bapak/Ibu berikan, kami ucapkan terima kasih.';
+            const splitPenutup = doc.splitTextToSize(textPenutup, rightMargin - leftMargin - 30);
+            doc.text(splitPenutup, leftMargin + 30, currentY);
+            
+            // --- AREA TANDA TANGAN (ORMAWA & SEKRETARIS) ---
+            currentY += (splitPenutup.length * 16) + 30;
+            doc.text('Ketua Ormawa,', leftMargin + 60, currentY, { align: 'center' });
+            doc.text('Sekretaris,', rightMargin - 60, currentY, { align: 'center' });
+
+            const ttdKetua = data.ttd?.ormawa || data.ttd_ormawa || data.ormawa_signature || null;
+            const ttdSekretaris = data.ttd?.sekretaris || data.ttd_sekretaris || data.secretary_signature || null;
+
+            if (ttdKetua && ttdKetua.startsWith('data:image')) {
+                doc.addImage(ttdKetua, 'PNG', leftMargin + 25, currentY + 10, 70, 40);
+            }
+            if (ttdSekretaris && ttdSekretaris.startsWith('data:image')) {
+                doc.addImage(ttdSekretaris, 'PNG', rightMargin - 95, currentY + 10, 70, 40);
+            }
+            
+            currentY += 65;
+            doc.setFont('times', 'bold');
+            doc.text(`${namaKetuaOrmawa}`, leftMargin + 60, currentY, { align: 'center' });
+            doc.text(`${namaSekretaris}`, rightMargin - 60, currentY, { align: 'center' });
+            
+            // --- AREA TANDA TANGAN MENYETUJUI (BAA) ---
+            const normalizedStatus = String(data.status || '').trim().toLowerCase();
+            const ttdBaa = data.baa_signature_url || data.baa_signature || data.ttd?.baa || null;
+
+            if (normalizedStatus === 'approved' || normalizedStatus === 'disetujui' || ttdBaa) {
+                currentY += 35; 
+                doc.setFont('times', 'normal');
+                doc.text('Menyetujui,', pageWidth / 2, currentY, { align: 'center' });
+                currentY += 15;
+                doc.setFont('times', 'bold');
+                doc.text('BAA', pageWidth / 2, currentY, { align: 'center' });
+                
+                // EKSPOR TTD DIGITAL BAA KE DALAM PDF
+                if (ttdBaa && ttdBaa.startsWith('data:image')) {
+                    doc.addImage(ttdBaa, 'PNG', (pageWidth / 2) - 40, currentY + 5, 80, 45);
+                }
+
+                currentY += 60; 
+                doc.setFont('times', 'bold');
+                doc.text('___________________', pageWidth / 2, currentY, { align: 'center' });
+            }
+
+            doc.save(`Surat_Sah_${typeParam || 'Dokumen'}_${id}.pdf`);
+        }
+
+        function formatDateIndo(dateStr) {
+            if (!dateStr) return '9 Juni 2026';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        loadDetail();
+    </script>
+</body>
+</html>

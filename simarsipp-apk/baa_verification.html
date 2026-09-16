@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Pengajuan Surat - BAA</title>
+    <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background: #f1f4f9;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #0a73ff, #1e73ff);
+            color: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .page-content {
+            padding: 16px;
+            padding-bottom: 100px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            border: none;
+            background: #e5e5e5;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #0a73ff;
+            color: white;
+        }
+
+        .request-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 5px solid #ffc107;
+        }
+
+        .request-card.approved {
+            border-left-color: #4caf50;
+        }
+
+        .request-card.rejected {
+            border-left-color: #f44336;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-approved { background: #d4edda; color: #155724; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+
+        .card-info {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+
+        .btn-download {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-download:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-approve {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: #45a049;
+        }
+
+        .btn-reject {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background: #da190b;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-title {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 16px;
+            padding-right: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #333;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .file-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-input-wrapper {
+            flex: 1;
+        }
+
+        input[type="file"] {
+            width: 100%;
+        }
+
+        .file-name {
+            font-size: 12px;
+            color: #666;
+            margin-top: 6px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-modal {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-modal-cancel {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-modal-confirm {
+            background: #0a73ff;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
+</head>
+<body>
+    <div class="page-header">
+        <i class="material-icons" onclick="history.back()" style="cursor: pointer;">arrow_back</i>
+        <span>Verifikasi Pengajuan Surat</span>
+    </div>
+
+    <div class="page-content">
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="filterStatus('pending')">📋 Menunggu</button>
+            <button class="tab-btn" onclick="filterStatus('approved')">✓ Disetujui</button>
+            <button class="tab-btn" onclick="filterStatus('rejected')">✗ Ditolak</button>
+        </div>
+
+        <div id="list-container">
+            <div class="loading">⏳ Memuat data...</div>
+        </div>
+    </div>
+
+    <!-- Approve Modal -->
+    <div id="approveModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeApproveModal()">&times;</button>
+            <div class="modal-title">Upload PDF Signed & Approve</div>
+            
+            <div class="form-group">
+                <div class="form-label">📄 File PDF (Sudah ditandatangani)</div>
+                <div class="file-input-group">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="approveFile" accept=".pdf" onchange="handleFileSelect(event)">
+                        <div class="file-name" id="approveFileName"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">✍️ Upload Tanda Tangan BAA (gambar)</div>
+                <div class="file-input-group">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="approveTtdImage" accept="image/*" onchange="handleImageSelect(event)">
+                        <div class="file-name" id="approveTtdImageName"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-modal btn-modal-cancel" onclick="closeApproveModal()">Batal</button>
+                <button class="btn-modal btn-modal-confirm" onclick="confirmApprove()">✓ Setujui & Upload</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div id="rejectModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeRejectModal()">&times;</button>
+            <div class="modal-title">Tolak Pengajuan</div>
+            
+            <div class="form-group">
+                <div class="form-label">📝 Alasan Penolakan</div>
+                <textarea id="rejectReason" class="form-textarea" placeholder="Jelaskan mengapa pengajuan ditolak..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">⏰ Tenggat Revisi (hari)</div>
+                <input type="number" id="revisionDays" class="form-input" value="7" min="1">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-modal btn-modal-cancel" onclick="closeRejectModal()">Batal</button>
+                <button class="btn-modal btn-modal-confirm btn-reject" onclick="confirmReject()" style="background: #f44336;">✗ Tolak</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let db, storage;
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+            authDomain: "simarsip-apk.firebaseapp.com",
+            databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "simarsip-apk",
+            storageBucket: "simarsip-apk.firebasestorage.app"
+        };
+
+        try {
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            storage = firebase.storage();
+        } catch (err) {
+            console.error('Firebase init error:', err);
+        }
+
+        let allRequests = [];
+        let currentFilter = 'pending';
+        let currentModal = null;
+        let currentRequestId = null;
+        let currentRequestType = null;
+        let selectedFile = null;
+        let selectedTtdDataUrl = null;
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file && file.type === 'application/pdf') {
+                selectedFile = file;
+                document.getElementById('approveFileName').textContent = `✓ ${file.name}`;
+            } else {
+                alert('Pilih file PDF yang valid');
+                selectedFile = null;
+                document.getElementById('approveFileName').textContent = '';
+            }
+        }
+
+        function handleImageSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                selectedTtdDataUrl = e.target.result;
+                document.getElementById('approveTtdImageName').textContent = '✓ ' + (file.name || 'image');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function filterStatus(status) {
+            currentFilter = status;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderRequests();
+        }
+
+        function openApproveModal(requestId, requestType) {
+            currentRequestId = requestId;
+            currentRequestType = requestType;
+            selectedFile = null;
+            document.getElementById('approveFile').value = '';
+            document.getElementById('approveFileName').textContent = '';
+            document.getElementById('approveModal').classList.add('active');
+        }
+
+        function closeApproveModal() {
+            document.getElementById('approveModal').classList.remove('active');
+        }
+
+        function openRejectModal(requestId, requestType) {
+            currentRequestId = requestId;
+            currentRequestType = requestType;
+            document.getElementById('rejectReason').value = '';
+            document.getElementById('revisionDays').value = '7';
+            document.getElementById('rejectModal').classList.add('active');
+        }
+
+        function closeRejectModal() {
+            document.getElementById('rejectModal').classList.remove('active');
+        }
+
+        async function confirmApprove() {
+            if (!selectedFile) {
+                alert('Pilih file PDF terlebih dahulu');
+                return;
+            }
+
+            const confirmBtn = event.target;
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = '⏳ Uploading...';
+
+            try {
+                // Upload file ke Firebase Storage
+                const timestamp = new Date().getTime();
+                const fileName = `pengajuan/${currentRequestType}/${currentRequestId}_final_${timestamp}.pdf`;
+                const storageRef = firebase.storage().ref().child(fileName);
+                
+                const snapshot = await storageRef.put(selectedFile);
+                const finalPdfUrl = await snapshot.ref.getDownloadURL();
+
+                // Update database
+                await db.ref(`pengajuan/${currentRequestType}/${currentRequestId}`).update({
+                    status: 'approved',
+                    final_pdf_url: finalPdfUrl,
+                    approvedAt: new Date().toISOString()
+                });
+
+                // Jika ada tanda tangan BAA yang diupload, simpan ke field ttd.baa
+                try {
+                    if (selectedTtdDataUrl) {
+                        const ttdPath = `pengajuan/${currentRequestType}/${currentRequestId}/ttd`;
+                        const ttdSnap = await db.ref(ttdPath).once('value');
+                        const currentTtd = ttdSnap.val() || {};
+                        currentTtd.baa = selectedTtdDataUrl;
+                        await db.ref(ttdPath).set(currentTtd);
+                    }
+                } catch (e) { console.warn('Could not save BAA ttd', e); }
+
+                // Create notification for the submitting user
+                try {
+                    const subSnap = await db.ref(`pengajuan/${currentRequestType}/${currentRequestId}`).once('value');
+                    const sub = subSnap.val() || {};
+                    const userId = sub.userId || sub.email || 'unknown';
+                    const notifId = `approved_${currentRequestId}_${Date.now()}`;
+                    await db.ref('notifications/users/' + userId + '/' + notifId).set({
+                        id: notifId,
+                        title: 'Pengajuan Disetujui oleh BAA',
+                        message: `Pengajuan Anda (${sub.title || currentRequestId}) telah disetujui oleh BAA.`,
+                        relatedRequest: currentRequestId,
+                        type: 'approval_baa',
+                        createdAt: new Date().toISOString(),
+                        read: false
+                    });
+                } catch (e) { console.warn('Could not create user notification', e); }
+
+                alert('✓ Pengajuan disetujui! File sudah terupload.');
+                closeApproveModal();
+                loadRequests();
+            } catch (err) {
+                alert('❌ Error: ' + err.message);
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = '✓ Setujui & Upload';
+            }
+        }
+
+        async function confirmReject() {
+            const reason = document.getElementById('rejectReason').value.trim();
+            if (!reason) {
+                alert('Masukkan alasan penolakan');
+                return;
+            }
+
+            const revisionDays = parseInt(document.getElementById('revisionDays').value) || 7;
+            const revisionDeadline = new Date();
+            revisionDeadline.setDate(revisionDeadline.getDate() + revisionDays);
+
+            const confirmBtn = event.target;
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = '⏳ Processing...';
+
+            try {
+                await db.ref(`pengajuan/${currentRequestType}/${currentRequestId}`).update({
+                    status: 'rejected',
+                    rejection_reason: reason,
+                    revision_deadline: revisionDeadline.toISOString(),
+                    revision_count: 0,
+                    rejectedAt: new Date().toISOString()
+                });
+
+                alert('✓ Pengajuan ditolak. Pengguna akan mendapat notifikasi untuk revisi.');
+                closeRejectModal();
+                loadRequests();
+            } catch (err) {
+                alert('❌ Error: ' + err.message);
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = '✗ Tolak';
+            }
+        }
+
+        function formatDate(isoString) {
+            if (!isoString) return '-';
+            const date = new Date(isoString);
+            return date.toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function loadRequests() {
+            const listContainer = document.getElementById('list-container');
+            listContainer.innerHTML = '<div class="loading">⏳ Memuat data...</div>';
+
+            if (!db) {
+                listContainer.innerHTML = '<div class="empty-state">Firebase tidak terhubung</div>';
+                return;
+            }
+
+            db.ref('pengajuan').once('value', snapshot => {
+                allRequests = [];
+                const data = snapshot.val();
+
+                if (data) {
+                    // Collect all submissions from all types
+                    ['dispensasi', 'peralatan', 'surat'].forEach(type => {
+                        if (data[type]) {
+                            Object.entries(data[type]).forEach(([id, submission]) => {
+                                if (submission.status !== 'pending') return; // Only load pending for approval
+                                allRequests.push({
+                                    id,
+                                    type,
+                                    ...submission
+                                });
+                            });
+                        }
+                    });
+                }
+
+                renderRequests();
+            }).catch(err => {
+                console.error('Error loading requests:', err);
+                listContainer.innerHTML = '<div class="empty-state">❌ Gagal memuat data</div>';
+            });
+        }
+
+        function renderRequests() {
+            const listContainer = document.getElementById('list-container');
+            const filtered = allRequests.filter(req => currentFilter === 'all' || req.status === currentFilter);
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = '<div class="empty-state">Tidak ada pengajuan untuk kategori ini</div>';
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(req => {
+                const statusClass = `status-${req.status}`;
+                const borderClass = req.status === 'approved' ? 'approved' : (req.status === 'rejected' ? 'rejected' : '');
+                
+                const statusText = {
+                    'pending': '⏳ Menunggu',
+                    'approved': '✓ Disetujui',
+                    'rejected': '✗ Ditolak'
+                }[req.status] || req.status;
+
+                html += `
+                    <div class="request-card ${borderClass}">
+                        <div class="card-header">
+                            <div class="card-title">${req.title || 'Pengajuan ' + req.type}</div>
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="card-info">
+                            📅 ${formatDate(req.createdAt)}<br>
+                            🏢 ${req.organisasi || '-'}<br>
+                            📍 ${req.kampus || '-'}
+                        </div>
+                        <div class="card-actions">
+                            ${req.draft_pdf_url ? `
+                                <button class="btn-action btn-download" onclick="downloadPDF('${req.draft_pdf_url}', 'draft')">
+                                    📥 Draft PDF
+                                </button>
+                            ` : ''}
+                            ${req.status === 'pending' ? `
+                                <button class="btn-action btn-approve" onclick="openApproveModal('${req.id}', '${req.type}')">
+                                    ✓ Setujui
+                                </button>
+                                <button class="btn-action btn-reject" onclick="openRejectModal('${req.id}', '${req.type}')">
+                                    ✗ Tolak
+                                </button>
+                            ` : ''}
+                            ${req.final_pdf_url && req.status === 'approved' ? `
+                                <button class="btn-action btn-download" onclick="downloadPDF('${req.final_pdf_url}', 'final')">
+                                    📥 Signed PDF
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            listContainer.innerHTML = html;
+        }
+
+        function downloadPDF(url, type) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pengajuan_${type}_${new Date().getTime()}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loggedUser = JSON.parse(localStorage.getItem('loggedUser'));
+            if (!loggedUser || loggedUser.role !== 'BAA') {
+                window.location.href = 'login.html';
+                return;
+            }
+            loadRequests();
+        });
+    </script>
+</body>
+</html>

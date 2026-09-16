@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <title>Manajemen User - SIMARSIP Admin</title>
+    <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            background: #f4f7fb;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .app-header {
+            background: linear-gradient(180deg, #2f8bff, #1e73ff);
+            color: #fff;
+            padding: 16px 16px 36px 16px;
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-title {
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .user-chip {
+            background: rgba(255,255,255,0.18);
+            padding: 8px 12px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .page-content { 
+            padding: 16px; 
+            padding-bottom: 100px;
+        }
+
+        .section { margin-bottom: 20px; }
+        .section-title { color: #1e73ff; font-weight: 700; margin-bottom: 12px; font-size: 14px; }
+
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .user-item {
+            background: white;
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .user-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #007aff, #0056d2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 11px;
+            transition: 0.2s;
+        }
+
+        .btn-edit {
+            background: #1e73ff;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #ff4b5c;
+            color: white;
+        }
+
+        /* Search */
+        .search-box {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-box input {
+            width: 100%;
+            border: none;
+            padding: 10px;
+            font-size: 14px;
+            outline: none;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .filter-btn {
+            padding: 8px 14px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .filter-btn.active {
+            background: #1e73ff;
+            color: white;
+            border-color: #1e73ff;
+        }
+
+        /* Role Badges */
+        .role-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-right: 6px;
+        }
+
+        .role-badge.organisasi {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .role-badge.baa {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .role-badge.admin {
+            background: #ffe0b2;
+            color: #e65100;
+        }
+
+        /* Toolbar */
+        .toolbar-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            z-index: 99;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .toolbar-inner {
+            display: flex;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .toolbar-link {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 6px;
+            text-decoration: none;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: 0.2s;
+            font-size: 12px;
+        }
+
+        .toolbar-link.active {
+            color: #1e73ff;
+            border-bottom-color: #1e73ff;
+        }
+
+        .toolbar-link i {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .toolbar-label {
+            font-size: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .add-btn {
+            position: fixed;
+            bottom: 80px;
+            right: 16px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #007aff, #0056d2);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            padding: 10px;
+            background: #007aff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 10px;
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Password field */
+        .password-wrapper {
+            position: relative;
+        }
+        .password-wrapper .form-input {
+            padding-right: 40px;
+        }
+        .toggle-pw {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+        .toggle-pw i {
+            font-size: 18px;
+        }
+        .pw-hint {
+            font-size: 11px;
+            display: block;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="app-header-inner">
+                <div class="app-title">Manajemen User</div>
+                <div class="user-chip" onclick="window.location.href='profile.html'">
+                    <span class="user-name" id="adminName" style="font-size: 13px; font-weight: 500;">Halo, Admin!</span>
+                    <i class="material-icons">admin_panel_settings</i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="page-content">
+            <div class="section">
+                <div class="section-title">👥 Daftar Pengguna Terdaftar</div>
+                
+                <!-- Search Box -->
+                <div class="search-box">
+                    <input type="text" placeholder="🔍 Cari nama atau email..." id="searchUser">
+                </div>
+
+                <!-- Filter Tabs -->
+                <div class="filter-tabs">
+                    <button class="filter-btn active" onclick="filterUsers('all')">Semua</button>
+                    <button class="filter-btn" onclick="filterUsers('organisasi')">Organisasi</button>
+                    <button class="filter-btn" onclick="filterUsers('BAA')">BAA</button>
+                    <button class="filter-btn" onclick="filterUsers('Admin Simarsip')">Admin</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="user-list" id="userList">
+                    <!-- User items will be rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Add Button -->
+        <button class="add-btn" title="Tambah User" onclick="openAddUserModal()">+</button>
+
+        <!-- Modal Edit/Add User -->
+        <div class="modal-overlay" id="userModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span id="modalTitle">Tambah User Baru</span>
+                    <button class="modal-close" onclick="closeUserModal()">&times;</button>
+                </div>
+                
+                <form id="userForm">
+                    <div class="form-group">
+                        <label class="form-label">Nama</label>
+                        <input type="text" id="formName" class="form-input" placeholder="Masukkan nama" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="formEmail" class="form-input" placeholder="Masukkan email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Role</label>
+                        <select id="formRole" class="form-select" required>
+                            <option value="">Pilih Role</option>
+                            <option value="organisasi">Organisasi</option>
+                            <option value="BAA">BAA</option>
+                            <option value="Admin Simarsip">Admin Simarsip</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="kampusGroup">
+                        <label class="form-label">Kampus</label>
+                        <select id="formKampus" class="form-select">
+                            <option value="">Pilih Kampus</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="organisasiGroup">
+                        <label class="form-label">Organisasi</label>
+                        <input type="text" id="formOrganisasi" class="form-input" placeholder="Contoh: HIMA, BEM, HMIF">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Jabatan/Posisi (Opsional)</label>
+                        <input type="text" id="formJabatan" class="form-input" placeholder="Contoh: Ketua, Wakil Ketua">
+                    </div>
+
+                    <!-- Password - hanya muncul saat Tambah User -->
+                    <div class="form-group" id="passwordGroup" style="display:none">
+                        <label class="form-label">Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="formPassword" class="form-input" placeholder="Masukkan password">
+                            <button type="button" class="toggle-pw" onclick="togglePw('formPassword', this)">
+                                <i class="material-icons">visibility</i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Konfirmasi Password - hanya muncul saat Tambah User -->
+                    <div class="form-group" id="confirmPasswordGroup" style="display:none">
+                        <label class="form-label">Konfirmasi Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="formConfirmPassword" class="form-input" placeholder="Ulangi password">
+                            <button type="button" class="toggle-pw" onclick="togglePw('formConfirmPassword', this)">
+                                <i class="material-icons">visibility</i>
+                            </button>
+                        </div>
+                        <small id="confirmPwHint" class="pw-hint"></small>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit">Simpan</button>
+                        <button type="button" class="btn-cancel" onclick="closeUserModal()">Batal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bottom Toolbar -->
+        <div class="toolbar-bottom">
+            <div class="toolbar-inner">
+                <a href="index_admin.html" class="toolbar-link">
+                    <i class="material-icons">dashboard</i>
+                    <span class="toolbar-label">Dashboard</span>
+                </a>
+                <a href="manajemen_user.html" class="toolbar-link active">
+                    <i class="material-icons">manage_accounts</i>
+                    <span class="toolbar-label">User</span>
+                </a>
+                <a href="verifikasi_baa.html" class="toolbar-link">
+                    <i class="material-icons">verified_user</i>
+                    <span class="toolbar-label">Verifikasi</span>
+                </a>
+                <a href="manajemen_kampus.html" class="toolbar-link">
+                    <i class="material-icons">business</i>
+                    <span class="toolbar-label">Kampus</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Config
+        let db;
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+            authDomain: "simarsip-apk.firebaseapp.com",
+            databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "simarsip-apk",
+            storageBucket: "simarsip-apk.firebasestorage.app",
+            messagingSenderId: "707332524030",
+            appId: "1:707332524030:web:d91551b5f199df489622af"
+        };
+
+        try {
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+        } catch (err) {
+            console.error('Firebase init error:', err);
+        }
+
+        let editingUserId = null;
+        let allUsers = [];
+        let currentFilter = 'all';
+        let searchQuery = '';
+
+        // Render user list from Firebase or fallback
+        function renderUserList() {
+            let filteredUsers = allUsers;
+
+            // Apply filter by role
+            if (currentFilter !== 'all') {
+                filteredUsers = filteredUsers.filter(u => u.role === currentFilter);
+            }
+
+            // Apply search filter
+            if (searchQuery) {
+                const q = searchQuery.toLowerCase();
+                filteredUsers = filteredUsers.filter(u => 
+                    (u.name && u.name.toLowerCase().includes(q)) || 
+                    (u.email && u.email.toLowerCase().includes(q))
+                );
+            }
+
+            const userList = document.getElementById('userList');
+            if (filteredUsers.length === 0) {
+                userList.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">Tidak ada pengguna ditemukan.</div>';
+                return;
+            }
+
+            let html = '';
+            filteredUsers.forEach(user => {
+                const initials = user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U';
+                const displayRole = user.role === 'organisasi' ? `${user.organisasi || 'Organisasi'} - ${user.jabatan || 'Member'}` : (user.role === 'BAA' ? 'Admin BAA' : 'Admin');
+                
+                let roleClass = user.role === 'organisasi' ? 'organisasi' : (user.role === 'BAA' ? 'baa' : 'admin');
+                
+                html += `
+                    <div class="user-item">
+                        <div class="user-info">
+                            <div class="user-avatar">${initials}</div>
+                            <div class="user-details">
+                                <div class="user-name">${user.name || 'N/A'}</div>
+                                <div class="user-role">
+                                    <span class="role-badge ${roleClass}">${displayRole}</span>
+                                </div>
+                                <div style="font-size: 11px; color: #999; margin-top: 4px;">${user.email || 'N/A'}</div>
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            <button class="btn-small btn-edit" onclick="editUser('${user.id}')">Edit</button>
+                            <button class="btn-small btn-delete" onclick="deleteUser('${user.id}', '${user.name}')">Hapus</button>
+                        </div>
+                    </div>
+                `;
+            });
+            userList.innerHTML = html;
+        }
+
+        // Load users from Firebase
+        function loadUsers() {
+            if (!db) {
+                allUsers = [
+                    { id: '1', name: 'Budi Santoso', email: 'budi@example.com', organisasi: 'Akuntan', role: 'organisasi', jabatan: 'Ketua', status: 'Aktif', kampus: 'Kampus Pusat' },
+                    { id: '2', name: 'Siti Nurhaliza', email: 'siti@example.com', organisasi: 'Akuntan', role: 'organisasi', jabatan: 'Wakil Ketua', status: 'Aktif', kampus: 'Kampus Pusat' },
+                    { id: '3', name: 'Ahmad Ridho', email: 'ahmad@example.com', organisasi: 'BEM', role: 'organisasi', jabatan: 'Sekretaris', status: 'Aktif', kampus: 'Kampus Pusat' },
+                    { id: '4', name: 'Rina Wijaya', email: 'rina@example.com', organisasi: 'BEM', role: 'organisasi', jabatan: 'Bendahara', status: 'Aktif', kampus: 'Kampus Pusat' },
+                    { id: '5', name: 'Drajat Admin', email: 'drajat@example.com', role: 'BAA', status: 'Aktif', kampus: 'Kampus Pusat' },
+                    { id: '6', name: 'Admin Simarsip', email: 'admin@example.com', role: 'Admin Simarsip', status: 'Aktif', kampus: 'Semua' },
+                ];
+                renderUserList();
+                return;
+            }
+
+            db.ref('users').once('value', snapshot => {
+                const data = snapshot.val();
+                if (data) {
+                    allUsers = Object.entries(data).map(([id, user]) => ({
+                        id,
+                        ...user
+                    }));
+                } else {
+                    allUsers = [];
+                }
+                renderUserList();
+            }).catch(err => {
+                console.warn('Error loading users:', err);
+                allUsers = [
+                    { id: '1', name: 'Budi Santoso', email: 'budi@example.com', organisasi: 'Akuntan', role: 'organisasi', jabatan: 'Ketua' },
+                    { id: '2', name: 'Siti Nurhaliza', email: 'siti@example.com', organisasi: 'Akuntan', role: 'organisasi', jabatan: 'Wakil Ketua' },
+                ];
+                renderUserList();
+            });
+        }
+
+        // Filter users by role
+        function filterUsers(role) {
+            currentFilter = role;
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            renderUserList();
+        }
+
+        // Search functionality
+        document.getElementById('searchUser').addEventListener('input', function(e) {
+            searchQuery = e.target.value;
+            renderUserList();
+        });
+
+        // Toggle show/hide password
+        function togglePw(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+            btn.querySelector('i').textContent = isHidden ? 'visibility_off' : 'visibility';
+        }
+
+        function loadKampusOptionsForUserForm() {
+            const kampusSelect = document.getElementById('formKampus');
+            if (!kampusSelect) return;
+
+            // Reset isi dropdown agar tidak dobel saat halaman dibuka ulang
+            kampusSelect.innerHTML = '<option value="">Pilih Kampus</option>';
+
+            if (!db) return;
+
+            db.ref('kampus/main').once('value', snapshot => {
+                const kampusFromDb = snapshot.val();
+
+                if (kampusFromDb) {
+                    Object.entries(kampusFromDb).forEach(([id, kampus]) => {
+                        const namaKampus = kampus.nama || kampus.name;
+                        if (!namaKampus) return;
+
+                        const existingOption = Array.from(kampusSelect.options).find(opt => opt.value === namaKampus);
+                        if (!existingOption) {
+                            const option = document.createElement('option');
+                            option.value = namaKampus;
+                            option.textContent = namaKampus;
+                            kampusSelect.appendChild(option);
+                        }
+                    });
+                }
+            }).catch(err => {
+                console.warn('Gagal memuat data kampus:', err);
+            });
+        }
+
+        function updateRoleFields() {
+            const role = document.getElementById('formRole').value;
+            const kampusGroup = document.getElementById('kampusGroup');
+            const organisasiGroup = document.getElementById('organisasiGroup');
+            const formKampus = document.getElementById('formKampus');
+            const formOrganisasi = document.getElementById('formOrganisasi');
+
+            // Field kampus dan organisasi tetap ditampilkan di mode Tambah maupun Edit
+            // agar form edit lengkap seperti form tambah. Required tetap mengikuti role.
+            kampusGroup.style.display = 'block';
+            organisasiGroup.style.display = 'block';
+
+            if (role === 'organisasi') {
+                formKampus.required = true;
+                formOrganisasi.required = true;
+            } else if (role === 'BAA') {
+                formKampus.required = true;
+                formOrganisasi.required = false;
+            } else {
+                formKampus.required = false;
+                formOrganisasi.required = false;
+            }
+        }
+
+        function openAddUserModal() {
+            editingUserId = null;
+            document.getElementById('userForm').reset();
+            document.getElementById('modalTitle').textContent = 'Tambah User Baru';
+            document.getElementById('confirmPwHint').textContent = '';
+
+            // Tampilkan field password
+            document.getElementById('passwordGroup').style.display = 'block';
+            document.getElementById('confirmPasswordGroup').style.display = 'block';
+            document.getElementById('formPassword').required = true;
+            document.getElementById('formConfirmPassword').required = true;
+            document.getElementById('formPassword').placeholder = 'Masukkan password';
+            document.getElementById('formConfirmPassword').placeholder = 'Ulangi password';
+            updateRoleFields();
+
+            document.getElementById('userModal').classList.add('active');
+        }
+
+        function setSelectValueSafely(selectId, value) {
+            const select = document.getElementById(selectId);
+            if (!select || !value) return;
+
+            const exists = Array.from(select.options).some(option => option.value === value);
+            if (!exists) {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                select.appendChild(option);
+            }
+
+            select.value = value;
+        }
+
+        function fillEditUserForm(user) {
+            editingUserId = user.id;
+            document.getElementById('formName').value = user.name || '';
+            document.getElementById('formEmail').value = user.email || '';
+            document.getElementById('formRole').value = user.role || '';
+            document.getElementById('formJabatan').value = user.jabatan || '';
+
+            updateRoleFields();
+            setSelectValueSafely('formKampus', user.kampus || '');
+            document.getElementById('formOrganisasi').value = user.organisasi || '';
+
+            // Tampilkan field password saat edit, tetapi tidak wajib diisi.
+            // Jika dikosongkan, password lama tetap dipakai.
+            document.getElementById('passwordGroup').style.display = 'block';
+            document.getElementById('confirmPasswordGroup').style.display = 'block';
+            document.getElementById('formPassword').required = false;
+            document.getElementById('formConfirmPassword').required = false;
+            document.getElementById('formPassword').value = '';
+            document.getElementById('formConfirmPassword').value = '';
+            document.getElementById('formPassword').placeholder = 'Kosongkan jika tidak ingin mengubah';
+            document.getElementById('formConfirmPassword').placeholder = 'Ulangi password baru';
+            document.getElementById('confirmPwHint').textContent = '';
+
+            document.getElementById('modalTitle').textContent = `Edit: ${user.name || 'User'}`;
+            document.getElementById('userModal').classList.add('active');
+        }
+
+        function editUser(id) {
+            const userFromList = allUsers.find(user => user.id === id);
+            if (userFromList) {
+                fillEditUserForm(userFromList);
+                return;
+            }
+
+            if (db) {
+                db.ref(`users/${id}`).once('value', snapshot => {
+                    const user = snapshot.val();
+                    if (!user) {
+                        alert('Data user tidak ditemukan');
+                        return;
+                    }
+                    fillEditUserForm({ id, ...user });
+                }).catch(err => alert('Error: ' + err.message));
+            }
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').classList.remove('active');
+            editingUserId = null;
+        }
+
+        function deleteUser(id, name) {
+            if (confirm(`Hapus user ${name}?`)) {
+                if (db) {
+                    db.ref(`users/${id}`).remove()
+                        .then(() => {
+                            alert('User berhasil dihapus');
+                            loadUsers();
+                        })
+                        .catch(err => alert('Error: ' + err.message));
+                } else {
+                    alert('User berhasil dihapus');
+                }
+            }
+        }
+
+        // Validasi realtime konfirmasi password
+        document.getElementById('formConfirmPassword').addEventListener('input', function() {
+            const pw = document.getElementById('formPassword').value;
+            const hint = document.getElementById('confirmPwHint');
+            if (this.value && this.value !== pw) {
+                hint.style.color = '#ff4b5c';
+                hint.textContent = '❌ Password tidak cocok';
+            } else if (this.value && this.value === pw) {
+                hint.style.color = '#22c55e';
+                hint.textContent = '✅ Password cocok';
+            } else {
+                hint.textContent = '';
+            }
+        });
+
+        // Form submit
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('formName').value.trim();
+            const email = document.getElementById('formEmail').value.trim();
+            const role = document.getElementById('formRole').value;
+            const jabatan = document.getElementById('formJabatan').value.trim() || '';
+            const kampus = document.getElementById('formKampus').value;
+            const organisasi = document.getElementById('formOrganisasi').value.trim();
+
+            if (!name || !email || !role) {
+                alert('Nama, email, dan role wajib diisi!');
+                return;
+            }
+
+            const password = document.getElementById('formPassword').value;
+            const confirmPassword = document.getElementById('formConfirmPassword').value;
+
+            // Saat tambah user, password wajib diisi.
+            // Saat edit user, password boleh kosong. Jika diisi, password akan diperbarui.
+            if (!editingUserId) {
+                if (!password) {
+                    alert('Password wajib diisi!');
+                    return;
+                }
+            }
+
+            if (password || confirmPassword) {
+                if (password.length < 6) {
+                    alert('Password minimal 6 karakter!');
+                    return;
+                }
+                if (password !== confirmPassword) {
+                    alert('Konfirmasi password tidak cocok!');
+                    return;
+                }
+            }
+
+            const userData = {
+                name: name,
+                email: email,
+                role: role,
+                jabatan: jabatan,
+                status: 'Aktif'
+            };
+
+            if (role === 'organisasi') {
+                if (!kampus) {
+                    alert('Kampus wajib dipilih untuk user organisasi!');
+                    return;
+                }
+                if (!organisasi) {
+                    alert('Organisasi wajib diisi untuk user organisasi!');
+                    return;
+                }
+                userData.kampus = kampus;
+                userData.organisasi = organisasi;
+                userData.baaStatus = 'Belum';
+            } else if (role === 'BAA') {
+                if (!kampus) {
+                    alert('Kampus wajib dipilih untuk user BAA!');
+                    return;
+                }
+                userData.kampus = kampus;
+                userData.baaStatus = 'Disetujui';
+                userData.organisasi = '';
+            } else if (role === 'Admin Simarsip') {
+                userData.kampus = 'Semua';
+                userData.organisasi = '';
+                userData.baaStatus = 'Disetujui';
+            }
+
+            // Simpan password saat tambah baru atau saat edit jika password baru diisi
+            if (password) {
+                userData.password = password;
+            }
+
+            if (!editingUserId) {
+                userData.createdAt = new Date().toISOString();
+            }
+
+            if (db) {
+                if (editingUserId) {
+                    // Update existing user
+                    db.ref(`users/${editingUserId}`).update(userData)
+                        .then(() => {
+                            alert('User berhasil diperbarui');
+                            closeUserModal();
+                            loadUsers();
+                        })
+                        .catch(err => alert('Error: ' + err.message));
+                } else {
+                    // Cek email agar tidak ada akun duplikat
+                    db.ref('users').orderByChild('email').equalTo(email).once('value', snapshot => {
+                        if (snapshot.exists()) {
+                            alert('Email sudah terdaftar. Gunakan email lain!');
+                            return;
+                        }
+
+                        // Add new user
+                        const newRef = db.ref('users').push();
+                        newRef.set(userData)
+                            .then(() => {
+                                alert('User berhasil ditambahkan');
+                                closeUserModal();
+                                loadUsers();
+                            })
+                            .catch(err => alert('Error: ' + err.message));
+                    }).catch(err => alert('Error: ' + err.message));
+                }
+            } else {
+                alert(editingUserId ? 'User berhasil diperbarui' : 'User berhasil ditambahkan');
+                closeUserModal();
+            }
+        });
+
+        // Set active toolbar link based on current page
+        function setActiveToolbarLink() {
+            const currentPage = window.location.pathname.split('/').pop() || 'manajemen_user.html';
+            document.querySelectorAll('.toolbar-link').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === currentPage || (href === 'manajemen_user.html' && currentPage === '')) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
+        function setAdminHeaderName() {
+            const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+            const adminNameElement = document.getElementById('adminName');
+
+            if (!adminNameElement || !loggedUser) return;
+
+            let displayName = loggedUser.name || 'Admin';
+
+            if (loggedUser.role === "super_admin") {
+                displayName += " 👑";
+            }
+
+            adminNameElement.textContent = `Halo, ${displayName}!`;
+        }
+
+        // Initial check & load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Session protection - redirect if not accessed from splash
+            const fromSplashAdmin = sessionStorage.getItem("fromSplash");
+            if (!fromSplashAdmin) {
+                window.location.href = "splash.html";
+            }
+
+            const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+            if (!loggedUser || (loggedUser.role !== "Admin Simarsip" && loggedUser.role !== "super_admin")) {
+                window.location.href = 'login.html';
+            }
+            
+            document.getElementById('formRole').addEventListener('change', updateRoleFields);
+            setAdminHeaderName();
+            setActiveToolbarLink();
+            loadKampusOptionsForUserForm();
+            loadUsers();
+        });
+    </script>
+</body>
+
+</html>

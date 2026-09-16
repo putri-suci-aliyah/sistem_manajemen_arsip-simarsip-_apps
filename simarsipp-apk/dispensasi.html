@@ -1,0 +1,672 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Surat Dispensasi - SIMARSIP</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --f7-theme-color: #1e73ff;
+    }
+
+    body {
+      background: #f0f4f8;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+    }
+
+    /* NAVBAR STYLING */
+    .navbar,
+    .navbar-inner {
+      background: #1e73ff !important;
+      color: white !important;
+      height: 56px !important;
+    }
+
+    .navbar-inner {
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+    }
+
+    .navbar .title {
+      font-weight: bold;
+      margin-left: 10px;
+      font-size: 17px;
+    }
+
+    .page-content {
+      padding-top: 56px !important;
+    }
+
+    /* FORM CARD */
+    .card-form {
+      background: #fff;
+      padding: 15px;
+      border-radius: 12px;
+      margin: 10px 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-row {
+      margin-bottom: 12px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #555;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ced4da;
+      box-sizing: border-box;
+      background: #f9f9f9;
+      font-size: 14px;
+    }
+
+    /* SURAT PREVIEW STYLING */
+    .surat-container {
+      background: white;
+      padding: 40px;
+      border: 1px solid #ddd;
+      font-family: "Times New Roman", Times, serif;
+      line-height: 1.5;
+      color: black;
+      margin: 15px;
+      font-size: 12px;
+    }
+
+    .header-kop {
+      text-align: center;
+      border-bottom: 3px double black;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .header-kop h1 {
+      margin: 0;
+      font-size: 18px;
+      color: #003366;
+      font-weight: bold;
+    }
+
+    .header-kop h2 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: normal;
+    }
+
+    /* TABEL DISPENSASI */
+    .table-dispensasi {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+
+    .table-dispensasi th,
+    .table-dispensasi td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .table-dispensasi th {
+      background: #f2f2f2;
+      text-align: center;
+    }
+
+    /* GRID TTD */
+    .ttd-container {
+      margin-top: 30px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      row-gap: 35px;
+      column-gap: 10px;
+      text-align: center;
+    }
+
+    .ttd-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .ttd-box.baa-box {
+      grid-column: 1 / -1;
+      justify-self: center;
+      width: min(220px, 100%);
+    }
+
+    .ttd-space {
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ttd-space img {
+      max-height: 50px;
+      max-width: 100px;
+      object-fit: contain;
+    }
+
+    .ttd-nama {
+      font-weight: bold;
+      border-bottom: 1px solid #000;
+      min-width: 120px;
+      font-size: 11px;
+    }
+
+    @media print {
+
+      .navbar,
+      .card-form,
+      .block-title,
+      .btn-add {
+        display: none !important;
+      }
+
+      .page-content {
+        padding-top: 0 !important;
+      }
+
+      .surat-container {
+        border: none;
+        margin: 0;
+        width: 100%;
+        padding: 0;
+      }
+    }
+
+    /* MODAL NOTIFICATIONS */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .modal-message {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .modal-btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-btn.primary {
+      background: #1e73ff;
+      color: white;
+    }
+
+    .modal-btn.primary:hover {
+      background: #0056d2;
+    }
+
+    .modal-btn.secondary {
+      background: #f5f5f5;
+      color: #666;
+      margin-left: 10px;
+    }
+
+    .modal-btn.secondary:hover {
+      background: #e0e0e0;
+    }
+
+    /* LOADING MODAL */
+    .loading-modal .modal-icon {
+      color: #1e73ff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="view view-main">
+      <div class="page">
+        <div class="navbar">
+          <div class="navbar-inner">
+            <div class="left"><a href="index.html" class="link external"><i class="material-icons"
+                  style="color:white">arrow_back</i></a></div>
+            <div class="title">Surat Dispensasi</div>
+            <div class="right"></div>
+          </div>
+        </div>
+
+        <div class="page-content">
+          <div class="block-title" style="margin: 15px 20px 5px 20px; font-weight: bold;">Data Dispensasi Mahasiswa
+          </div>
+
+          <div class="card-form">
+            <form id="dispensasi-form">
+              <div class="form-row">
+                <label class="form-label">Nama Kegiatan</label>
+                <input type="text" id="in-title" placeholder="Contoh: Lomba Inovasi Digital" oninput="updatePreview()">
+              </div>
+              <div class="form-row">
+                <label class="form-label">Mata Kuliah</label>
+                <input type="text" id="in-course" placeholder="Nama Mata Kuliah" oninput="updatePreview()">
+              </div>
+
+              <div id="student-inputs" class="form-row">
+                <label class="form-label">Daftar Mahasiswa (Nama / NIM)</label>
+                <input type="text" class="mhs-in" placeholder="Contoh: Didin / 230414019" oninput="updatePreview()"
+                  style="margin-bottom: 5px;">
+              </div>
+              <button type="button" class="button button-small button-outline color-blue btn-add" onclick="addMhs()"
+                style="margin-bottom: 15px;">+ Tambah Mahasiswa</button>
+
+              <div class="row">
+                <div class="col-50">
+                  <div class="form-row"><label class="form-label">Tanggal Pelaksanaan</label>
+                    <input type="date" id="in-date" oninput="updatePreview()">
+                  </div>
+                </div>
+                <div class="col-50">
+                  <div class="form-row"><label class="form-label">Waktu Kuliah</label>
+                    <input type="time" id="in-start" oninput="updatePreview()">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-50">
+                  <div class="form-row"><label class="form-label">Ketua Ormawa</label>
+                    <input type="text" id="in-ormawa" placeholder="Nama" oninput="updatePreview()">
+                  </div>
+                </div>
+                <div class="col-50">
+                  <div class="form-row"><label class="form-label">Sekretaris</label>
+                    <input type="text" id="in-sekretaris" placeholder="Nama" oninput="updatePreview()">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-50">
+                  <label class="form-label">TTD Ketua</label>
+                  <input type="file" style="font-size: 10px;" onchange="previewImage(this, 'img-ttd-ormawa')">
+                </div>
+                <div class="col-50">
+                  <label class="form-label">TTD Sekretaris</label>
+                  <input type="file" style="font-size: 10px;" onchange="previewImage(this, 'img-ttd-sekretaris')">
+                </div>
+              </div>
+              <div class="row" style="margin-top:15px">
+                <button type="button" onclick="window.print()" class="button button-fill color-orange col">Unduh Hasil
+                  PDF</button>
+                <button type="submit" class="button button-fill col">Simpan Data</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="block-title" style="margin-left: 20px;">Preview Surat</div>
+            <div class="surat-container">
+            <div class="header-kop">
+              <h2 id="kop-org">YAYASAN LPKIA</h2>
+              <h1 id="kop-nama">INSTITUT DIGITAL EKONOMI LPKIA</h1>
+              <p id="kop-alamat">Jl. Soekarno-Hatta No. 456, Bandung, Jawa Barat 40266</p>
+            </div>
+
+            <p style="text-align: right; margin-bottom: 20px;">Bandung, <span id="view-today"></span></p>
+
+            <div style="margin-bottom: 20px;">
+              Nomor : ___/<span id="kop-code">LPKIA</span>/ORM/2026<br>
+              Hal : <b>Permohonan Dispensasi Kuliah</b>
+            </div>
+
+            <div class="isi-surat">
+      <p>Kepada Yth.<br><b>Bapak/Ibu Dosen Pengampu Mata Kuliah <span id="view-course">..........</span></b><br><span id="kop-recipient-campus">IDE LPKIA</span></p>
+
+              <p>Dengan hormat, sehubungan dengan adanya kegiatan <b><span id="view-title">..........</span></b> yang
+                akan dilaksanakan pada tanggal <b><span id="view-date">................</span></b> pukul <b><span
+                    id="view-time">00:00</span> WIB</b>, kami memohon izin/dispensasi bagi mahasiswa berikut:</p>
+
+              <table class="table-dispensasi">
+                <thead>
+                  <tr>
+                    <th width="40" style="text-align:center">No</th>
+                    <th>Nama Mahasiswa / NIM</th>
+                  </tr>
+                </thead>
+                <tbody id="view-mhs-tbody">
+                  <tr>
+                    <td style="text-align:center">1</td>
+                    <td>..........</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <p>Demikian permohonan ini kami sampaikan. Atas perhatian dan kebijaksanaan Bapak/Ibu Dosen, kami ucapkan
+                terima kasih.</p>
+            </div>
+
+            <div class="ttd-container">
+              <div class="ttd-box">
+                <div>Ketua Ormawa,</div>
+                <div class="ttd-space"><img id="img-ttd-ormawa" style="display:none"></div>
+                <div class="ttd-nama" id="view-name-ttd">................</div>
+              </div>
+              <div class="ttd-box">
+                <div>Sekretaris,</div>
+                <div class="ttd-space"><img id="img-ttd-sekretaris" style="display:none"></div>
+                <div class="ttd-nama" id="view-sek-ttd">................</div>
+              </div>
+              <div class="ttd-box baa-box">
+                <div>Menyetujui,<br>BAA</div>
+                <div class="ttd-space"></div>
+                <div class="ttd-nama">________________</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="js/campus-utils.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      if (typeof getLoggedUser !== 'function') return;
+      const u = getLoggedUser(); if (!u) return;
+      const org = u.organisasi || u.organization || null;
+      const kampus = u.kampus || u.campus || null;
+      if (org) { const el = document.getElementById('kop-org'); if (el) el.textContent = org.toUpperCase(); }
+      if (kampus) {
+        let campusRaw = String(kampus || '').trim();
+        let short = (campusRaw.match(/\(([^)]+)\)/) || [])[1] || (campusRaw.indexOf(' - ') !== -1 ? campusRaw.split(' - ')[0] : campusRaw);
+        short = short ? short.trim() : '';
+        let address = campusRaw.indexOf(' - ') !== -1 ? campusRaw.split(' - ')[1].trim() : campusRaw.replace(/\([^)]*\)/,'').trim();
+        const h1 = document.getElementById('kop-nama') || document.getElementById('kop-org'); if (h1 && short) h1.textContent = short;
+        const elAlamat = document.getElementById('kop-alamat'); if (elAlamat && address) elAlamat.textContent = address;
+        const codeEl = document.getElementById('kop-code'); if (codeEl) codeEl.textContent = (short || '').replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+        const recEl = document.getElementById('kop-recipient-campus'); if (recEl && short) recEl.textContent = short;
+      }
+    });
+  </script>
+  <script>
+    // Removed Framework7 initialization
+
+    // Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+        authDomain: "simarsip-apk.firebaseapp.com",
+        databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "simarsip-apk"
+    };
+    
+    let db;
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        db = firebase.database();
+        console.log('Firebase initialized successfully');
+    } catch (error) {
+        console.error('Firebase initialization error:', error);
+        db = null;
+    }
+
+    function addMhs() {
+      const div = document.createElement('div');
+      div.style.marginTop = "5px";
+      div.innerHTML = '<input type="text" class="mhs-in" placeholder="Nama / NIM" oninput="updatePreview()">';
+      document.getElementById('student-inputs').appendChild(div);
+    }
+
+    function updatePreview() {
+      document.getElementById('view-title').innerText = document.getElementById('in-title').value || '..........';
+      document.getElementById('view-course').innerText = document.getElementById('in-course').value || '..........';
+      document.getElementById('view-name-ttd').innerText = document.getElementById('in-ormawa').value || '................';
+      document.getElementById('view-sek-ttd').innerText = document.getElementById('in-sekretaris').value || '................';
+      document.getElementById('view-time').innerText = document.getElementById('in-start').value || '00:00';
+
+      const d = document.getElementById('in-date').value;
+      if (d) document.getElementById('view-date').innerText = new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      const inputs = document.querySelectorAll('.mhs-in');
+      const tbody = document.getElementById('view-mhs-tbody');
+      tbody.innerHTML = Array.from(inputs).map((i, idx) => `<tr><td style="text-align:center">${idx + 1}</td><td>${i.value || '..........'}</td></tr>`).join('');
+    }
+
+    function previewImage(input, targetId) {
+      if (!input.files || !input.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = document.getElementById(targetId);
+        img.src = e.target.result;
+        img.style.display = 'block';
+        window.ttdCache = window.ttdCache || {};
+        window.ttdCache[targetId] = e.target.result;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+
+    // Handle Form Submission
+    document.getElementById('dispensasi-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const loggedUser = JSON.parse(localStorage.getItem('loggedUser'));
+      if (!loggedUser) {
+        alert('Anda harus login terlebih dahulu');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      if (!db) {
+        alert('Koneksi database tidak tersedia. Silakan refresh halaman dan coba lagi.');
+        return;
+      }
+
+      const title = document.getElementById('in-title').value.trim();
+      const course = document.getElementById('in-course').value.trim();
+      const date = document.getElementById('in-date').value;
+      const startTime = document.getElementById('in-start').value;
+      const ormawa = document.getElementById('in-ormawa').value.trim();
+      const sekretaris = document.getElementById('in-sekretaris').value.trim();
+
+      // Collect student names
+      const mhsInputs = document.querySelectorAll('.mhs-in');
+      const students = Array.from(mhsInputs).map(input => input.value.trim()).filter(val => val.length > 0);
+
+      if (!title || !course || !date || !startTime || !ormawa || !sekretaris || students.length === 0) {
+        alert('Harap isi semua field termasuk minimal satu mahasiswa');
+        return;
+      }
+
+      // Show loading modal
+      showLoadingModal('Mengirim pengajuan dispensasi...');
+
+      const id = 'dispensasi_' + Date.now();
+      const userId = loggedUser.uid || loggedUser.email || loggedUser.id;
+      const submissionData = {
+        title: title,
+        course: course,
+        date: date,
+        startTime: startTime,
+        students: students,
+        ormawa: ormawa,
+        sekretaris: sekretaris,
+        name: loggedUser.name || loggedUser.email || 'User',
+        email: loggedUser.email,
+        organisasi: loggedUser.organisasi || '',
+        kampus: loggedUser.kampus || '',
+        userId: userId,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        type: 'dispensasi',
+        ttd: {
+          ormawa: (window.ttdCache && window.ttdCache['img-ttd-ormawa']) || null,
+          sekretaris: (window.ttdCache && window.ttdCache['img-ttd-sekretaris']) || null,
+          baa: null
+        }
+      };
+
+      console.log('Submitting dispensasi data:', submissionData);
+
+      try {
+        db.ref('pengajuan/dispensasi/' + id).set(submissionData)
+          .then(() => {
+            console.log('Data saved successfully');
+            hideLoadingModal();
+            // buat notifikasi admin untuk pengajuan baru
+            try {
+              const notifId = `dispensasi_${id}_${Date.now()}`;
+              db.ref('notifications/admins/' + notifId).set({
+                id: notifId,
+                title: 'Pengajuan Dispensasi Baru',
+                message: `Pengajuan dispensasi dari ${submissionData.organisasi || submissionData.name}`,
+                relatedId: id,
+                type: 'submission_dispensasi',
+                kampus: submissionData.kampus || null,
+                from: submissionData.organisasi || submissionData.name,
+                createdAt: new Date().toISOString(),
+                read: false
+              }).catch(() => {});
+            } catch (e) { /* ignore */ }
+            showSuccessModal('✅ Pengajuan dispensasi berhasil dikirim!\n\nData akan muncul di riwayat dan halaman approval BAA secara real-time.', () => {
+              document.getElementById('dispensasi-form').reset();
+              window.location.href = 'index.html';
+            });
+          })
+          .catch(error => {
+            console.error('Firebase save error:', error);
+            hideLoadingModal();
+            showErrorModal('❌ Gagal menyimpan data: ' + error.message, () => {
+              console.error('Error saving data:', error);
+            });
+          });
+      } catch (error) {
+        console.error('Error in Firebase operation:', error);
+        hideLoadingModal();
+        showErrorModal('❌ Terjadi kesalahan sistem: ' + error.message);
+      }
+    });
+
+    document.getElementById('view-today').innerText = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // MODAL NOTIFICATION FUNCTIONS
+    function showLoadingModal(message = 'Menyimpan data...') {
+      const modal = document.getElementById('loadingModal');
+      document.getElementById('loadingMessage').textContent = message;
+      modal.classList.add('active');
+    }
+
+    function hideLoadingModal() {
+      document.getElementById('loadingModal').classList.remove('active');
+    }
+
+    function showSuccessModal(message, callback = null) {
+      const modal = document.getElementById('successModal');
+      document.getElementById('successMessage').textContent = message;
+      modal.classList.add('active');
+      
+      // Set callback for OK button
+      document.getElementById('successBtn').onclick = () => {
+        modal.classList.remove('active');
+        if (callback) callback();
+      };
+    }
+
+    function showErrorModal(message, callback = null) {
+      const modal = document.getElementById('errorModal');
+      document.getElementById('errorMessage').textContent = message;
+      modal.classList.add('active');
+      
+      // Set callback for OK button
+      document.getElementById('errorBtn').onclick = () => {
+        modal.classList.remove('active');
+        if (callback) callback();
+      };
+    }
+  </script>
+
+  <!-- MODAL NOTIFICATIONS -->
+  <!-- Loading Modal -->
+  <div class="modal-overlay" id="loadingModal">
+    <div class="modal-content loading-modal">
+      <div class="modal-icon">⏳</div>
+      <div class="modal-title">Sedang Memproses</div>
+      <div class="modal-message" id="loadingMessage">Menyimpan data...</div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal-overlay" id="successModal">
+    <div class="modal-content">
+      <div class="modal-icon" style="color: #4caf50;">✅</div>
+      <div class="modal-title">Berhasil!</div>
+      <div class="modal-message" id="successMessage">Data berhasil disimpan</div>
+      <button class="modal-btn primary" id="successBtn">OK</button>
+    </div>
+  </div>
+
+  <!-- Error Modal -->
+  <div class="modal-overlay" id="errorModal">
+    <div class="modal-content">
+      <div class="modal-icon" style="color: #f44336;">❌</div>
+      <div class="modal-title">Gagal!</div>
+      <div class="modal-message" id="errorMessage">Terjadi kesalahan</div>
+      <button class="modal-btn primary" id="errorBtn">OK</button>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,591 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Notifikasi - SIMARSIP</title>
+  <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    * { 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent;
+    }
+    html, body { 
+      margin: 0; 
+      padding: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: #fafafa;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .app-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 16px 12px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .app-header-inner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .page-content { 
+      padding: 16px;
+      padding-bottom: calc(60px + 16px);
+    }
+
+    .notif-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .notif-category {
+      margin-bottom: 16px;
+    }
+
+    .notif-category-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #667eea;
+      text-transform: uppercase;
+      padding: 0 4px;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .notif-item {
+      background: white;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      border-left: 4px solid #667eea;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .notif-item:hover {
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      transform: translateY(-1px);
+    }
+
+    .notif-item.unread {
+      background: #f8f9ff;
+      border-left-color: #667eea;
+    }
+
+    .notif-item.approved {
+      border-left-color: #1e73ff;
+    }
+
+    .notif-item.warning {
+      border-left-color: #ff9800;
+    }
+
+    .notif-item.completed {
+      border-left-color: #4caf50;
+    }
+
+    .notif-icon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
+    }
+
+    .notif-icon.approved {
+      background: #1e73ff;
+    }
+
+    .notif-icon.warning {
+      background: #ff9800;
+    }
+
+    .notif-icon.completed {
+      background: #4caf50;
+    }
+
+    .notif-content {
+      flex: 1;
+    }
+
+    .notif-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .notif-message {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.4;
+      margin-bottom: 6px;
+    }
+
+    .notif-time {
+      font-size: 11px;
+      color: #999;
+    }
+
+    .notif-badge {
+      flex-shrink: 0;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #667eea;
+      margin-top: 4px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 16px;
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      color: #ccc;
+      margin-bottom: 12px;
+    }
+
+    .empty-text {
+      font-size: 14px;
+      color: #999;
+    }
+
+    .actions {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 1px solid #e0e0e0;
+      padding: 12px;
+      display: flex;
+      gap: 8px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+      z-index: 50;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .btn-secondary:active {
+      background: #d0d0d0;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:active {
+      background: #5568d3;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 12px 0;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      background: #fff;
+      border-top: 1px solid #e0e0e0;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .toolbar a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      color: #666;
+      font-size: 12px;
+    }
+
+    .toolbar a.active {
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    .toolbar i {
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-header-inner">
+      <div style="font-weight:700;color:#fff">Notifikasi</div>
+      <div></div>
+    </div>
+  </header>
+
+  <main class="page-content" id="notifi-container">
+    <!-- Notifikasi akan diisi dari JavaScript -->
+  </main>
+
+  <div class="actions">
+    <button class="btn btn-secondary" id="mark-all">Tandai Semua</button>
+    <button class="btn btn-primary" id="close-notif" onclick="window.location.href='index.html'">Tutup</button>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <a href="index.html">
+      <i class="material-icons">home</i>
+      Beranda
+    </a>
+    <a href="calendar.html">
+      <i class="material-icons">calendar_today</i>
+      Kalender
+    </a>
+    <a href="notifikasi.html" class="active">
+      <i class="material-icons">notifications</i>
+      Notifikasi
+    </a>
+  </div>
+
+  <script>
+    // Initialize Firebase v9+
+    var db;
+    var firebaseLoaded = false;
+    function loadFirebase(){
+      var script1 = document.createElement('script');
+      script1.src = 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js';
+      script1.onload = function(){
+        var script2 = document.createElement('script');
+        script2.src = 'https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js';
+        script2.onload = function(){
+          try{
+            if(!firebase.apps.length){
+              var firebaseConfig = {
+                apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+                authDomain: "simarsip-apk.firebaseapp.com",
+                databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+                projectId: "simarsip-apk",
+                storageBucket: "simarsip-apk.firebasestorage.app",
+                messagingSenderId: "707332524030",
+                appId: "1:707332524030:web:d91551b5f199df489622af"
+              };
+              firebase.initializeApp(firebaseConfig);
+              db = firebase.database();
+              firebaseLoaded = true;
+              initNotifications();
+            }
+          }catch(err){ console.warn('Firebase init error:', err.message); initNotifications(); }
+        };
+        document.head.appendChild(script2);
+      };
+      document.head.appendChild(script1);
+    }
+    loadFirebase();
+  // campus-utils helper already loaded via separate script tag created dynamically in initNotifications if needed
+    
+    (function(){
+      var container = document.getElementById('notifi-container');
+      var notifications = [];
+      var displayLimit = 20; // batching: show latest 20, load more on demand
+
+      
+      // ========= SHARED DUMMY DATA ==========
+      const sharedDummyData = [
+    { id: 'dummy-1', type: 'ruangan', title: 'Rapat BEM', room: 'Ruang 101', date: '2026-01-05', status: 'approved', createdAt: new Date('2026-01-10T10:00:00Z').toISOString(), note: 'Rapat persiapan acara tahunan.' },
+    { id: 'dummy-2', type: 'peralatan', title: 'Peminjaman Proyektor', equipmentName: 'Proyektor Epson', quantity: 1, date: '2026-01-20', status: 'pending', createdAt: new Date('2026-01-18T14:00:00Z').toISOString(), note: 'Untuk presentasi kelas.' },
+    { id: 'dummy-3', type: 'dispensasi', title: 'Dispensasi Lomba', purpose: 'Lomba Debat Nasional', date: '2026-01-22', status: 'rejected', createdAt: new Date('2026-01-19T11:00:00Z').toISOString(), reason: 'Surat keterangan dari panitia tidak lengkap.' },
+    { id: 'dummy-4', type: 'ruangan', title: 'Workshop Fotografi', room: 'Lab. Komputer', date: '2026-01-25', status: 'approved', createdAt: new Date('2026-01-20T09:00:00Z').toISOString(), note: 'Dibutuhkan akses ke 5 unit PC.' },
+    { id: 'dummy-5', type: 'peralatan', title: 'Peminjaman Kamera', equipmentName: 'Kamera DSLR Canon', quantity: 2, date: '2026-01-28', status: 'pending', createdAt: new Date('2026-01-27T16:00:00Z').toISOString(), note: 'Untuk dokumentasi acara.' },
+];
+
+  // Load read status from localStorage
+      var readStatuses = {};
+      try {
+        readStatuses = JSON.parse(localStorage.getItem('notificationsReadStatus') || '{}');
+      } catch(e) {
+        readStatuses = {};
+      }
+
+      function saveReadStatus() {
+        localStorage.setItem('notificationsReadStatus', JSON.stringify(readStatuses));
+      }
+
+  // Use centralized campus helpers (ensure file exists at js/campus-utils.js)
+  const loggedUser = getLoggedUser();
+  const userCampus = getUserCampus(loggedUser);
+
+    function processDummyData() {
+          sharedDummyData.forEach(item => {
+              const notifId = item.id;
+              let title = '';
+              let message = '';
+              let notifType = 'completed';
+              let categoryName = '';
+
+              if (item.type === 'ruangan') categoryName = 'Peminjaman Ruangan';
+              else if (item.type === 'dispensasi') categoryName = 'Surat Dispensasi';
+              else if (item.type === 'peralatan') categoryName = 'Peminjaman Peralatan';
+
+              switch(item.status) {
+                  case 'approved': title = 'Pengajuan Disetujui'; message = `Pengajuan "${item.title}" Anda telah disetujui.`; notifType = 'approved'; break;
+                  case 'pending': title = 'Pengajuan Ditinjau'; message = `Pengajuan "${item.title}" sedang menunggu persetujuan.`; notifType = 'warning'; break;
+                  case 'rejected': title = 'Pengajuan Ditolak'; message = `Pengajuan "${item.title}" Anda ditolak.`; notifType = 'error'; break;
+                  default: title = 'Status Tidak Diketahui'; message = `Pengajuan "${item.title}" memiliki status yang tidak dikenali.`; notifType = 'warning';
+              }
+
+              notifications.push({
+                  id: notifId,
+                  category: categoryName,
+                  type: notifType,
+                  title: title,
+                  message: message,
+                  time: new Date(item.createdAt).toLocaleString('id-ID'),
+                  rawDate: item.createdAt,
+                  unread: !readStatuses[notifId]
+              });
+          });
+      }
+
+      window.initNotifications = function(){
+        notifications = [];
+        processDummyData(); // Load dummy notifications first
+
+        if(firebaseLoaded && db){
+          var pengajuanRef = db.ref('pengajuan');
+          pengajuanRef.on('value', function(snap){
+            var data = snap.val() || {};
+            
+            // Reset and add dummies again to avoid duplication on real-time updates
+            notifications = [];
+            processDummyData();
+
+            // Only process categories and include items that match user campus (if known)
+            processCategory(data.ruangan, 'ruangan', 'Peminjaman Ruangan');
+            processCategory(data.dispensasi, 'dispensasi', 'Surat Dispensasi');
+            processCategory(data.peralatan, 'peralatan', 'Peminjaman Peralatan');
+
+            // Load user-targeted notifications (if logged in)
+            try {
+              const loggedUser = JSON.parse(localStorage.getItem('loggedUser') || 'null');
+              if (loggedUser) {
+                const userId = loggedUser.uid || loggedUser.email || loggedUser.id || 'unknown';
+                db.ref('notifications/users/' + userId).once('value').then(userSnap => {
+                  const userNotifs = userSnap.val() || {};
+                  Object.keys(userNotifs).forEach(k => {
+                    const n = userNotifs[k];
+                    notifications.push({
+                      id: 'user-' + n.id,
+                      category: 'Pribadi',
+                      type: 'approved',
+                      title: n.title || 'Notifikasi',
+                      message: n.message || '',
+                      time: n.createdAt ? new Date(n.createdAt).toLocaleString('id-ID') : new Date().toLocaleString('id-ID'),
+                      rawDate: n.createdAt || new Date().toISOString(),
+                      unread: n.read === false
+                    });
+                  });
+
+                  notifications.forEach(n => n.unread = !readStatuses[n.id]);
+                  notifications.sort((a, b) => new Date(b.rawDate) - new Date(a.rawDate));
+                  renderNotifications();
+                }).catch(() => {
+                  notifications.forEach(n => n.unread = !readStatuses[n.id]);
+                  notifications.sort((a, b) => new Date(b.rawDate) - new Date(a.rawDate));
+                  renderNotifications();
+                });
+              } else {
+                notifications.forEach(n => n.unread = !readStatuses[n.id]);
+                notifications.sort((a, b) => new Date(b.rawDate) - new Date(a.rawDate));
+                renderNotifications();
+              }
+            } catch (e) {
+              notifications.forEach(n => n.unread = !readStatuses[n.id]);
+              notifications.sort((a, b) => new Date(b.rawDate) - new Date(a.rawDate));
+              renderNotifications();
+            }
+          }, (error) => {
+             console.error("Firebase read error, displaying dummy data:", error);
+             notifications.sort((a, b) => new Date(b.rawDate) - new Date(a.rawDate));
+             renderNotifications();
+          });
+        } else {
+          console.warn("Firebase not available. Displaying dummy data only.");
+          notifications.sort((a, b) => new Date(b.rawDate) - new Date(a.rawDate));
+          renderNotifications();
+        }
+      };
+
+      function processCategory(categoryData, categoryKey, categoryName) {
+        if (!categoryData) return;
+        for (const key in categoryData) {
+          const item = categoryData[key];
+          // Filter by campus if user's campus is known
+          // Use centralized matching helper (campus-first)
+          if (typeof belongsToUserCampusOrOrg === 'function') {
+            if (!belongsToUserCampusOrOrg(item, userCampus, getUserOrg(getLoggedUser()))) continue;
+          } else {
+            const itemCampus = normalizeCampus(item.campus || item.kampus || null);
+            if (userCampus && itemCampus && itemCampus !== userCampus) continue;
+          }
+          const notifId = `${categoryKey}-${key}`;
+          
+          let title = '', message = '', notifType = 'completed';
+
+          switch(item.status) {
+            case 'approved': title = 'Pengajuan Disetujui'; message = `Pengajuan "${item.title || categoryName}" Anda telah disetujui.`; notifType = 'approved'; break;
+            case 'pending': title = 'Pengajuan Ditinjau'; message = `Pengajuan "${item.title || categoryName}" sedang menunggu persetujuan.`; notifType = 'warning'; break;
+            case 'rejected': title = 'Pengajuan Ditolak'; message = `Mohon maaf, pengajuan "${item.title || categoryName}" Anda ditolak.`; notifType = 'error'; break;
+            default: title = 'Status Tidak Diketahui'; message = `Pengajuan "${item.title || categoryName}" memiliki status yang tidak dikenali.`; notifType = 'warning';
+          }
+
+          if (!notifications.find(n => n.id === notifId)) {
+            notifications.push({
+              id: notifId,
+              category: categoryName,
+              type: notifType,
+              title: title,
+              message: message,
+              time: item.createdAt ? new Date(item.createdAt).toLocaleString('id-ID') : 'Beberapa waktu lalu',
+              rawDate: item.createdAt,
+              unread: !readStatuses[notifId]
+            });
+          }
+        }
+      }
+
+      function renderNotifications(){
+        if(!notifications || notifications.length === 0){
+          container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">Tidak ada notifikasi</div></div>';
+          return;
+        }
+
+        var grouped = {};
+        // Apply display limit (batching)
+        const sorted = notifications.slice().sort((a,b) => new Date(b.rawDate) - new Date(a.rawDate));
+        const toShow = sorted.slice(0, displayLimit);
+
+        toShow.forEach(function(n){
+            var categoryTitle = n.unread ? 'Baru' : 'Sudah Dibaca';
+            if(!grouped[categoryTitle]) grouped[categoryTitle] = [];
+            grouped[categoryTitle].push(n);
+        });
+
+        var html = '<div class="notif-container">';
+        const orderedGroups = ['Baru', 'Sudah Dibaca'];
+
+        orderedGroups.forEach(function(cat) {
+            if (grouped[cat]) {
+                html += '<div class="notif-category">';
+                html += '<div class="notif-category-title">' + cat + '</div>';
+                
+                grouped[cat].sort((a,b) => new Date(b.rawDate) - new Date(a.rawDate));
+
+                grouped[cat].forEach(function(n){
+                    let icon = 'check_circle';
+                    if (n.type === 'approved') icon = 'check';
+                    if (n.type === 'warning') icon = 'warning';
+                    if (n.type === 'error') icon = 'error_outline';
+
+                    html += `<div class="notif-item ${n.type} ${n.unread ? 'unread' : ''}" onclick="markAsRead('${n.id}')">`;
+                    html += `<div class="notif-icon ${n.type}"><i class="material-icons">${icon}</i></div>`;
+                    html += '<div class="notif-content">';
+                    html += '<div class="notif-title">' + n.title + '</div>';
+                    html += '<div class="notif-message">' + n.message + '</div>';
+                    html += '<div class="notif-time">' + n.time + '</div>';
+                    html += '</div>';
+                    if(n.unread) html += '<div class="notif-badge"></div>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+        });
+
+        html += '</div>';
+        // show load more if there are more notifications
+        if (notifications.length > displayLimit) {
+          html += `<div style="text-align:center;margin-top:12px"><button class="btn btn-secondary" id="load-more">Tampilkan lebih banyak</button></div>`;
+        }
+        container.innerHTML = html;
+        // attach load more handler
+        if (notifications.length > displayLimit) {
+          document.getElementById('load-more').addEventListener('click', function(){
+            displayLimit += 20;
+            renderNotifications();
+          });
+        }
+      }
+
+      window.markAsRead = function(id){
+        readStatuses[id] = true;
+        saveReadStatus();
+        const notif = notifications.find(n => n.id === id);
+        if (notif) notif.unread = false;
+        // If this is a user notification persisted in Firebase, mark as read server-side as well
+        try {
+          if (id && id.startsWith('user-') && firebaseLoaded && db) {
+            const originalId = id.slice(5);
+            const loggedUser = JSON.parse(localStorage.getItem('loggedUser') || 'null');
+            if (loggedUser) {
+              const userId = loggedUser.uid || loggedUser.email || loggedUser.id || 'unknown';
+              db.ref('notifications/users/' + userId + '/' + originalId).update({ read: true }).catch(() => {});
+            }
+          }
+        } catch (e) { /* ignore */ }
+        renderNotifications();
+      };
+
+      document.getElementById('mark-all').addEventListener('click', function(){
+        notifications.forEach(function(n){ 
+            readStatuses[n.id] = true;
+            n.unread = false;
+        });
+        saveReadStatus();
+        renderNotifications();
+      });
+
+      initNotifications();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>Dashboard Ticketing - SIMARSIP APP</title>
+    <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/help-center-style.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Top header with blue background -->
+        <header class="app-header">
+            <div class="app-header-inner">
+                <div class="app-title">SIMARSIP APP</div>
+                <div class="user-chip" onclick="window.location.href='profile.html'">
+                    <span class="user-name">Halo, BAA!</span>
+                    <i class="material-icons user-icon">account_circle</i>
+                </div>
+            </div>
+        </header>
+
+        <div class="view view-main">
+            <!-- ADMIN DASHBOARD PAGE -->
+            <div class="page page-admin-dashboard" data-name="admin-dashboard">
+                <div class="page-content">
+                    <!-- Breadcrumb -->
+                    <div class="breadcrumb-nav">
+                        <a href="index_baa.html" class="breadcrumb-link">
+                            <i class="material-icons">home</i>
+                            Beranda
+                        </a>
+                        <span class="breadcrumb-separator">/</span>
+                        <span class="breadcrumb-current">Dashboard Ticketing</span>
+                    </div>
+
+                    <!-- Page Title -->
+                    <div class="page-title-section">
+                        <h1 class="page-title">Dashboard Ticketing</h1>
+                        <p class="page-subtitle">Kelola tiket keluhan dan respons dari pengguna</p>
+                    </div>
+
+                    <!-- Statistics Cards -->
+                    <div class="admin-stats-container">
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon-pending">
+                                <i class="material-icons">schedule</i>
+                            </div>
+                            <div class="stat-content">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div class="stat-number" id="statPending">0</div>
+                                    <span id="pendingBadge" class="badge-dot" style="display: none;"></span>
+                                </div>
+                                <div class="stat-label">Menunggu Respons</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon-processing">
+                                <i class="material-icons">hourglass_bottom</i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="statProcessing">0</div>
+                                <div class="stat-label">Sedang Diproses</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon-resolved">
+                                <i class="material-icons">check_circle</i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="statResolved">0</div>
+                                <div class="stat-label">Terselesaikan</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon-closed">
+                                <i class="material-icons">close_circle</i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="statClosed">0</div>
+                                <div class="stat-label">Ditutup</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filter & Search -->
+                    <div class="admin-filter-section">
+                        <div class="filter-group">
+                            <input type="text" id="adminSearchInput" class="filter-input" placeholder="Cari tiket...">
+                        </div>
+                        <div class="filter-group">
+                            <select id="adminStatusFilter" class="filter-input">
+                                <option value="">Semua Status</option>
+                                <option value="baru">Baru</option>
+                                <option value="dalam_proses">Dalam Proses</option>
+                                <option value="terselesaikan">Terselesaikan</option>
+                                <option value="ditutup">Ditutup</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <select id="adminPriorityFilter" class="filter-input">
+                                <option value="">Semua Prioritas</option>
+                                <option value="rendah">Rendah</option>
+                                <option value="sedang">Sedang</option>
+                                <option value="tinggi">Tinggi</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Tickets List -->
+                    <div class="admin-tickets-section">
+                        <div id="adminTicketsContainer" class="admin-tickets-container">
+                            <!-- Tickets will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back Button (Mobile) -->
+        <div class="mobile-back-button">
+            <a href="index_baa.html" class="btn-back">
+                <i class="material-icons">arrow_back</i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Modal for Ticket Detail & Response -->
+    <div id="adminTicketModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="adminTicketModalTitle"></h2>
+                <button class="modal-close-btn" onclick="closeAdminTicketModal()">
+                    <i class="material-icons">close</i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="adminTicketModalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.framework7.io/framework7/5.7.10/js/framework7.min.js"></script>
+    <script src="js/help-center.js"></script>
+</body>
+
+</html>

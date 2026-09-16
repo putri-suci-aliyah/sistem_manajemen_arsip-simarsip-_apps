@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Laporan Detail BAA - SIMARSIP</title>
+  <link rel="stylesheet" href="https://cdn.framework7.io/framework7/5.7.10/css/framework7.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    body {
+      background: #f4f7fb;
+      font-family: -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .app-header {
+      background: #007aff;
+      color: white;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-title a {
+      color: white;
+      text-decoration: none;
+      display: flex;
+    }
+
+    .filter-tab {
+      padding: 10px 16px;
+      background: white;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 8px 18px;
+      border-radius: 20px;
+      border: 1.5px solid #007aff;
+      color: #007aff;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      background: #007aff;
+      color: white;
+    }
+
+    .search-container {
+      padding: 10px 16px;
+      background: white;
+      border-bottom: 1px solid #eee;
+    }
+
+    .search-input {
+      width: 100%;
+      border: none;
+      background: #f0f0f0;
+      padding: 12px;
+      border-radius: 10px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .section {
+      padding: 16px;
+      padding-bottom: 100px;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .stat-card {
+      flex: 1;
+      background: white;
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: #007aff;
+    }
+
+    .stat-label {
+      font-size: 8px;
+      color: #999;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .archive-card {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      border-top: 5px solid #007aff;
+    }
+
+    .status-tag {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 800;
+      margin: 12px 0;
+      text-transform: uppercase;
+    }
+
+    .tag-approved {
+      background: #e8f5e9;
+      color: #4caf50;
+    }
+
+    .tag-rejected {
+      background: #ffebee;
+      color: #f44336;
+    }
+
+    .tag-pending {
+      background: #fff3e0;
+      color: #ff9800;
+    }
+
+    .org-name {
+      color: #007aff;
+      font-weight: 800;
+      font-size: 12px;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .item-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #333;
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    /* Box Detail Spesifik */
+    .detail-box {
+      background: #f8f9fa;
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px 0;
+      border: 1px dashed #ddd;
+    }
+
+    .detail-text {
+      font-size: 13px;
+      color: #444;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .detail-text i {
+      font-size: 16px;
+      color: #007aff;
+    }
+
+    .item-detail {
+      font-size: 12px;
+      color: #777;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .item-detail i {
+      font-size: 16px;
+      color: #aaa;
+    }
+
+    .toolbar-bottom {
+      background: white !important;
+      border-top: 1px solid #eee;
+      height: 65px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .toolbar-bottom a {
+      color: #999;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+    }
+
+    .toolbar-bottom a.active {
+      color: #007aff;
+    }
+
+    .tabbar-label {
+      font-size: 10px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .print-only {
+      display: none;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+      }
+
+      .archive-card {
+        border: 1px solid #ddd !important;
+        box-shadow: none;
+        break-inside: avoid;
+      }
+
+      .print-only {
+        display: block !important;
+        margin-top: 40px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-header">
+    <div class="header-title">
+      <div style="font-weight:700; font-size:18px;">Laporan Terintegrasi</div>
+    </div>
+    <button class="no-print"
+      style="background:white; color:#007aff; border:none; padding:8px 15px; border-radius:8px; font-weight:bold; font-size:12px;"
+      onclick="doPrint()">
+      CETAK PDF
+    </button>
+  </div>
+
+  <div class="filter-tab no-print">
+    <div class="tab-btn active" onclick="filterCategory('ALL', this)">Semua</div>
+    <div class="tab-btn" onclick="filterCategory('RUANGAN', this)">Ruangan</div>
+    <div class="tab-btn" onclick="filterCategory('PERALATAN', this)">Peralatan</div>
+    <div class="tab-btn" onclick="filterCategory('DISPENSASI', this)">Dispensasi</div>
+  </div>
+
+  <div class="section">
+    <div class="stats-row">
+      <div class="stat-card">
+        <div id="count-ruangan" class="stat-value">0</div>
+        <div class="stat-label">Ruangan</div>
+      </div>
+      <div class="stat-card">
+        <div id="count-peralatan" class="stat-value">0</div>
+        <div class="stat-label">Peralatan</div>
+      </div>
+      <div class="stat-card">
+        <div id="count-dispensasi" class="stat-value">0</div>
+        <div class="stat-label">Dispensasi</div>
+      </div>
+    </div>
+
+    <div class="search-container no-print">
+      <input type="text" id="searchInp" class="search-input" placeholder="Cari kegiatan atau organisasi..."
+        onkeyup="handleSearch()">
+    </div>
+
+    <div id="laporan-list" style="margin-top: 15px;">
+      <p style="text-align:center; color:#aaa;">Sinkronisasi data...</p>
+    </div>
+
+    <div class="print-only">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+          <p style="font-size: 11px;">SIMARSIP - Bagian Administrasi Akademik</p>
+          <p id="print-date" style="font-size: 10px; color: #666;"></p>
+        </div>
+        <div style="text-align: center; border-top: 1px solid #333; width: 200px; padding-top: 50px;">
+          <p style="font-size: 12px; font-weight: bold;">Petugas BAA</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="toolbar-bottom no-print">
+    <a href="index_baa.html"><i class="material-icons">home</i><span class="tabbar-label">Beranda</span></a>
+    <a href="calender_baa.html"><i class="material-icons">calendar_today</i><span
+        class="tabbar-label">Kalender</span></a>
+    <a href="laporan_baa.html" class="active"><i class="material-icons">assignment</i><span
+        class="tabbar-label">Laporan</span></a>
+    <a href="notifikasi_baa.html"><i class="material-icons">notifications</i><span
+        class="tabbar-label">Notifikasi</span></a>
+  </nav>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+  <script src="js/campus-utils.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+      authDomain: "simarsip-apk.firebaseapp.com",
+      databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "simarsip-apk"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let allData = [];
+    let currentFilter = 'ALL';
+
+    function loadData() {
+      const loggedUser = getLoggedUser();
+      const userCampus = getUserCampus(loggedUser);
+      const userOrg = getUserOrg(loggedUser);
+
+      db.ref('pengajuan').on('value', snap => {
+        const data = snap.val();
+        allData = [];
+        let r = 0, p = 0, d = 0;
+        if (data) {
+          Object.keys(data).forEach(cat => {
+            Object.values(data[cat]).forEach(item => {
+              // filter by campus/org when present on user
+              if (userCampus || userOrg) {
+                if (!belongsToUserCampusOrOrg(item, userCampus, userOrg)) return;
+              }
+              const type = cat.toUpperCase();
+              if (type === 'RUANGAN') r++;
+              else if (type === 'PERALATAN') p++;
+              else if (type === 'DISPENSASI') d++;
+              allData.push({ ...item, category: type });
+            });
+          });
+        }
+        document.getElementById('count-ruangan').innerText = r;
+        document.getElementById('count-peralatan').innerText = p;
+        document.getElementById('count-dispensasi').innerText = d;
+        allData.reverse();
+        renderLaporan(allData);
+      });
+    }
+
+    function renderLaporan(data) {
+        const wrap = document.getElementById('laporan-list');
+        const filtered = currentFilter === 'ALL' ? data : data.filter(i => i.category === currentFilter);
+
+        if (filtered.length === 0) {
+          wrap.innerHTML = '<p style="text-align:center; color:#aaa;">Data tidak ditemukan.</p>';
+          return;
+        }
+
+        wrap.innerHTML = filtered.map(i => {
+          // 1. Logika Status
+          const status = (i.status || 'pending').toLowerCase();
+          let sClass = 'tag-pending';
+          if (status === 'approved' || status === 'disetujui') sClass = 'tag-approved';
+          if (status === 'rejected' || status === 'ditolak') sClass = 'tag-rejected';
+
+          // 2. Logika Identitas & Waktu (Sesuai Pengajuan)
+          const displayOrg = i.organization || i.himpunan || "HMIF";
+          const jamMulai = i.start || i.timeStart || '08:00';
+          const jamSelesai = i.end || i.timeEnd || '--:--';
+
+          // 3. Logika Detail Spesifik Kategori
+          let specialDetail = "";
+
+          if (i.category === 'RUANGAN') {
+            let namaRuangRaw = i.room || i.roomName || '-';
+            let namaRuangTampil = "";
+            switch (namaRuangRaw) {
+              case 'ruang_a': namaRuangTampil = "Ruangan 111"; break;
+              case 'ruang_b': namaRuangTampil = "Ruangan 112"; break;
+              case 'ruang_c': namaRuangTampil = "Ruangan 113"; break;
+              case 'gsg': namaRuangTampil = "Ruangan GSG"; break;
+              default: namaRuangTampil = namaRuangRaw;
+            }
+            specialDetail = `<div class="detail-box"><div class="detail-text"><i class="material-icons">meeting_room</i> Ruangan: ${namaRuangTampil}</div></div>`;
+          }
+
+          else if (i.category === 'PERALATAN') {
+            // Mengambil nama alat dan jumlah dari database pengajuan
+            const namaAlat = i.equipmentName || i.title || 'Alat';
+            const jumlahAlat = i.amount || i.quantity || '1';
+            specialDetail = `<div class="detail-box"><div class="detail-text"><i class="material-icons">inventory_2</i> Peralatan: ${namaAlat} (${jumlahAlat} Unit)</div></div>`;
+          }
+
+          else if (i.category === 'DISPENSASI') {
+            // MENGAMBIL DATA LANGSUNG DARI PENGAJUAN SURAT DISPENSASI
+            const matkul = i.subject || i.mataKuliah || i.namaMatkul || '-';
+            const dosen = i.lecturer || i.namaDosen || i.dosenPengampu || '-';
+
+            specialDetail = `
+        <div class="detail-box">
+          <div class="detail-text"><i class="material-icons">menu_book</i> Matkul: ${matkul}</div>
+          <div class="detail-text" style="font-size:11px; color:#666; margin-top:4px;"><i class="material-icons">person</i> Dosen: ${dosen}</div>
+        </div>`;
+          }
+
+          // 4. Card Laporan
+          return `
+      <div class="archive-card">
+        <span class="org-name">${displayOrg}</span>
+        <h4 class="item-title">${i.title || i.namaKegiatan || 'Tanpa Judul'}</h4>
+        <span class="status-tag ${sClass}">${status.toUpperCase()}</span>
+        
+        ${specialDetail}
+
+        <div class="item-detail"><i class="material-icons">event</i> ${i.date || '-'}</div>
+        <div class="item-detail"><i class="material-icons">schedule</i> ${jamMulai} - ${jamSelesai}</div>
+        <div class="item-detail"><i class="material-icons">label</i> Tipe: ${i.category}</div>
+      </div>
+    `;
+        }).join('');
+      }
+
+    function filterCategory(cat, btn) {
+      currentFilter = cat;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderLaporan(allData);
+    }
+
+    function handleSearch() {
+      const val = document.getElementById('searchInp').value.toLowerCase();
+      const filtered = allData.filter(i =>
+        (i.title || '').toLowerCase().includes(val) ||
+        (displayOrg || 'HMIF').toLowerCase().includes(val)
+      );
+      renderLaporan(filtered);
+    }
+
+    function doPrint() {
+      document.getElementById('print-date').innerText = "Dicetak pada: " + new Date().toLocaleString('id-ID');
+      window.print();
+    }
+
+    loadData();
+  </script>
+</body>
+
+</html>

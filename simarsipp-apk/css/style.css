@@ -1,0 +1,172 @@
+*,*:before,*:after{box-sizing:border-box}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    background-color: #F2F6FB;
+    color: #333;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Prevent horizontal overflow on small devices */
+html,body{max-width:100%;overflow-x:hidden}
+
+/* Header */
+.app-header {
+    background: linear-gradient(180deg,#2f8bff,#1e73ff);
+    color: #fff;
+    padding: 16px 16px 36px 16px;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+}
+
+.app-header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.app-title {
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.user-chip {
+    background: rgba(255,255,255,0.18);
+    padding: 8px 12px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-chip .user-name { font-size: 13px; }
+.user-icon { font-size: 34px; color: #fff; }
+
+.welcome-card {
+    margin-top: 12px;
+}
+.welcome-title { font-size: 20px; font-weight: 700; color: #fff; }
+.welcome-sub { color: rgba(255,255,255,0.95); margin-top:6px; font-size:13px }
+
+/* Page content spacing */
+.page-content { padding: 16px; padding-top: 8px; }
+
+/* Search pill overlapping header */
+.search-wrapper { margin-top: -28px; margin-bottom: 8px; }
+.custom-searchbar {
+    background-color: #fff;
+    border-radius: 28px;
+    box-shadow: 0 10px 22px rgba(30, 50, 90, 0.09);
+    padding: 8px 12px;
+}
+.custom-searchbar .searchbar-input-wrap { position: relative; padding-left: 48px; }
+.custom-searchbar input { width: 100%; border: none; outline: none; font-size:14px; color:#3a4b6b }
+.custom-searchbar .searchbar-icon { position:absolute; left:16px; top:50%; transform:translateY(-50%); color:#9aa6bf; font-size:18px }
+.custom-searchbar input::placeholder { font-style: italic; color: #c8d3e6 }
+
+/* Sections */
+.section { margin-top: 12px; margin-bottom: 18px; }
+.section-title { color: #1e73ff; font-weight:700; margin-bottom: 12px; font-size:14px }
+
+.actions-row { display:flex; justify-content:space-between; gap:10px }
+.col-33 { flex:1 1 0; min-width:0 }
+
+.action-card {
+    background: linear-gradient(180deg,#3aa0ff,#1e73ff);
+    color: #fff;
+    border-radius: 14px;
+    padding: 12px 6px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    box-shadow: 0 12px 30px rgba(30,110,255,0.14);
+    min-height:84px;
+    width:100%;
+}
+.action-icon { background: rgba(255,255,255,0.12); padding: 10px; border-radius: 12px; margin-bottom:8px }
+.action-icon i { font-size: 22px; color: #fff; vertical-align:middle }
+.action-label { font-size:12px; opacity:0.95 }
+
+.action-card .action-label { margin-top:2px }
+
+/* Status card */
+.status-card { background:#fff; border-radius:14px; padding:14px; box-shadow: 0 12px 28px rgba(34,60,80,0.06); }
+.status-row { display:flex; align-items:center; justify-content:space-between }
+.status-left .status-title { font-weight:700; font-size:14px }
+.status-left .status-date { color:#8a98b3; font-size:12px; margin-top:4px }
+.status-right { text-align:right }
+
+.badge { padding:6px 10px; border-radius:16px; color:#fff; font-size:12px }
+.color-green { background-color: #2ecc71 }
+
+.history-link { display:block; text-align:right; margin-top:8px; color:#1e73ff; text-decoration:none }
+
+/* Toolbar bottom */
+.app-toolbar {
+    background:#fff;
+    box-shadow:0 -6px 18px rgba(30,50,90,0.05);
+    border-top-left-radius:12px;
+    border-top-right-radius:12px;
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:1200;
+    height:64px;
+    /* ensure space for device safe area (iPhone notch / Android gesture bar) */
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+}
+.app-toolbar .toolbar-inner { display:flex; justify-content:space-around; align-items:center; padding:8px 6px; height:100% }
+.app-toolbar .link { color:#7f95b8; display:flex; flex-direction:column; align-items:center; font-size:12px; text-decoration:none; padding-top:4px }
+.app-toolbar .link.active { color:#1e73ff; font-weight:600 }
+.app-toolbar .material-icons { font-size:20px; margin-bottom:4px; line-height:1 }
+.app-toolbar .tabbar-label { font-size:11px; margin-top:0 }
+
+/* Make sure page content doesn't get hidden under fixed toolbar */
+.page-content { padding-bottom: calc(64px + env(safe-area-inset-bottom, 8px) + 12px); }
+
+.app-toolbar .link:hover { text-decoration:underline }
+
+/* Responsive small adjustments */
+@media (max-width: 400px) {
+    .welcome-title { font-size:18px }
+    .action-icon i { font-size:20px }
+}
+
+/* Simple calendar grid */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-top: 6px;
+}
+.calendar-grid .day {
+    background: #eef7fb;
+    border-radius: 10px;
+    min-height: 54px;
+    padding: 8px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:flex-start;
+    font-size:13px;
+    color:#234;
+}
+.calendar-grid .day .date-num { font-weight:700; margin-bottom:6px; }
+.calendar-grid .day.available { background:#e9faf0 }
+.calendar-grid .day.borrowed { background:#fff7e6 }
+.calendar-grid .day.returned { background:#e8f7ff }
+.calendar-grid .day.pending { background:#ffeeb0 }
+.calendar-grid .day .status-dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-left:6px }
+.calendar-grid .day .status-label { font-size:11px; color:#51627a }
+
+.calendar-legend { display:flex; gap:14px; align-items:center; margin-top:12px }
+.legend-box { width:14px; height:14px; display:inline-block; border-radius:4px; margin-right:6px }
+.legend-box.available { background:#e9faf0 }
+.legend-box.borrowed { background:#fff7e6 }
+.legend-box.returned { background:#e8f7ff }
+
+@media (max-width:420px){
+    .calendar-grid .day{min-height:62px;padding:6px}
+}

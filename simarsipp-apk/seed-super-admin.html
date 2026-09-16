@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Create Super Admin Account - SIMARSIP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 12px;
+            color: #333;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn-create {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-create:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-back {
+            background: #f5f5f5;
+            color: #667eea;
+            border: 2px solid #667eea;
+            margin-top: 10px;
+        }
+
+        .btn-back:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: none;
+            animation: slideDown 0.3s ease-in-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .status.info {
+            background: #e7f3ff;
+            color: #004085;
+            border-left: 4px solid #017dd9;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #856404;
+            margin-bottom: 20px;
+        }
+
+        .creds-box {
+            background: #f9f9f9;
+            border: 2px dashed #667eea;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .creds-box.show {
+            display: block;
+        }
+
+        .creds-label {
+            font-weight: 600;
+            font-size: 12px;
+            color: #333;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .creds-item {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-family: monospace;
+            font-size: 13px;
+            word-break: break-all;
+        }
+
+        .creds-item.email {
+            color: #667eea;
+        }
+
+        .creds-item.password {
+            color: #dc3545;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Buat Super Admin</h1>
+        <p class="subtitle">Membuat akun super admin manual (tanpa registrasi)</p>
+
+        <div class="warning">
+            ⚠️ <strong>SETUP AWAL!</strong> Form sudah pre-filled dengan credentials super admin. Klik "Buat Super Admin" untuk setup di Firebase. Lihat <strong>ADMIN_SETUP.md</strong> untuk informasi lengkap.
+        </div>
+
+        <form onsubmit="createSuperAdmin(event)">
+            <div class="form-group">
+                <label class="form-label">👤 Nama Lengkap</label>
+                <input type="text" id="nameInput" class="form-input" placeholder="Masukkan nama super admin" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">📧 Email</label>
+                <input type="email" id="emailInput" class="form-input" placeholder="Email super admin" required>
+                <div class="hint">Pre-filled dengan: admin@simarsip.dev</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">🔐 Password</label>
+                <input type="password" id="passwordInput" class="form-input" placeholder="Password super admin (min. 8 karakter)" required minlength="8">
+                <div class="hint">Pre-filled dengan: Admin2026!Simarsip</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">🏢 Institusi</label>
+                <input type="text" id="institusiInput" class="form-input" placeholder="Nama institusi/universitas" required>
+            </div>
+
+            <button type="submit" class="btn btn-create" id="createBtn">
+                Buat Super Admin
+            </button>
+            <button type="button" class="btn btn-back" onclick="window.location.href='login.html'">
+                Kembali ke Login
+            </button>
+        </form>
+
+        <div id="statusMsg" class="status"></div>
+
+        <div id="credsBox" class="creds-box">
+            <div class="creds-label">✅ Super Admin Berhasil Dibuat!</div>
+            <div class="creds-item email">
+                📧 Email: <span id="displayEmail"></span>
+            </div>
+            <div class="creds-item password">
+                🔐 Password: <span id="displayPassword"></span>
+            </div>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
+                ✓ Credentials sudah disimpan di Firebase<br>
+                ✓ Dapat login di <strong>Login page</strong> dengan Email + Kampus apapun
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Jika sudah ada Super Admin yang login, redirect ke admin dashboard
+        const loggedUserSeed = JSON.parse(localStorage.getItem("loggedUser"));
+        if (loggedUserSeed && (loggedUserSeed.role === "super_admin" || loggedUserSeed.role === "Admin Simarsip")) {
+            window.location.href = "index_admin.html";
+        }
+
+        let db;
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtyn-cjuhsnlEn-9Wao1tCcJfUQbf6GnY",
+            authDomain: "simarsip-apk.firebaseapp.com",
+            databaseURL: "https://simarsip-apk-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "simarsip-apk",
+            storageBucket: "simarsip-apk.firebasestorage.app",
+            messagingSenderId: "707332524030",
+            appId: "1:707332524030:web:d91551b5f199df489622af"
+        };
+
+        try {
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+        } catch (err) {
+            console.error('Firebase init error:', err);
+        }
+
+        // ===== AUTO-FILL SUPER ADMIN CREDENTIALS =====
+        // Credentials yang digunakan untuk setup (lihat ADMIN_SETUP.md)
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('nameInput').value = 'Super Admin';
+            document.getElementById('emailInput').value = 'admin@simarsip.dev';
+            document.getElementById('passwordInput').value = 'Admin2026!Simarsip';
+            document.getElementById('institusiInput').value = 'SIMARSIP Development';
+        });
+
+        function showStatus(msg, type) {
+            const statusEl = document.getElementById('statusMsg');
+            statusEl.textContent = msg;
+            statusEl.classList.remove('success', 'error', 'info');
+            statusEl.classList.add('show', type);
+        }
+
+        function createSuperAdmin(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('nameInput').value.trim();
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const institusi = document.getElementById('institusiInput').value.trim();
+
+            if (!name || !email || !password || !institusi) {
+                showStatus('❌ Silakan isi semua field', 'error');
+                return;
+            }
+
+            if (password.length < 8) {
+                showStatus('❌ Password minimal 8 karakter', 'error');
+                return;
+            }
+
+            document.getElementById('createBtn').disabled = true;
+
+            if (!db) {
+                showStatus('❌ Firebase tidak terkoneksi', 'error');
+                document.getElementById('createBtn').disabled = false;
+                return;
+            }
+
+            // Cek apakah email sudah terdaftar
+            db.ref('users').orderByChild('email').equalTo(email).once('value', snapshot => {
+                if (snapshot.exists()) {
+                    showStatus('❌ Email sudah terdaftar di sistem', 'error');
+                    document.getElementById('createBtn').disabled = false;
+                    return;
+                }
+
+                // Buat UID untuk super admin
+                const uid = 'super_admin_' + Date.now();
+
+                // Data super admin
+                const superAdminData = {
+                    name: name,
+                    email: email,
+                    password: password, // NOTE: Untuk production, gunakan authentication yang aman
+                    institusi: institusi,
+                    kampus: "Admin",
+                    role: "super_admin",
+                    status: "Aktif",
+                    createdAt: new Date().toISOString(),
+                    baaStatus: "Sudah",
+                    permissions: {
+                        manageUsers: true,
+                        manageBAA: true,
+                        manageCampus: true,
+                        viewReports: true,
+                        systemSettings: true
+                    }
+                };
+
+                // Save ke Firebase
+                db.ref('users/' + uid).set(superAdminData, (error) => {
+                    if (error) {
+                        showStatus('❌ Error: ' + error.message, 'error');
+                        document.getElementById('createBtn').disabled = false;
+                    } else {
+                        // Tampilkan credentials
+                        document.getElementById('displayEmail').textContent = email;
+                        document.getElementById('displayPassword').textContent = password;
+                        document.getElementById('credsBox').classList.add('show');
+
+                        showStatus('✅ Super Admin berhasil dibuat! Credentials ditampilkan di bawah.', 'success');
+
+                        // Reset form
+                        document.querySelector('form').reset();
+                        document.getElementById('createBtn').disabled = false;
+                    }
+                });
+            }).catch(err => {
+                showStatus('❌ Error: ' + err.message, 'error');
+                document.getElementById('createBtn').disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
